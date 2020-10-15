@@ -1,0 +1,17 @@
+@import 'mword';
+
+.mw-header {
+  background: LightGray;
+  height: 60px;
+  min-width: 709px;
+  top: 0;
+}
+
+.mw-footer {
+  bottom: 0;
+  height: 48px;
+  left: 0;
+  line-height: 24px;
+  text-align: center;
+  width: 100%;
+}

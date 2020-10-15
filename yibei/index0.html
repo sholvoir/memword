@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Home</title>
+  <link rel="stylesheet" href="css/memword.css" />
+  <script src="js/memword.js"></script>
+</head>
+
+<body onresize="mwResize();">
+  <div class="mw-wrap">
+    <div class="flex-container-around mw-row-1">
+      <div>
+        <div class="flex-container-fix mw-row-2-1">
+          <div class="mw-text20" id="mw_prompt"></div>
+        </div>
+        <div class="flex-container-around mw-row-2-2">
+          <div class="mw-button" onclick="mwImportClick();">Import</div>
+          <div class="mw-button" onclick="mwExportClick();">Export</div>
+          <div class="mw-button" onclick="mwAddWordClick();">Add</div>
+          <div class="mw-button" onclick="mwStudyClick(5);">Study</div>
+        </div>
+      </div>
+      <div class="flex-container-around left-border">
+        <div class="mw-score-text">
+          <div class="mw-row-3">All</div>
+          <div class="mw-row-3">Finished</div>
+          <div class="mw-row-3">Familiar</div>
+        </div>
+        <div style="flex:4;">
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(5);">
+            <div class="mw-banner1" style="width:100%;background:Grey;"></div>
+          </div>
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(4);">
+            <div id="mw_finish_banner1" class="mw-banner1" style="width:0%;background:ForestGreen;"></div>
+            <div id="mw_finish_banner2" class="mw-banner2" style="width:100%"></div>
+          </div>
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(3);">
+            <div id="mw_familiar_banner1" class="mw-banner1" style="width:0%;background:Olive;"></div>
+            <div id="mw_familiar_banner2" class="mw-banner2" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="mw-score-number">
+          <div id="mw_all_number" class="mw-row-3">0/0</div>
+          <div id="mw_finish_number" class="mw-row-3">0/0</div>
+          <div id="mw_familiar_number" class="mw-row-3">0/0</div>
+        </div>
+      </div>
+      <div class="flex-container-around left-border">
+        <div class="mw-score-text">
+          <div class="mw-row-3">Medium</div>
+          <div class="mw-row-3">Start</div>
+          <div class="mw-row-3">Never</div>
+        </div>
+        <div style="flex:4;">
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(2);">
+            <div id="mw_medium_banner1" class="mw-banner1" style="width:0%;background:Orange;"></div>
+            <div id="mw_medium_banner2" class="mw-banner2" style="width:100%"></div>
+          </div>
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(1);">
+            <div id="mw_start_banner1" class="mw-banner1" style="width:0%;background:Blue;"></div>
+            <div id="mw_start_banner2" class="mw-banner2" style="width:100%"></div>
+          </div>
+          <div class="mw-row-3 flex-container-fix mw-banner" onclick="mwStudyClick(0);">
+            <div id="mw_never_banner1" class="mw-banner1" style="width:0%;background:DarkRed;"></div>
+            <div id="mw_never_banner2" class="mw-banner2" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="mw-score-number">
+          <div id="mw_medium_number" class="mw-row-3">0/0</div>
+          <div id="mw_start_number" class="mw-row-3">0/0</div>
+          <div id="mw_never_number" class="mw-row-3">0/0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p />
+  <div class="mw-wrap">
+    <div class="flex-container-fix mw-row-2-1">
+      <div id="mw_never_button" class="mw-button" onclick="mwBLevelClick(0);">Never</div>
+      <div id="mw_start_button" class="mw-button" onclick="mwBLevelClick(1);">Start</div>
+      <div id="mw_medium_button" class="mw-button" onclick="mwBLevelClick(2);">Medium</div>
+      <div id="mw_familiar_button" class="mw-button" onclick="mwBLevelClick(3);">Familiar</div>
+      <div id="mw_finish_button" class="mw-button" onclick="mwBLevelClick(4);">Finished</div>
+      <div id="mw_time" class="mw-text20">30 days</div>
+      <div class="mw-button mw-shove-right" onclick="mwDeleteButtonClick();">Delete</div>
+      <div id="mw_auto_read_button" class="mw-button" style="width:140px;" onclick="mwAutoReadButtonClick();">Auto Read: ON</div>
+    </div>
+    <div class="flex-container-around mw-row-2-2">
+      <div id="mw_text_word"></div>
+      <div class="mw-button" onclick="mwShowAnswerClick();" title="Hot key: Space"><strong>☺</strong> Show</div>
+      <div class="mw-button" onclick="mwIKnowItClick();" title="Hot key: Z/N" style="background:OliveDrab;"><strong>√</strong> Known</div>
+      <div class="mw-button" onclick="mwDontKnowClick();" title="Hot key: X/M" style="background:Peru;"><strong>ⅹ</strong> Don't</div>
+      <div class="mw-button" onclick="mwIgnoreItClick();" title="Hot key: ."><strong>⇗</strong> Ignore</div>
+    </div>
+  </div>
+  <p />
+  <div id="mw_dialog">
+    <textarea id="mw_text_port" name="mw_text_port" style=""></textarea>
+    <div id="mw_cancel_button" class="mw-button" style="right:90px;" onclick="mwCancelButtonClick();">Cancel</div>
+    <div id="mw_import_ok_button" class="mw-button" style="right:10px;" onclick="mwImportOkButtonClick();">OK</div>
+    <div id="mw_export_ok_button" class="mw-button" style="right:10px;" onclick="mwExportOkButtonClick();">OK</div>
+  </div>
+
+</body>
+
+</html>

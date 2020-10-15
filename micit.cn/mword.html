@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, maximum-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/mword.css">
+  <title>MemWord - MICIT</title>
+</head>
+
+<body>
+  <div class="navbar navbar-inverse container-fluid" role="navigation">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="index.html"><img id="logo" src="img/logo.svg" alt="logo"></a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+    		<ul class="nav navbar-nav navbar-right">
+          <li id="login" class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">LogIn <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#"><img src="https://myancestrees.com/img/facebook.svg" height="32" width="32"> Facebook</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/twitter.svg" height="32" width="32"> Twitter</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/google-plus.svg" height="32" width="32"> Google+</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/linkedin.svg" height="32" width="32"> LinkedIn</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/instagram.svg" height="32" width="32"> Instagram</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/amazon.svg" height="32" width="32"> Anazon</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/wechat.svg" height="32" width="32"> WeChat</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/qq.png" height="32" width="32"> QQ</a></li>
+              <li><a href="#"><img src="https://myancestrees.com/img/weibo.svg" height="32" width="32"> Weibo</a></li>
+            </ul>
+          </li>
+    		</ul>
+      </div>
+  </div>
+
+  <div>
+    <div class="col-sm-7 col-md-8 col-lg-9">
+      <div class="flex-container">
+        <input type="text" name="mw_search_input" id="mw_search_input"/>
+      </div>
+      <div class="flex-container search-panel">
+        <label for="">type:</label>
+        <select id="mw_type_select" name="mw_type_select">
+          <option value="listen">listen</option>
+          <option value="speak">speak</option>
+          <option value="read">read</option>
+          <option value="write">Familiar</option>
+        </select>
+        <label for="mw_level1">Level≥</label>
+        <input type="text" id="mw_level1" name="mw_level1" style="width:50px;" />
+        <label for="mw_level2">Level≤</label>
+        <input type="text" id="mw_level2" name="mw_level2"style="width:50px;" />
+        <input type="checkbox" id="mw_in_task" name="mw_in_task"/>
+        <label for="mw_in_task">Intask</label>
+        <button type="button">Search</button>
+        <button type="button">Import</button>
+        <button type="button">Delete</button>
+      </div>
+      <div class="flex-container" style="height: 800px;">
+        <textarea id="mw_text_port" name="mw_text_port" style="flex:1"></textarea>
+      </div>
+    </div>
+    <div class="col-sm-5 col-md-4 col-lg-3 flex-container">
+      <table class="stat">
+        <colgroup>
+          <col>
+          <col width="90%">
+          <col>
+        </colgroup>
+        <tbody>
+          <tr data-level="all">
+            <td>Allwords</td>
+            <td><div><div style="background:blue;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="blevel4">
+            <td>Finished</td>
+            <td><div><div style="background:blueviolet;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="blevel3">
+            <td>Familiar</td>
+            <td><div><div style="background:brown;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="blevel2">
+            <td>Medium</td>
+            <td><div><div style="background:burlywood;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="blevel1">
+            <td>Start</td>
+            <td><div><div style="background:cadetblue;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="blevel0">
+            <td>Never</td>
+            <td><div><div style="background:chartreuse;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="hard">
+            <td>Hard</td>
+            <td><div><div style="background:chocolate;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star5">
+            <td>Star5</td>
+            <td><div><div style="background:coral;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star4">
+            <td>Star4</td>
+            <td><div><div style="background:darkblue;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star3">
+            <td>Star3</td>
+            <td><div><div style="background:cornflowerblue;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star2">
+            <td>Star2</td>
+            <td><div><div style="background:darkturquoise;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star1">
+            <td>Star1</td>
+            <td><div><div style="background:crimson;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+          <tr data-level="star0">
+            <td>Star0</td>
+            <td><div><div style="background:cyan;"></div></div></td>
+            <td>0|0</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="mwStudy" style="display:none;">
+    <div class="mw-header flex-container">
+      <select id="mw_blevel_select" name="mw_blevel_select" onchange="mwBLevelChange();">
+        <option value="0">Never</option>
+        <option value="1">Start</option>
+        <option value="2">Medium</option>
+        <option value="3">Familiar</option>
+        <option value="4">Finished</option>
+        <option value="-1">Delete</option>
+      </select>
+      
+      <button id="mw_readIt"><strong>∈ </strong> Read</button>
+      <button id="mw_showAns" title="Hot key: Space"><strong>☺</strong> Show</button>
+      <button is="mw_known" title="Hot key: Z/N" style="background:OliveDrab;"><strong>√</strong> Known</button>
+      <button id="mw_notknow" title="Hot key: X/M" style="background:Peru;"><strong>ⅹ</strong> Don't</button>
+      <button id="mw_ignoreIt" title="Hot key: ."><strong>⇗</strong> Ignore</button>
+    </div>
+
+    <div class="mw-content">
+      <div id="word" style="display:none;"></div>
+      <div id="concept" style="display:none;"></div>
+      <div id="textbox" style="display:none;"></div>
+      <div id="phonic" style="display:none;"></div>
+    </div>
+
+    <div class="flex-container mw-footer">
+      <div id="mw_time" class="mw-text">30 days</div>
+      <div id="mw_remainder" class="mw-text" style="text-align:right">0</div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="js/mword.js"></script>
+</body>
+</html>
