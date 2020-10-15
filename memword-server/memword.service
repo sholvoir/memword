@@ -1,0 +1,17 @@
+[Unit]
+Description=memword
+After=network.target
+
+[Service]
+WorkingDirectory=/root
+ExecStart=/usr/bin/node /root/memword-server/src/index.js -p 8080
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=node-memword
+User=root
+Group=root
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
