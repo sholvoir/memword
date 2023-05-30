@@ -1,2 +1,0 @@
-# memword-server
-memword server
