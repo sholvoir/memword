@@ -1,5 +1,5 @@
 import { create, Header, Payload, verify } from "djwt";
-import * as b64 from 'std/encoding/base64.ts';
+import * as b64 from '$std/encoding/base64.ts';
 
 const key = await crypto.subtle.importKey(
     'raw',

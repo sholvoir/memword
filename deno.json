@@ -1,8 +1,43 @@
 {
+  "lock": false,
   "tasks": {
-    "start": "deno run -A --watch=static/,routes/ dev.ts"
+    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+    "start": "deno run -A --watch=static/,routes/ dev.ts",
+    "build": "deno run -A dev.ts build",
+    "preview": "deno run -A main.ts",
+    "update": "deno run -A -r https://fresh.deno.dev/update ."
   },
-  "importMap": "./import_map.json",
+  "lint": {
+    "rules": {
+      "tags": [
+        "fresh",
+        "recommended"
+      ]
+    },
+    "exclude": [
+      "_fresh"
+    ]
+  },
+  "fmt": {
+    "exclude": [
+      "_fresh"
+    ]
+  },
+  "imports": {
+    "$fresh/": "https://deno.land/x/fresh@1.4.2/",
+    "preact": "https://esm.sh/preact@10.17.1",
+    "preact/": "https://esm.sh/preact@10.17.1/",
+    "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.2.1",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.1",
+    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.4.0",
+    "twind": "https://esm.sh/twind@0.16.19",
+    "twind/": "https://esm.sh/twind@0.16.19/",
+    "$std/": "https://deno.land/std@0.201.0/",
+    "sholvoir/": "https://sholvoir.github.io/generic/",
+    "djwt": "https://deno.land/x/djwt@v2.9.1/mod.ts",
+    "tabler_icons/": "https://deno.land/x/tabler_icons_tsx@0.0.4/tsx/",
+    "baidu-aip": "https://esm.sh/baidu-aip-sdk@4.16.13"
+  },
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact"
