@@ -1,5 +1,5 @@
 import { dict } from './dict.ts';
-import { trans } from './baibu.ts';
+import { trans } from './baidu.ts';
 import { getSound } from './dictionary.ts';
 
 export async function getDict(word: string) {

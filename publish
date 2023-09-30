@@ -1,0 +1,10 @@
+#!/bin/sh
+set -euo pipefail
+# [ ! -d "bin" ] && mkdir bin
+# [ -d "bin/deno" ] && rm bin/deno
+# curl -fsSL https://github.com/denoland/deno/releases/download/v1.16.1/deno-x86_64-unknown-linux-gnu.zip -o /tmp/deno-linux.zip
+# unzip /tmp/deno-linux.zip -d bin
+# rm /tmp/deno-linux.zip
+deno bundle mod.ts dict.js
+zip dict.zip dict.js
+aws lambda update-function-code --function-name dict --zip-file fileb://lambda-deno-runtime.zip

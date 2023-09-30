@@ -1,28 +1,33 @@
-import { Mongo } from 'sholvoir/mongo.ts';
-import { IDict } from './idict.ts';
+import { IDataSource, Mongo } from 'sholvoir/mongo.ts';
 
-const mongo = new Mongo(
-    Deno.env.get('MONGO_DB_END_POINT')!,
-    Deno.env.get('MONGO_DB_API_KEY')!,
-    {
-        "dataSource": "Cluster0",
-        "database": "dict",
-        "collection": "dict"
-    });
+const dataSource: IDataSource = {
+    "dataSource": "Cluster0",
+    "database": "dict",
+    "collection": "dict"
+}
 
-export const dict = {
-    async get(word: string) {
-        return (await mongo.findOne({ word })) as IDict;
-    },
-    async remove(word: string) {
-        return await mongo.deleteOne({ word });
-    },
-    async add(dict: IDict) {
-        return await mongo.insertOne(dict as Record<string, unknown>);
-    },
-    async patch(word: string, value: IDict) {
-        if (value.word) delete value.word;
-        if (value._id) delete value._id;
-        return await mongo.updateOne({ word }, value as Record<string, unknown>);
-    }
+const dict = new Mongo(Deno.env.get('MONGO_END_POINT')!, Deno.env.get('MONGO_API_KEY')!, dataSource);
+
+export interface Dict {
+    _id?: string
+    word?: string;
+    trans?: string;
+    sound?: string;
+    phonetics?: string;
+}
+
+
+export async function get(word: string) {
+    return (await dict.findOne({ word })) as Dict;
+}
+export async function remove(word: string) {
+    return await dict.deleteOne({ word });
+}
+export async function add(d: Dict) {
+    return await dict.insertOne(d as Record<string, unknown>);
+}
+export async function patch(word: string, value: Dict) {
+    if (value.word) delete value.word;
+    if (value._id) delete value._id;
+    return await dict.updateOne({ word }, value as Record<string, unknown>);
 }

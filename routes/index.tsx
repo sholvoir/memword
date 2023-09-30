@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import Counter from "../islands/Counter.tsx";
+import Counter from "/islands/Counter.tsx";
 
 export default function Home() {
   const count = useSignal(3);
@@ -14,6 +14,7 @@ export default function Home() {
           alt="the Fresh logo: a sliced lemon dripping with juice"
         />
         <h1 class="text-4xl font-bold">Welcome to Fresh</h1>
+        <p>{count}</p>
         <p class="my-4">
           Try updating this message in the
           <code class="mx-2">./routes/index.tsx</code> file, and refresh.
