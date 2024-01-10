@@ -54,14 +54,18 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const shouldSound = dict.value && dict.value.sound && (isPhaseAnswer.value || task.type == 'L');
     const shouldSpell = isPhaseAnswer.value || task.type == 'R';
     const init = async () => {
+        addEventListener('keypress', handleKeyPress);
         if (!dict.value) dict.value = await getDict(task.word);
         if (shouldSound && player.current) {
             player.current.src = dict.value!.sound!;
             player.current.play();
         }
     };
-    useEffect(() => { init().catch(console.error); });
-    return <div class="flex flex-col flex-1 h-full" onKeyUp={handleKeyPress}>
+    const cleanup = () => {
+        removeEventListener('keypress', handleKeyPress);
+    }
+    useEffect(() => { init().catch(console.error); return cleanup; });
+    return <div class="flex flex-col flex-1 h-full">
         <div class="flex"><div class="flex-1">{index.value+1}/{tasks.value.length}</div><div>Level: {task.level}</div></div>
         <div class="flex-1">
             {shouldSpell && <div class="text-4xl">{task.word}</div>}

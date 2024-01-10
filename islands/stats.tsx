@@ -33,7 +33,7 @@ export default ({stats, onClickStatBar}: IStatsProps) => {
                         <td onClick={() => onClickStatBar(taskType, tag, blevel)}>
                             <div class="bg-gray-300 h-4 w-full">
                                 <div class="h-full bg-gray-500" style={`width: ${value * 100 / all}%`}>
-                                    <div class="h-full bg-red-400" style={`width: ${value ? (task * 100 / value) : 100}%`}/>
+                                    <div class="h-full bg-red-400" style={`width: ${value ? (task * 100 / value) : 0}%`}/>
                                 </div>
                             </div>
                         </td>

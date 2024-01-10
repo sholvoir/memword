@@ -1,6 +1,5 @@
 // deno-lint-ignore-file
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import { JSX } from "preact/jsx-runtime";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
@@ -10,30 +9,29 @@ import * as mem from '../lib/mem.ts';
 
 import Stats from './stats.tsx';
 import About from './about.tsx';
+import Signin from './signin.tsx';
 import Study from './study.tsx';
 import Setting from './setting.tsx';
+import Dialog from './dialog.tsx';
+import Tasks from './tasks.tsx';
 
-const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
-export type Loca = 'empty'|'about'|'stat'|'study'|'setting';
+export type Loca = 'empty'|'about'|'signin'|'stat'|'study'|'setting'|'dialog'|'tasks';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
     const isLogin = useSignal(false);
     const isMenuToggle = useSignal(false);
-    const email = useSignal(mem.getUser() ?? '');
     const loca = useSignal<Loca>('empty');
     const stats  = useSignal(mem.getStats());
     const tasks = useSignal<Array<ITask>>([]);
     const dialogContent = useSignal('');
+    const preLoca = useSignal<Loca>('stat');
 
-    const handleEmailChange = ({ target }: Event) => email.value = (target as HTMLInputElement).value;
-    const handleClickSignup = async () => {
-        if (!emailPattern.test(email.value)) dialogContent.value = 'Invalid email address';
-        else try {
-            await mem.signup(email.value);
-            dialogContent.value = 'The Active Email have alread sent to you from MemWord<memword.sholvoir@gmail.com>.';
-        } catch (e) { dialogContent.value = e.message; }
-    };
+    const showDialog = (content: string, backLoca: Loca = 'empty') => {
+        dialogContent.value = content;
+        preLoca.value = backLoca;
+        loca.value = 'dialog';
+    }
     const handleClickMenu = (event: Event) => {
         event.stopPropagation();
         if (isMenuToggle.value = !isMenuToggle.value) window.addEventListener('click', handleClickBlank);
@@ -72,9 +70,12 @@ export default () => {
         switch (loca.value) {
             case 'empty': return <div/>
             case 'about': return <About/>;
+            case 'signin': return <Signin showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
             case 'study': return <Study tasks={tasks} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
+            case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
+            case 'tasks': return <Tasks/>
         }
     };
     const init = async () => {
@@ -87,25 +88,16 @@ export default () => {
         await mem.syncTasks();
         stats.value = await mem.updateStats();
     }
-    const cleanup = async () => {
-        await mem.syncTasks();
-        localStorage.setItem('_test', Date.now().toString());
-        mem.closeDatabase();
-    }
-    useEffect(() => { init().catch(console.error); return () => cleanup().then(()=>{}); }, []);
+    useEffect(() => (init().catch(console.error), mem.closeDatabase), []);
     return <div class="h-full flex flex-col">
-        <div class={`flex bg-gray-200 flex-none px-2 py-1`}>
-            <img class="flex-none h-12" src="/logo.svg" onClick={handleClickLogo}/>
-            <div class="flex-1"></div>
-            {!isLogin.value && <input type="email" placeholder="Your Email"
-                class="w-64 px-2 rounded border border-gray-500"
-                value={email} onInput={handleEmailChange} />}
-            {!isLogin.value && <button
-                class="w-32 ml-2 bg-indigo-700 text-white rounded"
-                onClick={handleClickSignup}>Signup</button>}
-            {isLogin.value && <div class="relative flex-none">
-                <button id="appbardropdown" class="w-12 h-full bg-[url('/head.svg')]" onClick={handleClickMenu}></button>
+        <div class={`flex bg-gray-200 px-2 py-1 justify-between`}>
+            <img class="h-12" src="/logo.svg" onClick={handleClickLogo}/>
+            {isLogin.value ? <div class="relative">
+                <button id="appbardropdown"
+                    class="w-12 h-full bg-[url('/head.svg')]"
+                    onClick={handleClickMenu}></button>
                 <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>button]:p-2 [&>div]:h-px [&>div]:bg-gray-300`}>
+                    <button onClick={() => loca.value = 'tasks'}>Tasks</button>
                     <button onClick={handleClickMenuStatis}>Status</button>
                     <button onClick={() => handleClickStatBar()}>Study</button>
                     <div/>
@@ -113,17 +105,8 @@ export default () => {
                     <div/>
                     <button onClick={handleClickMenuLogout}>Logout</button>
                 </div>
-            </div>}
-            {dialogContent.value && <div class="fixed inset-0 flex justify-center items-center bg-black/50 z-50">
-                <div class="size-fit max-w-[80%] p-3 rounded-md bg-white">
-                    <div class="m-6 leading-loose text-center">{dialogContent}</div>
-                    <div class="m-6 text-center">
-                        <button class="w-32 h-12 bg-indigo-700 text-white rounded"
-                            onClick={() => dialogContent.value = ''}>确定</button>
-                    </div>
-                </div>
-            </div>}
+            </div> : <button class="w-32 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'signin'}>Signin</button>}
         </div>
-        <div class="flex-1 p-2 overflow-y-auto">{home()}</div>
+        <div class="grow p-2 overflow-y-auto">{home()}</div>
     </div>;
 }

@@ -13,10 +13,10 @@ const dictApi = 'https://dict.sholvoir.com/api';
 const taskApi = '/api';
 const eachEpisode = 20;
 
+const MAX_NEXT = 2000000000;
 // times: 1m, 5m, 30m, 90m, 6h, 24h, 42h, 72h, 7d, 13d, 25d, 49d, 97d, 191d, 367d
-const times = [60000, 300000, 1800000, 5400000, 21600000, 86400000,
-    151200000, 259200000, 604800000, 1123200000, 2160000000, 4233600000,
-    8380800000, 16502400000, 31708800000];
+const times = [60, 5*60, 30*60, 90*60, 6*60*60, 24*60*60, 42*60*60, 72*60*60, 7*24*60*60,
+    13*24*60*60, 25*24*60*60, 49*24*60*60, 97*24*60*60, 191*24*60*60, 367*24*60*60];
 
 const fetchInit = (body: any, method: HTTPMethod = 'POST' ) => ({
     method,
@@ -45,9 +45,9 @@ const toBLevel = (level: number): BLevel => {
 };
 
 export const study = (task: ITask) => {
-    task.last = Date.now();
+    task.last = Math.round(Date.now() / 1000);
     const next = times[task.level++];
-    task.next = next ? task.last + next : Number.MAX_SAFE_INTEGER;
+    task.next = next ? task.last + next : MAX_NEXT;
 }
 
 export type StudyType = (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => void;
@@ -66,7 +66,8 @@ export const getSetting = () => {
     const s = localStorage.getItem('_setting');
     if (s) return JSON.parse(s) as Record<string, boolean>;
     const setting: Record<string, boolean> = {};
-    for (const taskType of TaskTypes) for (const tag of Tags) setting[`${taskType}${tag}`] = true;
+    const tag: Tag = 'OG';
+    for (const taskType of TaskTypes) setting[`${taskType}${tag}`] = true;
     return setting;
 }
 export const setSetting = (setting: any) => localStorage.setItem('_setting', JSON.stringify(setting));
@@ -112,25 +113,23 @@ export const openDatabase = () => new Promise<boolean>((resolve, reject) => {
 export const closeDatabase = () => _db?.close();
 
 export const initVocabulary = async () => {
-    const opfsRoot = (await navigator.storage.getDirectory());
-    try {
-        vocabulary = JSON.parse(await (await (await opfsRoot.getFileHandle('vocabulary.json')).getFile()).text());
-    } catch {
-        const resp = await fetch(vocabularyUrl);
-        if (!resp.ok) throw new Error('Network Error, Can not download init data!');
-        const vocabularyString = await resp.text();
-        vocabulary = JSON.parse(vocabularyString);
-        const fileStream = await (await opfsRoot.getFileHandle('vocabulary.json', { create: true })).createWritable();
-        await fileStream.write(vocabularyString);
-        await fileStream.close();
-    }
+    const resp = await fetch(vocabularyUrl);
+    if (!resp.ok) throw new Error('Network Error, Can not download init data!');
+    vocabulary = await resp.json();
 }
+
+export const getTask = (type: TaskType, word: string) => new Promise<ITask>((resolve, reject) => {
+    if (!_db) return reject('Open Database First!');
+    const request = _db.transaction('task', 'readonly').objectStore('task').get([type, word]);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = reject;
+});
 
 const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
     if (!_db) return reject('Open Database First!');
     const request = _db.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last, true));
     request.onsuccess = () => resolve(request.result);
-    request.onerror = (e: Event) => reject(e);
+    request.onerror = reject;
 })
 
 export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, reject) => {
@@ -152,7 +151,7 @@ export const initTasks = async () => {
     if (!vocabulary) throw new Error('Please Init Vocabulary First!');
     const tasks: Array<ITask> = []
     for (const word in vocabulary) for (const type of TaskTypes)
-        tasks.push({type, word, last: 0, next: Number.MAX_SAFE_INTEGER, level: 0});
+        tasks.push({type, word, last: 0, next: MAX_NEXT, level: 0});
     await putTasks(tasks);
 }
 
@@ -205,7 +204,7 @@ export const initStats = () => {
 
 export const updateStats = async () => {
     const stats = initStats();
-    const ctime = Date.now();
+    const ctime = Math.ceil(Date.now() / 1000);
     await traversingTask(
         (cursor) => {
             const task = cursor.value as ITask;
@@ -225,7 +224,7 @@ export const updateStats = async () => {
 
 export const syncTasks = async () => {
     const syncTime = getSyncTime();
-    const now = Date.now();
+    const now = Math.ceil(Date.now() / 1000);
     const otasks = await getTasks(syncTime);
     const resp =  await fetch(`${taskApi}/task?lastgt=${syncTime}`, fetchInit(otasks));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
@@ -236,7 +235,7 @@ export const syncTasks = async () => {
 
 export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
     const tasks: Array<ITask> = [];
-    const ctime = Date.now();
+    const ctime = Math.ceil(Date.now() / 1000);
     await traversingTask(
         cursor => {
             const task = cursor.value as ITask;

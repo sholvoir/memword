@@ -11,10 +11,13 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $signup from "./routes/signup.ts";
 import * as $about from "./islands/about.tsx";
+import * as $dialog from "./islands/dialog.tsx";
 import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
+import * as $signin from "./islands/signin.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
+import * as $tasks from "./islands/tasks.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -30,10 +33,13 @@ const manifest = {
   },
   islands: {
     "./islands/about.tsx": $about,
+    "./islands/dialog.tsx": $dialog,
     "./islands/root.tsx": $root,
     "./islands/setting.tsx": $setting,
+    "./islands/signin.tsx": $signin,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
+    "./islands/tasks.tsx": $tasks,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
