@@ -1,4 +1,5 @@
-import { MongoClient } from 'mongo';
+// deno-lint-ignore-file
+import { Mongo } from 'generic-ts/mongo.ts';
 
 const endpoint = Deno.env.get('MONGO_END_POINT')!;
 const apiKey = Deno.env.get('MONGO_API_KEY')!;
@@ -18,10 +19,9 @@ const run = async () => {
     const tasks: Array<Task> = [];
     for (const o of otasks) if (vocabulary[o.word]) tasks.push({type: 'R', word: o.word, last: o.last, next: o.next, level: o.level});
     console.log(`Valid Task: ${tasks.length}`);
-    const mongo = new MongoClient({endpoint, auth: { apiKey }, dataSource: 'Cluster0'});
-    const collection = mongo.database('task').collection<Task>(btoa('sovar.he@gmail.com').replaceAll('=', ''))
-    const result = await collection.insertMany(tasks);
-    console.log(`Insert: ${result.insertedIds.length}`);
+    const mongo = new Mongo(endpoint, apiKey, { dataSource: 'Cluster0', database: 'task', collection: btoa('sovar.he@gmail.com').replaceAll('=', '')});
+    const result = await mongo.insertMany(tasks as any);
+    console.log(`Insert: ${result.length}`);
 };
 
 if (import.meta.main) run();
