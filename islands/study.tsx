@@ -4,7 +4,6 @@ import { Signal, useSignal } from "@preact/signals";
 import { getDict, study } from '../lib/mem.ts';
 import { ITask } from "../lib/itask.ts";
 import { IDict } from "dict/lib/idict.ts";
-import { MemberExpression } from "https://deno.land/x/ts_morph@20.0.0/ts_morph.js";
 
 interface StudyProps {
     tasks: Signal<Array<ITask>>;
@@ -17,6 +16,7 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const dict = useSignal<IDict | null>(null);
     const player = useRef<HTMLAudioElement>(null);
     const task = tasks.value[index.value];
+    if (!task) return (onFinish(), <div/>);
 
     const handleKeyPress = (event: any) => {
         event.preventDefault();
