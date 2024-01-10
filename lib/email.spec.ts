@@ -1,3 +1,3 @@
 import { sendActiveEmail } from './email.ts';
 
-sendActiveEmail('sovar.he@gmail.com', 'sagkjsdiofgwjlejgkls');
+console.log(await sendActiveEmail('http://localhost:8000', 'sholvoir@gmail.com', 'sagkjsdiofgwjlejgkls'));
