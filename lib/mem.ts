@@ -11,7 +11,11 @@ import Cookies from "js-cookie";
 const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.1/vocabulary.json';
 const dictApi = 'https://dict.sholvoir.com/api';
 const taskApi = '/api';
-const eachEpisode = 20;
+
+type Setting = {
+    sprintNumber: number;
+    wordBooks: Record<string, boolean>
+}
 
 const MAX_NEXT = 2000000000;
 // times: 1m, 5m, 30m, 90m, 6h, 24h, 42h, 72h, 7d, 13d, 25d, 49d, 97d, 191d, 367d
@@ -55,6 +59,7 @@ export type StudyType = (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => voi
 // Local Storage
 let _db: IDBDatabase | undefined;
 let vocabulary: Record<string, Array<Tag>>;
+let setting: Setting;
 
 export const getAuth = () => Cookies.get('auth');
 export const removeAuth = () => Cookies.remove('auth');
@@ -63,14 +68,15 @@ export const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
 export const setSyncTime = (time: number) => localStorage.setItem('_sync-time', `${time}`);
 
 export const getSetting = () => {
+    if (setting) return setting;
     const s = localStorage.getItem('_setting');
-    if (s) return JSON.parse(s) as Record<string, boolean>;
-    const setting: Record<string, boolean> = {};
+    if (s) return JSON.parse(s) as Setting;
+    setting  = { sprintNumber: 10, wordBooks: {} };
     const tag: Tag = 'OG';
-    for (const taskType of TaskTypes) setting[`${taskType}${tag}`] = true;
+    for (const taskType of TaskTypes) setting.wordBooks[`${taskType}${tag}`] = true;
     return setting;
 }
-export const setSetting = (setting: any) => localStorage.setItem('_setting', JSON.stringify(setting));
+export const setSetting = () => setting && localStorage.setItem('_setting', JSON.stringify(setting));
 
 export const getStats = () => {
     const s = localStorage.getItem('_stats');
@@ -236,6 +242,7 @@ export const syncTasks = async () => {
 export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
     const tasks: Array<ITask> = [];
     const ctime = Math.ceil(Date.now() / 1000);
+    const sprintNumber = getSetting().sprintNumber;
     await traversingTask(
         cursor => {
             const task = cursor.value as ITask;
@@ -243,7 +250,7 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
             if (tag && !vocabulary[task.word].includes(tag)) return true;
             if (blevel && toBLevel(task.level) != blevel) return true;
             tasks.push(task);
-            return tasks.length < eachEpisode;
+            return tasks.length < sprintNumber;
         },
         'next', IDBKeyRange.upperBound(ctime), "prev"
     );

@@ -15,7 +15,7 @@ export default ({stats, onClickStatBar}: IStatsProps) => {
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const stat = stats.value[taskType][tag];
         const all = BLevels.reduce((s,b) => s + stat.all[b], 0);
-        if (setting[`${taskType}${tag}`]) result.push(<table>
+        if (setting.wordBooks[`${taskType}${tag}`]) result.push(<table>
             <colgroup>
                 <col class="pr-1"/>
                 <col class="w-full" />

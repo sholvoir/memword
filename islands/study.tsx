@@ -74,12 +74,12 @@ export default ({ tasks, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && dict.value && <div><pre>{dict.value.trans}</pre></div>}
         </div>
         <div class="flex gap-1 [&>button]:flex-1 [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
-            <button onClick={handlePrevious} title="Hot Key: ,">Previous</button>
-            <button onClick={handleSpeakIt} title="Hot Key: B/C">Read</button>
+            <button onClick={handlePrevious} title="Hot Key: ,">Previous (,)</button>
+            <button onClick={handleSpeakIt} title="Hot Key: ">Read (B/C)</button>
             <button onClick={handleShowAnswer} title="Hot key: Space">Answer</button>
-            <button onClick={handleIKnown} title="Hot key: X/N">Known</button>
-            <button onClick={handleDontKnow} title="Hot key: Z/M">Don't</button>
-            <button onClick={handleNext} title="Hot key: .">Ignore</button>
+            <button onClick={handleIKnown} title="Hot key: X/N">Known (X/N)</button>
+            <button onClick={handleDontKnow} title="Hot key: Z/M">Don't (Z/M)</button>
+            <button onClick={handleNext} title="Hot key: .">Ignore (.)</button>
         </div>
         <audio ref={player} />
     </div>;
