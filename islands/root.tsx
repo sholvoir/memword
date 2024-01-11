@@ -104,16 +104,16 @@ export default () => {
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
                     onClick={handleClickMenu}></button>
-                <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>button]:p-2 [&>div]:h-px [&>div]:bg-gray-300`}>
-                    <button onClick={handleClickMenuStatis}>Status</button><br/>
-                    <button onClick={() => handleClickStatBar()}>Study</button><br/>
-                    <button onClick={() => loca.value = 'dict'}>Dict</button>
+                <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
+                    <menu onClick={handleClickMenuStatis}>Status</menu>
+                    <menu onClick={() => handleClickStatBar()}>Study</menu>
+                    <menu onClick={() => loca.value = 'dict'}>Dict</menu>
                     <div/>
-                    <button onClick={handleClickMenuSetting}>Setting</button>
+                    <menu onClick={handleClickMenuSetting}>Setting</menu>
                     <div/>
-                    <button onClick={() => loca.value = 'issue'}>Report Issue</button>
+                    <menu onClick={() => loca.value = 'issue'}>Report Issue</menu>
                     <div/>
-                    <button onClick={handleClickMenuLogout}>Logout</button>
+                    <menu onClick={handleClickMenuLogout}>Logout</menu>
                 </div>
             </div> : <button class="w-32 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'signin'}>Signin</button>}
         </div>

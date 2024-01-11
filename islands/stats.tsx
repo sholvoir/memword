@@ -24,7 +24,7 @@ export default ({stats, onClickStatBar}: IStatsProps) => {
                 </colgroup>
                 <thead>
                     <tr><th colspan={3}>
-                        <a onClick={() => onClickStatBar(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {all}</a>
+                        <a class="hover:cursor-pointer hover:underline" onClick={() => onClickStatBar(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {all}</a>
                     </th></tr>
                 </thead>
                 <tbody>
@@ -34,7 +34,7 @@ export default ({stats, onClickStatBar}: IStatsProps) => {
                         return <tr>
                             <td class="text-left">{blevel}</td>
                             <td onClick={(ev: Event) => (ev.stopPropagation(), onClickStatBar(taskType, tag, blevel))}>
-                                <div class="bg-gray-300 h-4 w-full hover:cursor-grab">
+                                <div class="bg-gray-300 h-4 w-full hover:cursor-pointer">
                                     <div class="h-full bg-gray-500" style={`width: ${value * 100 / all}%`}>
                                         <div class="h-full bg-red-400" style={`width: ${value ? (task * 100 / value) : 0}%`}/>
                                     </div>

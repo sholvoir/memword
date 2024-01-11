@@ -77,11 +77,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && dict.value && dict.value.pic && <img src={dict.value.pic} />}
             {isPhaseAnswer.value && dict.value && <div><pre>{dict.value.trans}</pre></div>}
         </div>
-        <div class="flex gap-1 [&>button]:grow [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
-            <button onClick={handleSpeakIt}>Read(B/C)</button>
-            <button onClick={handleShowAnswer}>Answer(_)</button>
-            <button onClick={handleIKnown}>Known(X/N)</button>
-            <button onClick={handleDontKnow}>Don't(Z/M)</button>
+        <div class="flex gap-1 [&>menu]:text-center [&>menu]:hover:cursor-pointer [&>menu]:grow [&>menu]:p-px [&>menu]:rounded [&>menu]:bg-gray-300">
+            <menu onClick={handleShowAnswer}>Answer(_)</menu>
+            <menu onClick={handleSpeakIt}>Read(B/C)</menu>
+            <menu onClick={handleDontKnow}>Don't(Z/M)</menu>
+            <menu onClick={handleIKnown}>Known(X/N)</menu>
         </div>
         <audio ref={player} />
     </div>;
