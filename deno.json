@@ -30,6 +30,7 @@
         "tailwindcss/plugin": "npm:/tailwindcss@3.4.0/plugin.js",
         "mongodb": "npm:mongodb@6.3.0",
         "generic-ts/": "https://raw.githubusercontent.com/sholvoir/generic-ts/main/",
+        "deno-esmtp/": "https://raw.githubusercontent.com/sholvoir/deno-esmtp/master/",
         "vocabulary/": "https://raw.githubusercontent.com/sholvoir/vocabulary/main/",
         "dict/": "https://raw.githubusercontent.com/sholvoir/dict/main/",
         "js-cookie": "https://esm.sh/js-cookie@3.0.5",

@@ -5,6 +5,7 @@
 import * as $_root_auth_middleware from "./routes/(root)/(auth)/_middleware.ts";
 import * as $_root_auth_active_email from "./routes/(root)/(auth)/active-email.tsx";
 import * as $_root_auth_api_task from "./routes/(root)/(auth)/api/task.ts";
+import * as $_root_auth_issue from "./routes/(root)/(auth)/issue.tsx";
 import * as $_root_middleware from "./routes/(root)/_middleware.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
@@ -12,6 +13,8 @@ import * as $_app from "./routes/_app.tsx";
 import * as $signup from "./routes/signup.ts";
 import * as $about from "./islands/about.tsx";
 import * as $dialog from "./islands/dialog.tsx";
+import * as $dict from "./islands/dict.tsx";
+import * as $issue from "./islands/issue.tsx";
 import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
 import * as $signin from "./islands/signin.tsx";
@@ -25,6 +28,7 @@ const manifest = {
     "./routes/(root)/(auth)/_middleware.ts": $_root_auth_middleware,
     "./routes/(root)/(auth)/active-email.tsx": $_root_auth_active_email,
     "./routes/(root)/(auth)/api/task.ts": $_root_auth_api_task,
+    "./routes/(root)/(auth)/issue.tsx": $_root_auth_issue,
     "./routes/(root)/_middleware.ts": $_root_middleware,
     "./routes/(root)/index.tsx": $_root_index,
     "./routes/_404.tsx": $_404,
@@ -34,6 +38,8 @@ const manifest = {
   islands: {
     "./islands/about.tsx": $about,
     "./islands/dialog.tsx": $dialog,
+    "./islands/dict.tsx": $dict,
+    "./islands/issue.tsx": $issue,
     "./islands/root.tsx": $root,
     "./islands/setting.tsx": $setting,
     "./islands/signin.tsx": $signin,

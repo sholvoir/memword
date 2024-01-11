@@ -14,8 +14,11 @@ import Study from './study.tsx';
 import Setting from './setting.tsx';
 import Dialog from './dialog.tsx';
 import Tasks from './tasks.tsx';
+import Issue from './issue.tsx';
+import Dict from './dict.tsx';
 
-export type Loca = 'empty'|'about'|'signin'|'stat'|'study'|'setting'|'dialog'|'tasks';
+export type Loca = 'empty'|'about'|'signin'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
+export type ShowDialog = (content: string, backLoca: Loca) => void;
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
@@ -58,14 +61,17 @@ export default () => {
         loca.value = 'about';
     };
     const handleClickStatBar = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
-        tasks.value = await mem.getEpisode(taskType, tag, blevel);
-        loca.value = 'study';
+        startStudy(await mem.getEpisode(taskType, tag, blevel));
     };
     const handleStudyFinish = async () => {
         await mem.putTasks(tasks.value);
         await handleClickMenuStatis();
         await mem.syncTasks();
     };
+    const startStudy = async (ts: Array<ITask>) => {
+        tasks.value = ts;
+        loca.value = 'study';
+    }
     const home = () => {
         switch (loca.value) {
             case 'empty': return <div/>
@@ -76,6 +82,8 @@ export default () => {
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>
+            case 'issue': return <Issue showDialog={showDialog} />
+            case 'dict': return <Dict showDialog={showDialog} startStudy={startStudy}/>
         }
     };
     const init = async () => {
@@ -96,12 +104,14 @@ export default () => {
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
                     onClick={handleClickMenu}></button>
-                <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>button]:p-2 [&>div]:h-px [&>div]:bg-gray-300`}>
-                    <button onClick={() => loca.value = 'tasks'}>Tasks</button>
-                    <button onClick={handleClickMenuStatis}>Status</button>
-                    <button onClick={() => handleClickStatBar()}>Study</button>
+                <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>button]:p-2 [&>div]:h-px [&>div]:bg-gray-300`}>
+                    <button onClick={handleClickMenuStatis}>Status</button><br/>
+                    <button onClick={() => handleClickStatBar()}>Study</button><br/>
+                    <button onClick={() => loca.value = 'dict'}>Dict</button>
                     <div/>
                     <button onClick={handleClickMenuSetting}>Setting</button>
+                    <div/>
+                    <button onClick={() => loca.value = 'issue'}>Report Issue</button>
                     <div/>
                     <button onClick={handleClickMenuLogout}>Logout</button>
                 </div>

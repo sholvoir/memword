@@ -11,7 +11,6 @@ export const handler = async (_req: Request, ctx: MemContext) => {
             await collection.createIndex({ type: 1, word: 1 }, { unique: true });
             await collection.createIndex({ last: 1 });
         }
-
     })} catch (e) { return internalServerError; }
     return await setAuth(await ctx.render(), ctx.state.user as string );
 }

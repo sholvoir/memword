@@ -148,7 +148,9 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
         const req = objectStore.get([task.type, task.word]);
         req.onsuccess = () => {
             const otask = req.result as ITask;
-            if (!otask || task.last > otask.last) objectStore.put(task);
+            if (!otask || task.last > otask.last) {
+                objectStore.put(task);
+            }
         };
     }
 })
@@ -182,10 +184,8 @@ const traversingTask = (
 });
 
 
-export const signup = async (email: string) => {
-    const resp = await fetch(`/signup?email=${encodeURIComponent(email)}`);
-    if (!resp.ok) throw new Error(`Error: ${await resp.text()}`);
-};
+export const signup = async (email: string) => await fetch(`/signup?email=${encodeURIComponent(email)}`);
+export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 
 export const getDict = async (word: string) => {
     const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`);

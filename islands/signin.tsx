@@ -14,14 +14,11 @@ export default ({showDialog}: ISigninProps) => {
         email.value = (target as HTMLInputElement).value;
     }
     const handleClickSignup = async () => {
-        if (!emailPattern.test(email.value)) {
-            showDialog('Invalid email address', 'signin');
-        }
-        else try {
-            await signup(email.value);
-            showDialog('The Active Email have alread sent to you.', 'about');
-        } catch (e) {
-            showDialog(e.message, 'about');
+        if (!emailPattern.test(email.value)) showDialog('Invalid email address', 'signin');
+        else {
+            const resp = await signup(email.value);
+            if (!resp.ok) showDialog(await resp.text(), 'about');
+            else showDialog('The Active Email have alread sent to you.', 'about');
         }
     };
     return <div class="h-full grid grid-cols-1 gap-4 content-center [&>div]:text-center">

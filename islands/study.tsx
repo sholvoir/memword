@@ -15,8 +15,7 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const isPhaseAnswer = useSignal(false);
     const dict = useSignal<IDict | null>(null);
     const player = useRef<HTMLAudioElement>(null);
-    const task = tasks.value[index.value];
-    if (!task) return (onFinish(), <div/>);
+    if (!tasks.value[index.value]) return (onFinish(), <div/>);
 
     const handleKeyPress = (event: any) => {
         event.preventDefault();
@@ -32,12 +31,12 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const handleSpeakIt = () => player.current && player.current.play();
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = () => {
-        study(task);
+        study(tasks.value[index.value]);
         if (isPhaseAnswer.value) handleNext();
         else (isPhaseAnswer.value = true , setTimeout(handleNext, 5000));
     };
     const handleDontKnow = () => {
-        task.level = 0;
+        tasks.value[index.value].level = 0;
         handleIKnown();
     };
     const handleNext = () => {
@@ -51,24 +50,26 @@ export default ({ tasks, onFinish }: StudyProps) => {
         isPhaseAnswer.value = false;
         dict.value = null;
     }
-    const shouldSound = dict.value && dict.value.sound && (isPhaseAnswer.value || task.type == 'L');
-    const shouldSpell = isPhaseAnswer.value || task.type == 'R';
+    const shouldSound = () => dict.value && dict.value.sound && (isPhaseAnswer.value || tasks.value[index.value].type == 'L');
+    const shouldSpell = () => isPhaseAnswer.value || tasks.value[index.value].type == 'R';
     const init = async () => {
-        addEventListener('keypress', handleKeyPress);
-        if (!dict.value) dict.value = await getDict(task.word);
-        if (shouldSound && player.current) {
+        if (!dict.value) dict.value = await getDict(tasks.value[index.value].word);
+        if (shouldSound() && player.current) {
             player.current.src = dict.value!.sound!;
             player.current.play();
         }
     };
-    const cleanup = () => {
-        removeEventListener('keypress', handleKeyPress);
-    }
-    useEffect(() => { init().catch(console.error); return cleanup; });
+    useEffect(() => {
+        addEventListener('keypress', handleKeyPress);
+        return () => removeEventListener('keypress', handleKeyPress);
+    }, []);
+    useEffect(() => { init().catch(console.error) });
     return <div class="flex flex-col flex-1 h-full">
-        <div class="flex"><div class="flex-1">{index.value+1}/{tasks.value.length}</div><div>Level: {task.level}</div></div>
+        <div class="flex">
+            <div class="flex-1">{index.value+1}/{tasks.value.length}</div><div>Level: {tasks.value[index.value].level}</div>
+        </div>
         <div class="flex-1">
-            {shouldSpell && <div class="text-4xl">{task.word}</div>}
+            {shouldSpell() && <div class="text-4xl">{tasks.value[index.value].word}</div>}
             {isPhaseAnswer.value && <div>{dict.value?.phonetic}</div>}
             {isPhaseAnswer.value && dict.value && dict.value.pic && <img src={dict.value.pic} />}
             {isPhaseAnswer.value && dict.value && <div><pre>{dict.value.trans}</pre></div>}
