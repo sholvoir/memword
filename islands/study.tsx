@@ -65,8 +65,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
     }, []);
     useEffect(() => { init().catch(console.error) });
     return <div class="flex flex-col flex-1 h-full">
-        <div class="flex">
-            <div class="flex-1">{index.value+1}/{tasks.value.length}</div><div>Level: {tasks.value[index.value].level}</div>
+        <div class="flex gap-2">
+            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
+            <div>{index.value+1}/{tasks.value.length}</div>
+            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= tasks.value.length}>{'>>'}</a>
+            <div class="grow text-right">Level: {tasks.value[index.value].level}</div>
         </div>
         <div class="flex-1">
             {shouldSpell() && <div class="text-4xl">{tasks.value[index.value].word}</div>}
@@ -74,13 +77,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && dict.value && dict.value.pic && <img src={dict.value.pic} />}
             {isPhaseAnswer.value && dict.value && <div><pre>{dict.value.trans}</pre></div>}
         </div>
-        <div class="flex gap-1 [&>button]:flex-1 [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
-            <button onClick={handlePrevious} title="Hot Key: ,">Previous (,)</button>
-            <button onClick={handleSpeakIt} title="Hot Key: ">Read (B/C)</button>
-            <button onClick={handleShowAnswer} title="Hot key: Space">Answer</button>
-            <button onClick={handleIKnown} title="Hot key: X/N">Known (X/N)</button>
-            <button onClick={handleDontKnow} title="Hot key: Z/M">Don't (Z/M)</button>
-            <button onClick={handleNext} title="Hot key: .">Ignore (.)</button>
+        <div class="flex gap-1 [&>button]:grow [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
+            <button onClick={handleSpeakIt}>Read(B/C)</button>
+            <button onClick={handleShowAnswer}>Answer(_)</button>
+            <button onClick={handleIKnown}>Known(X/N)</button>
+            <button onClick={handleDontKnow}>Don't(Z/M)</button>
         </div>
         <audio ref={player} />
     </div>;
