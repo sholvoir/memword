@@ -243,6 +243,7 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
     const tasks: Array<ITask> = [];
     const ctime = Math.ceil(Date.now() / 1000);
     const sprintNumber = getSetting().sprintNumber;
+    const query = blevel == 'never' ? undefined : IDBKeyRange.upperBound(ctime);
     await traversingTask(
         cursor => {
             const task = cursor.value as ITask;
@@ -252,7 +253,7 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
             tasks.push(task);
             return tasks.length < sprintNumber;
         },
-        'next', IDBKeyRange.upperBound(ctime), "prev"
+        'next', query, "prev"
     );
     return tasks;
 };
