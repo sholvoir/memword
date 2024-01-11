@@ -39,7 +39,8 @@ export default ({onFinished}: ISettingProps) => {
     return <>
         <div class="flex">
             <label for="sprintNumber">Sprint Number:</label>
-            <input type="text" name="sprintNumber" class="grow px-2 rounded border border-gray-500" onInput={handleSprintNuberChange}/>
+            <input type="text" name="sprintNumber" value={sprintNumber.value}
+                class="grow px-2 rounded border border-gray-500" onInput={handleSprintNuberChange}/>
         </div>
         <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap [&>div]:min-w-40">
             <legend>Select Your Word Books</legend>
