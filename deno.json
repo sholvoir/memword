@@ -28,6 +28,7 @@
         "tailwindcss": "npm:tailwindcss@3.4.0",
         "tailwindcss/": "npm:/tailwindcss@3.4.0/",
         "tailwindcss/plugin": "npm:/tailwindcss@3.4.0/plugin.js",
+        "mongodb": "npm:mongodb@6.3.0",
         "generic-ts/": "https://raw.githubusercontent.com/sholvoir/generic-ts/main/",
         "vocabulary/": "https://raw.githubusercontent.com/sholvoir/vocabulary/main/",
         "dict/": "https://raw.githubusercontent.com/sholvoir/dict/main/",

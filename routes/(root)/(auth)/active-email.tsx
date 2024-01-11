@@ -1,34 +1,18 @@
 import { internalServerError, MemContext } from "../../../lib/mem-server.ts";
 import { setAuth } from "../../../lib/jwt.ts";
-
-const mongoDDL = 'https://mongo-ddl.deno.dev';
-const requestInit: RequestInit = {
-    method: 'POST',
-    headers: new Headers([
-        ['Content-Type', 'application/json'],
-        ['Authorization', `Bearer ${Deno.env.get('MONGO_TOKEN')}`]
-    ])
-}
-const indexInfo = {
-    database: 'task',
-    collection: '',
-    indexes: [
-        { key: { type: 1, word: 1 }, name: 'type_word', unique: true },
-        { key: { last: 1 }, name: 'last' }
-    ]
-}
+import mongorun from '../../../lib/mongo.ts';
 
 export const handler = async (_req: Request, ctx: MemContext) => {
-    requestInit.body = JSON.stringify({ database: 'task' });
-    const resp1 = await fetch(`${mongoDDL}/get-collection-names`, requestInit);
-    if (!(resp1).ok) return internalServerError;
-    const collections = await resp1.json() as Array<string>;
-    if (!collections.includes(ctx.state.collection)) {
-        indexInfo.collection = ctx.state.collection;
-        requestInit.body = JSON.stringify(indexInfo);
-        const resp2 = await fetch(`${mongoDDL}/create-index`, requestInit);
-        if (!(resp2).ok) return internalServerError;
-    }
+    try { await mongorun(async client => {
+        const db = client.db('task');
+        const collectionNames = (await db.collections()).map(conn => conn.collectionName);
+        if (!collectionNames.includes(ctx.state.collection)) {
+            const collection = await db.createCollection(ctx.state.collection);
+            await collection.createIndex({ type: 1, word: 1 }, { unique: true });
+            await collection.createIndex({ last: 1 });
+        }
+
+    })} catch (e) { return internalServerError; }
     return await setAuth(await ctx.render(), ctx.state.user as string );
 }
 
