@@ -14,7 +14,7 @@ export default ({showDialog}: ISigninProps) => {
         email.value = (target as HTMLInputElement).value;
     }
     const handleClickSignup = async () => {
-        if (!emailPattern.test(email.value)) showDialog('Invalid email address', 'signin');
+        if (!emailPattern.test(email.value)) showDialog('Invalid email address', 'login');
         else {
             const resp = await signup(email.value);
             if (!resp.ok) showDialog(await resp.text(), 'about');
@@ -33,7 +33,7 @@ export default ({showDialog}: ISigninProps) => {
         <div><button
             class="w-64 p-2 bg-indigo-700 text-white rounded"
             onClick={handleClickSignup}>
-                Signin
+                OK
         </button></div>
         
     </div>;

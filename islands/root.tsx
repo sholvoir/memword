@@ -17,7 +17,7 @@ import Tasks from './tasks.tsx';
 import Issue from './issue.tsx';
 import Dict from './dict.tsx';
 
-export type Loca = 'empty'|'about'|'signin'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
+export type Loca = 'empty'|'about'|'login'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
 export type ShowDialog = (content: string, backLoca: Loca) => void;
 
 export default () => {
@@ -76,7 +76,7 @@ export default () => {
         switch (loca.value) {
             case 'empty': return <div/>
             case 'about': return <About/>;
-            case 'signin': return <Signin showDialog={showDialog}/>;
+            case 'login': return <Signin showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
             case 'study': return <Study tasks={tasks} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
@@ -115,7 +115,7 @@ export default () => {
                     <div/>
                     <menu onClick={handleClickMenuLogout}>Logout</menu>
                 </div>
-            </div> : <button class="w-32 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'signin'}>Signin</button>}
+            </div> : <button class="w-32 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'login'}>Login</button>}
         </div>
         <div class="grow p-2 overflow-y-auto">{home()}</div>
     </div>;
