@@ -20,7 +20,7 @@ export const handler: Handlers = {
         const res = await fetch(`${dictApi}/${ctx.params.word}`);
         if (!res.ok) return res;
         const dict = await res.json() as IDict;
-        updateSound(dict);
+        await updateSound(dict);
         const resp = new Response(JSON.stringify(dict), { headers: jsonHeader });
         resp.headers.append('Cache-Control', `max-age=${24*60*60}`);
         return resp;

@@ -3,7 +3,7 @@ import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
-import { TaskType } from "../lib/itask.ts";
+import { ITask, TaskType } from "../lib/itask.ts";
 import { BLevel } from "../lib/istat.ts";
 import * as mem from '../lib/mem.ts';
 
@@ -16,7 +16,6 @@ import Dialog from './dialog.tsx';
 import Tasks from './tasks.tsx';
 import Issue from './issue.tsx';
 import Dict from './dict.tsx';
-import { IStudy } from "../lib/istudy.ts";
 
 export type Loca = 'empty'|'about'|'login'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
 export type ShowDialog = (content: string, backLoca: Loca) => void;
@@ -27,7 +26,7 @@ export default () => {
     const isMenuToggle = useSignal(false);
     const loca = useSignal<Loca>('empty');
     const stats  = useSignal(mem.getStats());
-    const studies = useSignal<Array<IStudy>>([]);
+    const tasks = useSignal<Array<ITask>>([]);
     const dialogContent = useSignal('');
     const preLoca = useSignal<Loca>('stat');
 
@@ -68,8 +67,8 @@ export default () => {
         await handleClickMenuStatis();
         await mem.syncTasks();
     };
-    const startStudy = async (ts: Array<IStudy>) => {
-        studies.value = ts;
+    const startStudy = async (ts: Array<ITask>) => {
+        tasks.value = ts;
         loca.value = 'study';
     }
     const home = () => {
@@ -78,7 +77,7 @@ export default () => {
             case 'about': return <About/>;
             case 'login': return <Signin showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
-            case 'study': return <Study studies={studies} onFinish={handleStudyFinish}/>;
+            case 'study': return <Study tasks={tasks} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>

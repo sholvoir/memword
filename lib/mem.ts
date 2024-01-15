@@ -7,7 +7,6 @@ import { BLevel, BLevels, Stats } from "./istat.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
-import { IStudy } from "./istudy.ts";
 import { IDict } from "dict/lib/idict.ts";
 
 const MAX_NEXT = 2000000000;
@@ -46,8 +45,8 @@ const fetchInit = (body: any, method: HTTPMethod = 'POST') => ({
 export const signup = async (email: string) => await fetch(`/signup?email=${encodeURIComponent(email)}`);
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
-export const getDict = async (word: string) => {
-    const resp = await fetch(`/dict/${encodeURIComponent(word)}`);
+export const getDict = async (word: string, refresh?: boolean) => {
+    const resp = await fetch(`/dict/${encodeURIComponent(word)}`, refresh? { cache: 'no-cache' } : undefined);
     if (resp.ok) return resp.json() as IDict;
 }
 export const removeAuth = () => Cookies.remove('auth');
@@ -126,13 +125,13 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
 
 export const syncTasks = async () => {
     const thisTime = now();
-    const lastTime = await getSyncTime();
+    const lastTime = getSyncTime();
     const otasks = await getTasks(lastTime);
     const resp = await fetch(`/task?lastgt=${lastTime}`, fetchInit(otasks));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
     const ntasks = await resp.json();
     await putTasks(ntasks);
-    await setSyncTime(thisTime);
+    setSyncTime(thisTime);
 }
 
 const traversingTask = (
@@ -213,7 +212,7 @@ export const updateStats = async () => {
 };
 
 export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
-    const studies: Array<IStudy> = [];
+    const tasks: Array<ITask> = [];
     const ctime = now();
     const sprintNumber = setting!.sprintNumber;
     const query = blevel == 'never' ? undefined : IDBKeyRange.upperBound(ctime);
@@ -223,13 +222,12 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
             if (taskType && task.type != taskType) return true;
             if (tag && !vocabulary![task.word].includes(tag)) return true;
             if (blevel && toBLevel(task.level) != blevel) return true;
-            studies.push({ task });
-            return studies.length < sprintNumber;
+            tasks.push(task);
+            return tasks.length < sprintNumber;
         },
         'next', query, "prev"
     );
-    for (const study of studies) study.dict = await getDict(study.task.word);
-    return studies;
+    return tasks;
 };
 
 export const init = async () => {

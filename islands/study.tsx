@@ -1,22 +1,25 @@
 // deno-lint-ignore-file no-explicit-any
 import { useRef, useEffect } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
-import { IStudy } from "../lib/istudy.ts";
+import { ITask } from "../lib/itask.ts";
 import * as mem from '../lib/mem.ts';
+import { IDict } from "dict/lib/idict.ts";
+import IconRefresh from "tabler_icons/refresh.tsx";
 
 interface StudyProps {
-    studies: Signal<Array<IStudy>>;
+    tasks: Signal<Array<ITask>>;
     onFinish: () => void;
 };
 
-export default ({ studies, onFinish }: StudyProps) => {
+export default ({ tasks, onFinish }: StudyProps) => {
     const index = useSignal(0);
     const isPhaseAnswer = useSignal(false);
-    const study = useComputed(() => studies.value[index.value])
-    const shouldSound = useComputed(() => isPhaseAnswer.value || study.value.task.type == 'L');
-    const shouldSpell = useComputed(() => isPhaseAnswer.value || study.value.task.type == 'R');
+    const task = useComputed(() => tasks.value[index.value]);
+    const dict = useSignal<IDict|undefined>(undefined);
+    const shouldSound = useComputed(() => isPhaseAnswer.value || task.value.type == 'L');
+    const shouldSpell = useComputed(() => isPhaseAnswer.value || task.value.type == 'R');
     const player = useRef<HTMLAudioElement>(null);
-    if (!study.value) return (onFinish(), <div/>);
+    if (!task.value) return (onFinish(), <div/>);
 
     const handleKeyPress = (event: any) => {
         event.preventDefault();
@@ -29,42 +32,55 @@ export default ({ studies, onFinish }: StudyProps) => {
             case 46: case 62: handleNext();
         }
     };
-    const handleSpeakIt = () => player.current && player.current.play();
+    const handleSpeakIt = () => player.current?.play();
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
-        await mem.study(study.value.task);
+        await mem.study(task.value);
         if (isPhaseAnswer.value) handleNext();
         else (isPhaseAnswer.value = true , setTimeout(handleNext, 3000));
     };
     const handleDontKnow = () => {
-        study.value.task.level = 0;
+        task.value.level = 0;
         handleIKnown();
     };
     const handleNext = () => {
-        if (index.value >= studies.value.length) return onFinish();
+        if (index.value >= tasks.value.length) return onFinish();
         index.value++;
         isPhaseAnswer.value = false;
+        dict.value = undefined;
     };
     const handlePrevious = () => {
+        if (index.value <= 0) return onFinish();
         index.value--;
         isPhaseAnswer.value = false;
-    }
+        dict.value = undefined;
+    };
+    const handleRefresh = async () => {
+        dict.value = await mem.getDict(task.value.word, true);
+    };
     useEffect(() => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
+    const init = async () => {
+        if (!dict.value) dict.value = await mem.getDict(task.value.word);
+        if (dict.value && dict.value.sound && shouldSound.value) player.current?.play();
+    }
+    useEffect(() => { init().catch(console.error) });
     return <div class="flex flex-col flex-1 h-full">
         <div class="flex gap-2">
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
-            <div>{index.value+1}/{studies.value.length}</div>
-            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
-            <div class="grow text-right">Level: {study.value.task.level}</div>
+            <div>{index.value+1}/{tasks.value.length}</div>
+            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= tasks.value.length}>{'>>'}</a>
+            <div class="grow"/>
+            <IconRefresh class="w-6 h-6 disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}/>
+            <div>Level: {task.value.level}</div>
         </div>
         <div class="flex-1">
-            {shouldSpell.value && <div class="text-4xl">{study.value.task.word}</div>}
-            {isPhaseAnswer.value && <div>{study.value.dict?.phonetic}</div>}
-            {isPhaseAnswer.value && study.value.dict!.pic && <img src={study.value.dict!.pic} />}
-            {isPhaseAnswer.value && <div><pre>{study.value.dict!.trans}</pre></div>}
+            {shouldSpell.value && <div class="text-4xl">{task.value.word}</div>}
+            {isPhaseAnswer.value && <div>{dict.value?.phonetic}</div>}
+            {isPhaseAnswer.value && dict.value?.pic && <img src={dict.value?.pic} />}
+            {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}
         </div>
         <div class="flex gap-1 [&>menu]:text-center [&>menu]:hover:cursor-pointer [&>menu]:grow [&>menu]:p-px [&>menu]:rounded [&>menu]:bg-gray-300 [&>menu]:disabled:opacity-50">
             <menu onClick={handleShowAnswer}>Answer(_)</menu>
@@ -72,6 +88,6 @@ export default ({ studies, onFinish }: StudyProps) => {
             <menu onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</menu>
             <menu onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</menu>
         </div>
-        <audio ref={player} src={study.value.dict?.sound} autoplay={shouldSound.value}/>
+        <audio ref={player} src={dict.value?.sound}/>
     </div>;
 }
