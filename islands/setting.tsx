@@ -1,33 +1,33 @@
 // deno-lint-ignore-file no-explicit-any
-import { getSetting, setSetting } from '../lib/mem.ts';
 import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { TagName, Tags } from "vocabulary/tag.ts";
 import { useSignal } from "@preact/signals";
+import * as mem from "../lib/mem.ts";
 
 interface ISettingProps {
     onFinished: () => void;
 };
 
 export default ({onFinished}: ISettingProps) => {
-    const setting = getSetting();
-    const isModified = useSignal(false);
-    const sprintNumber = useSignal(setting.sprintNumber);
+    const setting = mem.getSetting();
+    const sprintNumber = useSignal(mem.setting.sprintNumber);
     const checkBoxs = {} as any;
 
     const handleCheckboxChange = (e: Event) => {
-        isModified.value = true;
         const target = e.target as HTMLInputElement;
         checkBoxs[target.name].value = setting.wordBooks[target.name] = target.checked;
     }
     const handleLableClick = (e: Event) => {
-        isModified.value = true;
         const target = e.target as HTMLLabelElement;
         checkBoxs[target.htmlFor].value = setting.wordBooks[target.htmlFor] = !setting.wordBooks[target.htmlFor];
     }
     const handleSprintNuberChange = (e: Event) => {
-        isModified.value = true;
         const target = e.target as HTMLInputElement;
         sprintNumber.value = setting.sprintNumber = Number.parseInt(target.value);
+    }
+    const handleOKClick = () => {
+        mem.setSetting(setting);
+        onFinished();
     }
     const result = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
@@ -46,9 +46,9 @@ export default ({onFinished}: ISettingProps) => {
             <legend>Select Your Word Books</legend>
             {result}
         </fieldset>
-        <div class="m-2 flex justify-end [&>button]:w-32 [&>button]:p-2 [&>button]:rounded gap-2">
+        <div class="m-2 flex justify-end [&>button]:w-32 [&>button]:p-2 [&>button]:rounded">
             <button class="bg-gray-300" onClick={onFinished}>Cancel</button>
-            <button class="bg-indigo-700 text-white" onClick={() => (setSetting(), onFinished())} disabled={!isModified.value}>Save</button>
+            <button class="bg-indigo-700 text-white" onClick={handleOKClick}>OK</button>
         </div>
     </>
 }

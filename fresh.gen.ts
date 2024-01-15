@@ -3,14 +3,16 @@
 // This file is automatically updated during development when running `dev.ts`.
 
 import * as $_root_auth_middleware from "./routes/(root)/(auth)/_middleware.ts";
-import * as $_root_auth_active_email from "./routes/(root)/(auth)/active-email.tsx";
-import * as $_root_auth_api_task from "./routes/(root)/(auth)/api/task.ts";
-import * as $_root_auth_issue from "./routes/(root)/(auth)/issue.tsx";
+import * as $_root_auth_issue from "./routes/(root)/(auth)/issue.ts";
+import * as $_root_auth_task from "./routes/(root)/(auth)/task.ts";
 import * as $_root_middleware from "./routes/(root)/_middleware.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
+import * as $dict_word_ from "./routes/dict/[word].ts";
+import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
+import * as $vocabulary from "./routes/vocabulary.ts";
 import * as $about from "./islands/about.tsx";
 import * as $dialog from "./islands/dialog.tsx";
 import * as $dict from "./islands/dict.tsx";
@@ -26,14 +28,16 @@ import { type Manifest } from "$fresh/server.ts";
 const manifest = {
   routes: {
     "./routes/(root)/(auth)/_middleware.ts": $_root_auth_middleware,
-    "./routes/(root)/(auth)/active-email.tsx": $_root_auth_active_email,
-    "./routes/(root)/(auth)/api/task.ts": $_root_auth_api_task,
-    "./routes/(root)/(auth)/issue.tsx": $_root_auth_issue,
+    "./routes/(root)/(auth)/issue.ts": $_root_auth_issue,
+    "./routes/(root)/(auth)/task.ts": $_root_auth_task,
     "./routes/(root)/_middleware.ts": $_root_middleware,
     "./routes/(root)/index.tsx": $_root_index,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
+    "./routes/dict/[word].ts": $dict_word_,
+    "./routes/login.ts": $login,
     "./routes/signup.ts": $signup,
+    "./routes/vocabulary.ts": $vocabulary,
   },
   islands: {
     "./islands/about.tsx": $about,

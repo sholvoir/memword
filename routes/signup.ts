@@ -1,27 +1,34 @@
-import { FreshContext } from "$fresh/server.ts";
+import { Handlers } from "$fresh/server.ts";
 import { sendEmail } from "../lib/email.ts";
-import { STATUS_CODE } from "$std/http/status.ts";
-import { jwt } from "../lib/jwt.ts";
+import { badRequest } from '../lib/mem-server.ts';
+import mongorun from '../lib/mongo.ts';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 
-export const handler = async (req: Request, _ctx: FreshContext) => {
-    const url = new URL(req.url);
-    const email = decodeURIComponent(url.searchParams.get('email')!).toLowerCase();
-    if (!email || !emailPattern.test(email))
-        return new Response(undefined, { status: STATUS_CODE.BadRequest });
-    const token = encodeURIComponent(await jwt.createToken(10 * 60, { aud: email }));
-    const mail = {
-        from: 'MEMWORD <memword.sholvoir@gmail.com>',
-        to: `${email}`,
-        subject: 'Active your MEMWORD account',
-        content: `<p>Dear user ${email}:</p>
-<p>Thanks for your register for MEMWORD, please click the flow link to active your account:</p>
-<p><a href="${url.origin}/active-email?auth=${token}">${url.origin}/active-email?auth=${token}</a></p>
-<p>If you can not click this link you can copy it and paste to you address of your brower and press enter.</p>
-<p>Note: You must active your account in 14 days, or the link will expire.</p>
-<p>Best Wish</p>
-<p>MEMWORD <memword.sholvoir@gmail.com></p>`
-    };
-    return await sendEmail(mail);
+export const handler: Handlers = {
+    async GET(req) {
+        const url = new URL(req.url);
+        const rawEmail = url.searchParams.get('email');
+        if (!rawEmail) return badRequest;
+        const email = decodeURIComponent(rawEmail).toLowerCase();
+        if (!emailPattern.test(email)) return badRequest;
+        const name = btoa(email).replaceAll('=', '');
+        const password = Math.random().toString(36).slice(7);
+        await mongorun(async (client) => {
+            await client.db('user').collection('user').updateOne({ name }, { $set: { time: Math.round(Date.now() / 1000), password } }, { upsert: true });
+        });
+        const mail = {
+            from: 'MEMWORD <memword.sholvoir@gmail.com>',
+            to: `${email}`,
+            subject: 'Your MemWord Account',
+            content: `<p>Dear user ${email}:</p>
+                <p>Thanks for your using MEMWORD, the flow is your temporary password:</p>
+                <p style="padding: 8px; font-size: 40px; font-weight: 700">${password}</p>
+                <p>Note: You must use this temporary password in 5 minutes, or the it will expire.</p>
+                <p>Best Wish</p>
+                <p>MEMWORD <memword.sholvoir@gmail.com></p>
+            `
+        };
+        return await sendEmail(mail);
+    }
 };

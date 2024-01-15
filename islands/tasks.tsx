@@ -1,14 +1,11 @@
 import { useSignal } from "@preact/signals";
 import { ITask, TaskType } from "../lib/itask.ts";
-import { getTask } from "../lib/mem.ts";
 
 export default () => {
     const type = useSignal<TaskType>('L');
     const word = useSignal('');
     const task = useSignal<ITask | null>(null);
-    const handleApplyClick = async () => {
-        task.value = await getTask(type.value, word.value);
-    }
+    const handleApplyClick = async () => {}
 
     return <div class="h-full">
         <div class="flex gap-2">

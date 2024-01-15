@@ -3,7 +3,7 @@ import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
-import { ITask, TaskType } from "../lib/itask.ts";
+import { TaskType } from "../lib/itask.ts";
 import { BLevel } from "../lib/istat.ts";
 import * as mem from '../lib/mem.ts';
 
@@ -16,6 +16,7 @@ import Dialog from './dialog.tsx';
 import Tasks from './tasks.tsx';
 import Issue from './issue.tsx';
 import Dict from './dict.tsx';
+import { IStudy } from "../lib/istudy.ts";
 
 export type Loca = 'empty'|'about'|'login'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
 export type ShowDialog = (content: string, backLoca: Loca) => void;
@@ -26,7 +27,7 @@ export default () => {
     const isMenuToggle = useSignal(false);
     const loca = useSignal<Loca>('empty');
     const stats  = useSignal(mem.getStats());
-    const tasks = useSignal<Array<ITask>>([]);
+    const studies = useSignal<Array<IStudy>>([]);
     const dialogContent = useSignal('');
     const preLoca = useSignal<Loca>('stat');
 
@@ -64,12 +65,11 @@ export default () => {
         startStudy(await mem.getEpisode(taskType, tag, blevel));
     };
     const handleStudyFinish = async () => {
-        await mem.putTasks(tasks.value);
         await handleClickMenuStatis();
         await mem.syncTasks();
     };
-    const startStudy = async (ts: Array<ITask>) => {
-        tasks.value = ts;
+    const startStudy = async (ts: Array<IStudy>) => {
+        studies.value = ts;
         loca.value = 'study';
     }
     const home = () => {
@@ -78,7 +78,7 @@ export default () => {
             case 'about': return <About/>;
             case 'login': return <Signin showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
-            case 'study': return <Study tasks={tasks} onFinish={handleStudyFinish}/>;
+            case 'study': return <Study studies={studies} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>
@@ -86,20 +86,19 @@ export default () => {
             case 'dict': return <Dict showDialog={showDialog} startStudy={startStudy}/>
         }
     };
+
     const init = async () => {
-        const email = mem.getUser();
-        if (!email) return loca.value = 'about';
-        await mem.initVocabulary();
+        if (!mem.user) return loca.value = 'about';
         isLogin.value = true;
         loca.value = 'stat';
-        if (await mem.openDatabase()) await mem.initTasks();
+        await mem.init();
         await mem.syncTasks();
         stats.value = await mem.updateStats();
-    }
-    useEffect(() => (init().catch(console.error), mem.closeDatabase), []);
+    };
+    useEffect(() => (init().catch(console.error), mem.close), []);
     return <div class="h-full flex flex-col">
         <div class={`flex bg-gray-200 px-2 py-1 justify-between`}>
-            <img class="h-12" src="/logo.svg" onClick={handleClickLogo}/>
+            <img class="h-12" src="/favicon.svg" onClick={handleClickLogo}/>
             {isLogin.value ? <div class="relative">
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
@@ -115,7 +114,7 @@ export default () => {
                     <div/>
                     <menu onClick={handleClickMenuLogout}>Logout</menu>
                 </div>
-            </div> : <button class="w-32 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'login'}>Login</button>}
+            </div> : <button class="px-4 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'login'}>Login</button>}
         </div>
         <div class="grow p-2 overflow-y-auto">{home()}</div>
     </div>;
