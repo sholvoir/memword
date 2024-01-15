@@ -11,7 +11,6 @@ export const handler: Handlers<any, MemState> = {
         const otasks: ITask[] = [];
         try {
             await mongorun(async client => {
-                console.log(ctx.state.user, lastgt);
                 const collection = client.db('task').collection(ctx.state.user);
                 const cursor = collection.find({ last: { $gt: lastgt } });
                 for await (const task of cursor) otasks.push(task as any);
