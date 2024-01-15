@@ -51,14 +51,12 @@ export const getDict = async (word: string, refresh?: boolean) => {
 }
 export const removeAuth = () => Cookies.remove('auth');
 
-export const user = (() => {
-    const token = Cookies.get('auth');
-    if (token) {
-        const [_, payload] = jwtDecode(token) as [unknown, Payload, Uint8Array];
-        return payload.aud as string;
-    }
-})();
+export let user: string;
+export let setting: ISetting;
+let vocabulary: Record<string, Array<Tag>>;
+let userDB: IDBDatabase;
 
+export const setSetting = (s: ISetting) => localStorage.setItem('_setting', JSON.stringify(setting = s));
 export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) return JSON.parse(result) as ISetting;
@@ -66,14 +64,9 @@ export const getSetting = () => {
     for (const taskType of TaskTypes) defaultSetting.wordBooks[`${taskType}OG`] = true;
     return defaultSetting;
 };
-export const setSetting = (s: ISetting) => localStorage.setItem('_setting', JSON.stringify(setting = s));
-export let setting = getSetting();
 
-let vocabulary: Record<string, Array<Tag>>;
-let userDB: IDBDatabase;
-
-const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
 const setSyncTime = (time: number) => localStorage.setItem('_sync-time', `${time}`);
+const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
 
 
 const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
@@ -183,13 +176,13 @@ const initStats = () => {
         }
     }
     return stats;
-}
+};
 
 export const getStats = () => {
     const result = localStorage.getItem('_stats');
     if (result) return JSON.parse(result) as Stats;
     return initStats();
-}
+};
 
 export const updateStats = async () => {
     const stats = initStats();
@@ -231,7 +224,13 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
 };
 
 export const init = async () => {
+    const token = Cookies.get('auth');
+    if (token) {
+        const [_, payload] = jwtDecode(token) as [unknown, Payload, Uint8Array];
+        user = payload.aud as string;
+    }
+    setting = getSetting();
     const resp = await fetch('/vocabulary');
     if (resp.ok) vocabulary = await resp.json();
     if (user) userDB = await openDatabase();
-}
+};
