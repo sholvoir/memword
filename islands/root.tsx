@@ -29,12 +29,18 @@ export default () => {
     const tasks = useSignal<Array<ITask>>([]);
     const dialogContent = useSignal('');
     const preLoca = useSignal<Loca>('stat');
+    const tips = useSignal('');
 
     const showDialog = (content: string, backLoca: Loca = 'empty') => {
         dialogContent.value = content;
         preLoca.value = backLoca;
         loca.value = 'dialog';
     }
+    const showTips = (content: string) => {
+        tips.value = content;
+        setTimeout(hideTips, 3000);
+    };
+    const hideTips = () => tips.value = '';
     const handleClickMenu = (event: Event) => {
         event.stopPropagation();
         if (isMenuToggle.value = !isMenuToggle.value) window.addEventListener('click', handleClickBlank);
@@ -77,9 +83,9 @@ export default () => {
         switch (loca.value) {
             case 'empty': return <div/>
             case 'about': return <About/>;
-            case 'login': return <Signin showDialog={showDialog}/>;
+            case 'login': return <Signin showTips={showTips} showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
-            case 'study': return <Study tasks={tasks} onFinish={handleStudyFinish}/>;
+            case 'study': return <Study tasks={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>
@@ -87,7 +93,6 @@ export default () => {
             case 'dict': return <Dict showDialog={showDialog} startStudy={startStudy}/>
         }
     };
-
     const init = async () => {
         if (!mem.getSetting().user) return loca.value = 'about';
         isLogin.value = true;
@@ -98,6 +103,7 @@ export default () => {
     };
     useEffect(() => (init().catch(console.error), mem.close), []);
     return <div class="h-full flex flex-col">
+        <div class="absolute top-0 inset-x-[10%] bg-[rgba(255,255,0,0.5)] text-center rounded-md" onClick={hideTips}>{tips.value}</div>
         <div class={`flex bg-gray-200 px-2 py-1 justify-between`}>
             <img class="h-12" src="/favicon.svg" onClick={handleClickLogo}/>
             {isLogin.value ? <div class="relative">

@@ -59,7 +59,9 @@ export let setting: ISetting;
 let vocabulary: Record<string, Array<Tag>>;
 let userDB: IDBDatabase;
 
-export const setSetting = (s: ISetting) => localStorage.setItem('_setting', JSON.stringify(setting = s));
+export const setSetting = (s: ISetting) => {
+    if (s) localStorage.setItem('_setting', JSON.stringify(setting = s));
+};
 export const getSetting = () => {
     let s: ISetting;
     const result = localStorage.getItem('_setting');

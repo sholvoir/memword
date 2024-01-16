@@ -5,13 +5,15 @@ import { ITask } from "../lib/itask.ts";
 import * as mem from '../lib/mem.ts';
 import { IDict } from "dict/lib/idict.ts";
 import IconRefresh from "tabler_icons/refresh.tsx";
+import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 
 interface StudyProps {
     tasks: Signal<Array<ITask>>;
+    showTips: (content: string) => void;
     onFinish: () => void;
 };
 
-export default ({ tasks, onFinish }: StudyProps) => {
+export default ({ tasks, showTips, onFinish }: StudyProps) => {
     const index = useSignal(0);
     const isPhaseAnswer = useSignal(false);
     const task = useComputed(() => tasks.value[index.value]);
@@ -60,6 +62,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const handleRefresh = async () => {
         dict.value = await mem.getDict(task.value.word, true);
     };
+    const handleReportIssue = async () => {
+        const resp = await mem.submitIssue(task.value.word);
+        if (!resp.ok) showTips(await resp.text());
+        else showTips('Submit Success!');
+    };
     useEffect(() => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
@@ -68,14 +75,15 @@ export default ({ tasks, onFinish }: StudyProps) => {
         if (!dict.value) dict.value = await mem.getDict(task.value.word);
         handleSpeakIt();
     }
-    useEffect(() => { init().catch(console.error) });
-    return <div class="flex flex-col flex-1 h-full">
+    useEffect(() => { init().catch(console.error) }, [dict.value, shouldSound.value]);
+    return <div class="flex flex-col flex-1 h-full pb-3">
         <div class="flex gap-2">
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
             <div>{index.value+1}/{tasks.value.length}</div>
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= tasks.value.length}>{'>>'}</a>
             <div class="grow"/>
-            <button class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></button>
+            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-5 h-5" /></button>
+            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-5 h-5"/></button>
             <div>Level: {task.value.level}</div>
         </div>
         <div class="flex-1">
@@ -84,11 +92,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && dict.value?.pic && <img src={dict.value?.pic} />}
             {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}
         </div>
-        <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
-            <button onClick={handleShowAnswer}>Answer(_)</button>
-            <button onClick={handleSpeakIt} class="disabled:opacity-50" disabled={!shouldSound.value}>Read(B/C)</button>
-            <button onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
-            <button onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
+        <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
+            <button type="button" onClick={handleShowAnswer}>Answer(_)</button>
+            <button type="button" onClick={handleSpeakIt} class="disabled:opacity-50" disabled={!shouldSound.value}>Read(B/C)</button>
+            <button type="button" onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
+            <button type="button" onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
         </div>
     </div>;
 }
