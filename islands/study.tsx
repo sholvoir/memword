@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { useRef, useEffect } from "preact/hooks";
+import { useEffect } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
 import { ITask } from "../lib/itask.ts";
 import * as mem from '../lib/mem.ts';
@@ -75,7 +75,7 @@ export default ({ tasks, onFinish }: StudyProps) => {
             <div>{index.value+1}/{tasks.value.length}</div>
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= tasks.value.length}>{'>>'}</a>
             <div class="grow"/>
-            <IconRefresh class="w-6 h-6 disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}/>
+            <button class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></button>
             <div>Level: {task.value.level}</div>
         </div>
         <div class="flex-1">
@@ -84,11 +84,11 @@ export default ({ tasks, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && dict.value?.pic && <img src={dict.value?.pic} />}
             {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}
         </div>
-        <div class="flex gap-1 [&>menu]:text-center [&>menu]:hover:cursor-pointer [&>menu]:grow [&>menu]:p-px [&>menu]:rounded [&>menu]:bg-gray-300 [&>menu]:disabled:opacity-50">
-            <menu onClick={handleShowAnswer}>Answer(_)</menu>
-            <menu onClick={handleSpeakIt} disabled={!shouldSound.value}>Read(B/C)</menu>
-            <menu onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</menu>
-            <menu onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</menu>
+        <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:p-px [&>button]:rounded [&>button]:bg-gray-300">
+            <button onClick={handleShowAnswer}>Answer(_)</button>
+            <button onClick={handleSpeakIt} class="disabled:opacity-50" disabled={!shouldSound.value}>Read(B/C)</button>
+            <button onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
+            <button onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
         </div>
     </div>;
 }
