@@ -9,6 +9,7 @@ import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
 import { IDict } from "dict/lib/idict.ts";
 
+const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const now = () => Math.floor(Date.now() / 1000);
 // times: 1m, 5m, 30m, 90m, 6h, 24h, 42h, 72h, 7d, 13d, 25d, 49d, 97d, 191d, 367d
@@ -46,7 +47,7 @@ export const signup = async (email: string) => await fetch(`/signup?email=${enco
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 export const getDict = async (word: string, refresh?: boolean) => {
-    const resp = await fetch(`/dict/${encodeURIComponent(word)}`, refresh? { cache: 'no-cache' } : undefined);
+    const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, refresh? { cache: 'no-cache' } : undefined);
     if (resp.ok) return resp.json() as IDict;
 }
 export const removeAuth = async () => {
