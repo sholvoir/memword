@@ -4,6 +4,7 @@
 
 import * as $_root_auth_middleware from "./routes/(root)/(auth)/_middleware.ts";
 import * as $_root_auth_issue from "./routes/(root)/(auth)/issue.ts";
+import * as $_root_auth_setting from "./routes/(root)/(auth)/setting.ts";
 import * as $_root_auth_task from "./routes/(root)/(auth)/task.ts";
 import * as $_root_middleware from "./routes/(root)/_middleware.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
@@ -29,6 +30,7 @@ const manifest = {
   routes: {
     "./routes/(root)/(auth)/_middleware.ts": $_root_auth_middleware,
     "./routes/(root)/(auth)/issue.ts": $_root_auth_issue,
+    "./routes/(root)/(auth)/setting.ts": $_root_auth_setting,
     "./routes/(root)/(auth)/task.ts": $_root_auth_task,
     "./routes/(root)/_middleware.ts": $_root_middleware,
     "./routes/(root)/index.tsx": $_root_index,

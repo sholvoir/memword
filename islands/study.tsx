@@ -18,7 +18,6 @@ export default ({ tasks, onFinish }: StudyProps) => {
     const dict = useSignal<IDict|undefined>(undefined);
     const shouldSound = useComputed(() => isPhaseAnswer.value || task.value.type == 'L');
     const shouldSpell = useComputed(() => isPhaseAnswer.value || task.value.type == 'R');
-    const player = useRef<HTMLAudioElement>(null);
     if (!task.value) return (onFinish(), <div/>);
 
     const handleKeyPress = (event: any) => {
@@ -32,7 +31,10 @@ export default ({ tasks, onFinish }: StudyProps) => {
             case 46: case 62: handleNext();
         }
     };
-    const handleSpeakIt = () => player.current?.play();
+    const handleSpeakIt = () => {
+        if (dict.value && dict.value.sound && shouldSound.value)
+            new Audio(dict.value.sound).play();
+    };
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
         await mem.study(task.value);
@@ -64,7 +66,7 @@ export default ({ tasks, onFinish }: StudyProps) => {
     }, []);
     const init = async () => {
         if (!dict.value) dict.value = await mem.getDict(task.value.word);
-        if (dict.value && dict.value.sound && shouldSound.value) player.current?.play();
+        handleSpeakIt();
     }
     useEffect(() => { init().catch(console.error) });
     return <div class="flex flex-col flex-1 h-full">
@@ -88,6 +90,5 @@ export default ({ tasks, onFinish }: StudyProps) => {
             <menu onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</menu>
             <menu onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</menu>
         </div>
-        <audio ref={player} src={dict.value?.sound}/>
     </div>;
 }

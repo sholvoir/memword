@@ -54,14 +54,16 @@ export default () => {
     const handleClickMenuSetting = () => {
         loca.value = 'setting';
     };
-    const handleClickMenuLogout = () => {
-        mem.removeAuth();
+    const handleClickMenuLogout = async () => {
         isLogin.value = false;
         isMenuToggle.value = false;
         loca.value = 'about';
+        await mem.removeAuth();
     };
     const handleClickStatBar = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
-        startStudy(await mem.getEpisode(taskType, tag, blevel));
+        const ts = await mem.getEpisode(taskType, tag, blevel);
+        if (ts.length) return startStudy(ts);
+        showDialog('Congratulations! There are no more task need to do. You can click one word book\'s NEVER BAR to study some new word!', 'stat');
     };
     const handleStudyFinish = async () => {
         await handleClickMenuStatis();
@@ -87,7 +89,7 @@ export default () => {
     };
 
     const init = async () => {
-        if (!mem.user) return loca.value = 'about';
+        if (!mem.getSetting().user) return loca.value = 'about';
         isLogin.value = true;
         loca.value = 'stat';
         await mem.init();

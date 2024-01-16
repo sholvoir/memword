@@ -49,20 +49,29 @@ export const getDict = async (word: string, refresh?: boolean) => {
     const resp = await fetch(`/dict/${encodeURIComponent(word)}`, refresh? { cache: 'no-cache' } : undefined);
     if (resp.ok) return resp.json() as IDict;
 }
-export const removeAuth = () => Cookies.remove('auth');
+export const removeAuth = async () => {
+    await fetch('/setting', fetchInit(setting));
+    Cookies.remove('auth');
+    localStorage.clear();
+}
 
-export let user: string;
 export let setting: ISetting;
 let vocabulary: Record<string, Array<Tag>>;
 let userDB: IDBDatabase;
 
 export const setSetting = (s: ISetting) => localStorage.setItem('_setting', JSON.stringify(setting = s));
 export const getSetting = () => {
+    let s: ISetting;
     const result = localStorage.getItem('_setting');
-    if (result) return JSON.parse(result) as ISetting;
-    const defaultSetting: ISetting = { sprintNumber: 10, wordBooks: {} };
-    for (const taskType of TaskTypes) defaultSetting.wordBooks[`${taskType}OG`] = true;
-    return defaultSetting;
+    if (result) s = JSON.parse(result);
+    s = { user: '', sprintNumber: 10, wordBooks: {} };
+    for (const taskType of TaskTypes) s.wordBooks[`${taskType}OG`] = true;
+    const token = Cookies.get('auth');
+    if (token) {
+        const [_, payload] = jwtDecode(token) as [unknown, Payload, Uint8Array];
+        s.user = payload.aud as string;
+    }
+    return setting = s;
 };
 
 const setSyncTime = (time: number) => localStorage.setItem('_sync-time', `${time}`);
@@ -70,7 +79,7 @@ const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
 
 
 const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(user!, 1);
+    const request = indexedDB.open(setting.user!, 1);
     request.onerror = () => {
         console.error(`Database Error: ${request.error}.`);
         reject(request.error);
@@ -224,13 +233,7 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
 };
 
 export const init = async () => {
-    const token = Cookies.get('auth');
-    if (token) {
-        const [_, payload] = jwtDecode(token) as [unknown, Payload, Uint8Array];
-        user = payload.aud as string;
-    }
-    setting = getSetting();
     const resp = await fetch('/vocabulary');
     if (resp.ok) vocabulary = await resp.json();
-    if (user) userDB = await openDatabase();
+    if (setting.user) userDB = await openDatabase();
 };

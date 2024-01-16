@@ -1,7 +1,6 @@
 import { Signal, useSignal } from "@preact/signals";
 import { signup, login } from "../lib/mem.ts";
 import { Loca } from "./root.tsx";
-import Cookies from "js-cookie";
 import * as mem from '../lib/mem.ts';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
@@ -12,7 +11,7 @@ interface ISigninProps {
 
 export default ({showDialog}: ISigninProps) => {
     const state: Record<string, Signal> = {
-        email: useSignal(mem.user ? atob(mem.user) : ''),
+        email: useSignal(mem.setting.user ? atob(mem.setting.user) : ''),
         password: useSignal('')
     };
     const isPassSent = useSignal(false);
@@ -24,7 +23,11 @@ export default ({showDialog}: ISigninProps) => {
         if (isPassSent.value) {
             const resp = await login(state.email.value, state.password.value);
             if (!resp.ok) showDialog('Invail email or password', 'login');
-            else location.reload();
+            else {
+                const s = await resp.json();
+                if (s) mem.setSetting(s);
+                location.reload();
+            }
         } else if (!emailPattern.test(state.email.value))
             showDialog('Invalid email address', 'login');
         else {
