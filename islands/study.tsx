@@ -93,7 +93,7 @@ export default ({ tasks, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}
         </div>
         <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
-            <button type="button" onClick={handleShowAnswer}>Answer(_)</button>
+            <button type="button" onClick={handleShowAnswer} class="disabled:opacity-50" disabled={isPhaseAnswer.value}>Answer(_)</button>
             <button type="button" onClick={handleSpeakIt} class="disabled:opacity-50" disabled={!shouldSound.value}>Read(B/C)</button>
             <button type="button" onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
             <button type="button" onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
