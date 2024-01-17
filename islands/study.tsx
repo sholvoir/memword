@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { useEffect } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
 import * as mem from '../lib/mem.ts';
 import IconRefresh from "tabler_icons/refresh.tsx";
@@ -19,6 +19,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
     const shouldSound = useComputed(() => isPhaseAnswer.value || study.value.type == 'L');
     const shouldSpell = useComputed(() => isPhaseAnswer.value || study.value.type == 'R');
     if (!study.value) return (onFinish(), <div/>);
+    const player = useRef<HTMLAudioElement>(null);
 
     const handleKeyPress = (event: any) => {
         event.preventDefault();
@@ -67,7 +68,6 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    useEffect(() => { handleSpeakIt() }, [study.value, isPhaseAnswer.value]);
     return <div class="flex flex-col flex-1 h-full pb-3">
         <div class="flex gap-2">
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
@@ -90,5 +90,6 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <button type="button" onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
             <button type="button" onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
         </div>
+        <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
     </div>;
 }
