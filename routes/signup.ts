@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { sendEmail } from "../lib/email.ts";
 import { IUser } from "../lib/iuser.ts";
-import { badRequest } from '../lib/mem-server.ts';
+import { badRequest, internalServerError } from '../lib/mem-server.ts';
 import mongorun from '../lib/mongo.ts';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
@@ -16,9 +16,9 @@ export const handler: Handlers = {
         const name = btoa(email).replaceAll('=', '');
         const pass = Math.random().toString(36).slice(7);
         const user: IUser = { name, pass, expire: Math.round(Date.now() / 1000) + 5 * 60 }
-        await mongorun(async (client) => {
+        try { await mongorun(async (client) => {
             await client.db('user').collection('user').updateOne({ name }, { $set: user }, { upsert: true });
-        });
+        })} catch { return internalServerError }
         const mail = {
             from: 'MEMWORD <memword.sholvoir@gmail.com>',
             to: `${email}`,

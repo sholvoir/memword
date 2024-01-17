@@ -20,7 +20,7 @@ const run = async () => {
         await mongorun(async client => {
             const collection = client.db('task').collection(btoa('sovar.he@gmail.com').replaceAll('=', ''));
             result = await collection.insertMany(tasks as any);
-        }) ;
+        });
         console.log(`Insert: ${result!.insertedCount}`);
     } catch (e) {
         console.error(e);
