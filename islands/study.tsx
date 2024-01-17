@@ -26,15 +26,14 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         switch (event.keyCode) {
             case 44: case 60: handlePrevious(); break;
             case 66: case 98: case 67: case 99: handleSpeakIt(); break;
-            case 32: handleShowAnswer(); break;
-            case 78: case 88: case 110: case 120: handleIKnown(); break;
-            case 77: case 90: case 109: case 122: handleDontKnow(); break;
+            case 32: if (!isPhaseAnswer.value) handleShowAnswer(); break;
+            case 78: case 88: case 110: case 120: if (isPhaseAnswer.value) handleIKnown(); break;
+            case 77: case 90: case 109: case 122: if (isPhaseAnswer.value) handleDontKnow(); break;
             case 46: case 62: handleNext();
         }
     };
     const handleSpeakIt = () => {
-        if (study.value.sound && shouldSound.value)
-            new Audio(study.value.sound).play();
+        if (study.value.sound && shouldSound.value) player.current?.play();
     };
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
