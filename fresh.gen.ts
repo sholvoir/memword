@@ -23,6 +23,7 @@ import * as $signin from "./islands/signin.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
 import * as $tasks from "./islands/tasks.tsx";
+import * as $waiting from "./islands/waiting.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -50,6 +51,7 @@ const manifest = {
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
     "./islands/tasks.tsx": $tasks,
+    "./islands/waiting.tsx": $waiting,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

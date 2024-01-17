@@ -17,22 +17,23 @@ import Dialog from './dialog.tsx';
 import Tasks from './tasks.tsx';
 import Issue from './issue.tsx';
 import Dict from './dict.tsx';
+import Waiting from './waiting.tsx';
 
-export type Loca = 'empty'|'about'|'login'|'stat'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
+export type Loca = 'waiting'|'about'|'login'|'stats'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
 export type ShowDialog = (content: string, backLoca: Loca) => void;
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
     const isLogin = useSignal(false);
     const isMenuToggle = useSignal(false);
-    const loca = useSignal<Loca>('empty');
+    const loca = useSignal<Loca>('about');
     const stats  = useSignal(mem.getStats());
     const tasks = useSignal<Array<IStudy>>([]);
     const dialogContent = useSignal('');
-    const preLoca = useSignal<Loca>('stat');
+    const preLoca = useSignal<Loca>('stats');
     const tips = useSignal('');
 
-    const showDialog = (content: string, backLoca: Loca = 'empty') => {
+    const showDialog = (content: string, backLoca: Loca = 'stats') => {
         dialogContent.value = content;
         preLoca.value = backLoca;
         loca.value = 'dialog';
@@ -55,7 +56,7 @@ export default () => {
         loca.value = 'about';
     }
     const handleClickMenuStatis = async () => {
-        loca.value = 'stat';
+        loca.value = 'stats';
         stats.value = await mem.updateStats();
     };
     const handleClickMenuSetting = () => {
@@ -68,9 +69,10 @@ export default () => {
         await mem.removeAuth();
     };
     const handleClickStatBar = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
+        loca.value = 'waiting';
         const ts = await mem.getEpisode(taskType, tag, blevel);
         if (ts.length) return startStudy(ts);
-        showDialog('Congratulations! There are no more task need to do. You can click one word book\'s NEVER BAR to study some new word!', 'stat');
+        showDialog('Congratulations! There are no more task need to do. You can click one word book\'s NEVER BAR to study some new word!', 'stats');
     };
     const handleStudyFinish = async () => {
         await handleClickMenuStatis();
@@ -82,10 +84,10 @@ export default () => {
     }
     const home = () => {
         switch (loca.value) {
-            case 'empty': return <div/>
+            case 'waiting': return <Waiting/>
             case 'about': return <About/>;
             case 'login': return <Signin showTips={showTips} showDialog={showDialog}/>;
-            case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
+            case 'stats': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
             case 'study': return <Study studies={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
@@ -97,7 +99,7 @@ export default () => {
     const init = async () => {
         if (!mem.getSetting().user) return loca.value = 'about';
         isLogin.value = true;
-        loca.value = 'stat';
+        loca.value = 'stats';
         await mem.init();
         await mem.syncTasks();
         stats.value = await mem.updateStats();

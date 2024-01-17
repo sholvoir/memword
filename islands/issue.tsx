@@ -11,7 +11,7 @@ export default ({ showDialog }: IIssueProps) => {
     const handleSubmitClick = async () => {
         const resp = await submitIssue(issue.value);
         if (!resp.ok) showDialog(await resp.text(), 'issue');
-        else showDialog('Submit Success!', 'stat');
+        else showDialog('Submit Success!', 'stats');
     }
 
     return <div class="h-full flex flex-col">
