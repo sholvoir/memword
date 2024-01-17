@@ -1,16 +1,17 @@
 // deno-lint-ignore-file no-explicit-any
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
-import { jsonHeader } from "./mem-server.ts";
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
 import { BLevel, BLevels, Stats } from "./istat.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
-import { IDict } from "dict/lib/idict.ts";
+import { IDiction } from "./idict.ts";
+import { IStudy } from "./istudy.ts";
 
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
+const dictExpire = 3 * 24 * 60 * 60;
 const now = () => Math.floor(Date.now() / 1000);
 // times: 1m, 5m, 30m, 90m, 6h, 24h, 42h, 72h, 7d, 13d, 25d, 49d, 97d, 191d, 367d
 const times = [60, 5 * 60, 30 * 60, 90 * 60, 6 * 60 * 60, 24 * 60 * 60, 42 * 60 * 60, 72 * 60 * 60, 7 * 24 * 60 * 60,
@@ -39,17 +40,14 @@ const toBLevel = (level: number): BLevel => {
 
 const fetchInit = (body: any, method: HTTPMethod = 'POST') => ({
     method,
-    headers: jsonHeader,
+    headers: [['Content-Type', 'application/json']],
     body: JSON.stringify(body)
 }) as RequestInit;
 
 export const signup = async (email: string) => await fetch(`/signup?email=${encodeURIComponent(email)}`);
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
-export const getDict = async (word: string, refresh?: boolean) => {
-    const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, refresh? { cache: 'no-cache' } : undefined);
-    if (resp.ok) return resp.json() as IDict;
-}
+
 export const removeAuth = async () => {
     await fetch('/setting', fetchInit(setting));
     Cookies.remove('auth');
@@ -58,6 +56,7 @@ export const removeAuth = async () => {
 
 export let setting: ISetting;
 let vocabulary: Record<string, Array<Tag>>;
+let dictDB: IDBDatabase;
 let userDB: IDBDatabase;
 
 export const setSetting = (s: ISetting) => {
@@ -80,13 +79,36 @@ export const getSetting = () => {
 const setSyncTime = (time: number) => localStorage.setItem('_sync-time', `${time}`);
 const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
 
+const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open('dict', 1);
+    request.onerror = reject;
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = () => request.result.createObjectStore('dict', { keyPath: 'word' });
+});
 
-const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
+export const getFreshDiction = async (word: string): Promise<IDiction|undefined> => {
+    const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'no-cache' });
+    if (!resp.ok) return await getDiction(word, false);
+    const dict = await resp.json() as IDiction;
+    dict.word = word;
+    dict.version = now();
+    dictDB.transaction('dict', 'readwrite').objectStore('dict').put(dict);
+    return dict;
+}
+
+export const getDiction = async (word: string, check = true): Promise<IDiction|undefined> => {
+    const dict = await new Promise<IDiction>((resolve, reject) => {
+        const request = dictDB.transaction('dict', 'readonly').objectStore('dict').get(word);
+        request.onerror = reject;
+        request.onsuccess = () => resolve(request.result);
+    });
+    if (check && (!dict || dict.version + dictExpire < now())) return await getFreshDiction(word);
+    return dict;
+}
+
+const openUserDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(setting.user!, 1);
-    request.onerror = () => {
-        console.error(`Database Error: ${request.error}.`);
-        reject(request.error);
-    }
+    request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = () => {
         const db = request.result;
@@ -232,11 +254,17 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
         },
         'next', query, "prev"
     );
-    return tasks;
+    const studies: Array<IStudy> = [];
+    for (const task of tasks) {
+        const dict = await getDiction(task.word);
+        studies.push({...task, ...dict} as IStudy);
+    }
+    return studies;
 };
 
 export const init = async () => {
+    dictDB = await openDictDB();
     const resp = await fetch('/vocabulary');
     if (resp.ok) vocabulary = await resp.json();
-    if (setting.user) userDB = await openDatabase();
+    if (setting.user) userDB = await openUserDB();
 };

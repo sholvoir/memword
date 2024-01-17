@@ -10,7 +10,6 @@ import * as $_root_middleware from "./routes/(root)/_middleware.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
-import * as $dict_word_ from "./routes/dict/[word].ts";
 import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
 import * as $vocabulary from "./routes/vocabulary.ts";
@@ -36,7 +35,6 @@ const manifest = {
     "./routes/(root)/index.tsx": $_root_index,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
-    "./routes/dict/[word].ts": $dict_word_,
     "./routes/login.ts": $login,
     "./routes/signup.ts": $signup,
     "./routes/vocabulary.ts": $vocabulary,

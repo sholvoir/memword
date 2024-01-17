@@ -1,26 +1,24 @@
 // deno-lint-ignore-file no-explicit-any
 import { useEffect } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
-import { ITask } from "../lib/itask.ts";
 import * as mem from '../lib/mem.ts';
-import { IDict } from "dict/lib/idict.ts";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
+import { IStudy } from "../lib/istudy.ts";
 
 interface StudyProps {
-    tasks: Signal<Array<ITask>>;
+    studies: Signal<Array<IStudy>>;
     showTips: (content: string) => void;
     onFinish: () => void;
 };
 
-export default ({ tasks, showTips, onFinish }: StudyProps) => {
+export default ({ studies, showTips, onFinish }: StudyProps) => {
     const index = useSignal(0);
     const isPhaseAnswer = useSignal(false);
-    const task = useComputed(() => tasks.value[index.value]);
-    const dict = useSignal<IDict|undefined>(undefined);
-    const shouldSound = useComputed(() => isPhaseAnswer.value || task.value.type == 'L');
-    const shouldSpell = useComputed(() => isPhaseAnswer.value || task.value.type == 'R');
-    if (!task.value) return (onFinish(), <div/>);
+    const study = useSignal(studies.value[index.value]);
+    const shouldSound = useComputed(() => isPhaseAnswer.value || study.value.type == 'L');
+    const shouldSpell = useComputed(() => isPhaseAnswer.value || study.value.type == 'R');
+    if (!study.value) return (onFinish(), <div/>);
 
     const handleKeyPress = (event: any) => {
         event.preventDefault();
@@ -34,36 +32,34 @@ export default ({ tasks, showTips, onFinish }: StudyProps) => {
         }
     };
     const handleSpeakIt = () => {
-        if (dict.value && dict.value.sound && shouldSound.value)
-            new Audio(dict.value.sound).play();
+        if (study.value.sound && shouldSound.value)
+            new Audio(study.value.sound).play();
     };
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
-        await mem.study(task.value);
-        if (isPhaseAnswer.value) handleNext();
-        else (isPhaseAnswer.value = true , setTimeout(handleNext, 3000));
+        await mem.study(study.value);
+        handleNext();
     };
     const handleDontKnow = () => {
-        task.value.level = 0;
+        study.value.level = 0;
         handleIKnown();
     };
     const handleNext = () => {
-        if (index.value >= tasks.value.length) return onFinish();
-        index.value++;
+        if (index.value >= studies.value.length) return onFinish();
+        study.value = studies.value[++index.value];
         isPhaseAnswer.value = false;
-        dict.value = undefined;
     };
     const handlePrevious = () => {
         if (index.value <= 0) return onFinish();
-        index.value--;
+        study.value = studies.value[--index.value];
         isPhaseAnswer.value = false;
-        dict.value = undefined;
     };
     const handleRefresh = async () => {
-        dict.value = await mem.getDict(task.value.word, true);
+        const dict: any = await mem.getFreshDiction(study.value.word);
+        study.value = { ...study.value, ...dict };
     };
     const handleReportIssue = async () => {
-        const resp = await mem.submitIssue(task.value.word);
+        const resp = await mem.submitIssue(study.value.word);
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
@@ -71,26 +67,22 @@ export default ({ tasks, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    const init = async () => {
-        if (!dict.value) dict.value = await mem.getDict(task.value.word);
-        handleSpeakIt();
-    }
-    useEffect(() => { init().catch(console.error) }, [dict.value, shouldSound.value]);
+    useEffect(() => { handleSpeakIt() }, [study.value, isPhaseAnswer.value]);
     return <div class="flex flex-col flex-1 h-full pb-3">
         <div class="flex gap-2">
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
-            <div>{index.value+1}/{tasks.value.length}</div>
-            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= tasks.value.length}>{'>>'}</a>
+            <div>{index.value+1}/{studies.value.length}</div>
+            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
             <div class="grow"/>
             <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-5 h-5" /></button>
             <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-5 h-5"/></button>
-            <div>Level: {task.value.level}</div>
+            <div>Level: {study.value.level}</div>
         </div>
-        <div class="grow text-3xl">
-            {shouldSpell.value && <div class=" text-5xl">{task.value.word}</div>}
-            {isPhaseAnswer.value && <div>{dict.value?.phonetic}</div>}
-            {isPhaseAnswer.value && dict.value?.pic && <img src={dict.value?.pic} />}
-            {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}
+        <div class="grow text-2xl">
+            {shouldSpell.value && <div class="text-4xl font-bold">{study.value.word}</div>}
+            {isPhaseAnswer.value && <div>{study.value.phonetic}</div>}
+            {isPhaseAnswer.value && study.value.pic && <img src={study.value.pic} />}
+            {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
             <button type="button" onClick={handleShowAnswer} class="disabled:opacity-50" disabled={isPhaseAnswer.value}>Answer(_)</button>

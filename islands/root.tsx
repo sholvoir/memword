@@ -4,6 +4,7 @@ import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
 import { ITask, TaskType } from "../lib/itask.ts";
+import { IStudy } from "../lib/istudy.ts";
 import { BLevel } from "../lib/istat.ts";
 import * as mem from '../lib/mem.ts';
 
@@ -26,7 +27,7 @@ export default () => {
     const isMenuToggle = useSignal(false);
     const loca = useSignal<Loca>('empty');
     const stats  = useSignal(mem.getStats());
-    const tasks = useSignal<Array<ITask>>([]);
+    const tasks = useSignal<Array<IStudy>>([]);
     const dialogContent = useSignal('');
     const preLoca = useSignal<Loca>('stat');
     const tips = useSignal('');
@@ -75,7 +76,7 @@ export default () => {
         await handleClickMenuStatis();
         await mem.syncTasks();
     };
-    const startStudy = async (ts: Array<ITask>) => {
+    const startStudy = async (ts: Array<IStudy>) => {
         tasks.value = ts;
         loca.value = 'study';
     }
@@ -85,7 +86,7 @@ export default () => {
             case 'about': return <About/>;
             case 'login': return <Signin showTips={showTips} showDialog={showDialog}/>;
             case 'stat': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
-            case 'study': return <Study tasks={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
+            case 'study': return <Study studies={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>

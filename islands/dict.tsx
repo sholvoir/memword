@@ -1,11 +1,11 @@
 import { useSignal } from "@preact/signals";
 import { ShowDialog } from "./root.tsx";
-import { ITask } from "../lib/itask.ts";
+import { IStudy } from "../lib/istudy.ts";
 import * as mem from '../lib/mem.ts'
 
 interface DictProps {
     showDialog: ShowDialog;
-    startStudy: (studies: Array<ITask>) => void;
+    startStudy: (studies: Array<IStudy>) => void;
 }
 export default ({showDialog, startStudy}: DictProps) => {
     const word = useSignal('');
@@ -13,7 +13,10 @@ export default ({showDialog, startStudy}: DictProps) => {
     const handleSearchClick = async () => {
         const task = await mem.getTask('R', word.value);
         if (!task) showDialog('Not Found!', 'dict');
-        else startStudy([task]);
+        else {
+            const dict = await mem.getDiction(task.word);
+            startStudy([{...task, ...dict} as IStudy]);
+        }
     }
     return <div class="flex">
         <input type="text" name="word" placeholder="word"
