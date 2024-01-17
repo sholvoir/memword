@@ -86,8 +86,8 @@ export default ({ tasks, showTips, onFinish }: StudyProps) => {
             <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-5 h-5"/></button>
             <div>Level: {task.value.level}</div>
         </div>
-        <div class="flex-1">
-            {shouldSpell.value && <div class="text-4xl">{task.value.word}</div>}
+        <div class="grow text-3xl">
+            {shouldSpell.value && <div class=" text-5xl">{task.value.word}</div>}
             {isPhaseAnswer.value && <div>{dict.value?.phonetic}</div>}
             {isPhaseAnswer.value && dict.value?.pic && <img src={dict.value?.pic} />}
             {isPhaseAnswer.value && <div><pre>{dict.value?.trans}</pre></div>}

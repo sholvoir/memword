@@ -60,7 +60,7 @@ export default ({showTips, showDialog}: ISigninProps) => {
                 Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}</a>
         </div>
         <div><input
-            type="password"
+            type="text"
             name="password"
             placeholder="Password"
             class="w-64 p-2 rounded border border-gray-500"
