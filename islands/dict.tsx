@@ -22,7 +22,7 @@ export default ({showDialog, startStudy}: DictProps) => {
         <input type="text" name="word" placeholder="word"
             class="grow border px-2" value={word.value}
             onInput={handleInput} onChange={handleSearchClick}/>
-        <button type="button" class="w-20 border rounded-md px-2 bg-indigo-700 text-white"
+        <button type="button" class="w-20 border rounded-md px-2 bg-indigo-700 text-white active:bg-indigo-950"
             onClick={handleSearchClick}>Search</button>
     </div>
 }

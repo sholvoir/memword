@@ -22,7 +22,7 @@ export default ({isLogin, loca}: ISignoutProps) => {
             <label for="cleanup">Clean My Study Record</label>
         </div>
         <div>
-            <button class="w-full p-2 bg-indigo-700 text-white rounded"
+            <button class="w-full p-2 rounded bg-indigo-700 text-white active:bg-indigo-950"
                 onClick={handleClickSignout}>Logout</button>
         </div>
     </div>;

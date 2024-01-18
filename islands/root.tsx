@@ -114,7 +114,7 @@ export default () => {
                     <div/>
                     <menu onClick={() => loca.value = 'logout'}>Logout</menu>
                 </div>
-            </div> : <button class="px-4 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'login'}>Login</button>}
+            </div> : <button class="px-4 ml-2 rounded bg-indigo-700 text-white active:bg-indigo-950" onClick={() => loca.value = 'login'}>Login</button>}
         </div>
         <div class="grow p-2 overflow-y-auto">{home()}</div>
     </div>;

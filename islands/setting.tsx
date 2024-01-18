@@ -47,8 +47,8 @@ export default ({onFinished}: ISettingProps) => {
             {result}
         </fieldset>
         <div class="m-2 flex justify-end [&>button]:w-32 [&>button]:p-2 [&>button]:rounded">
-            <button class="bg-gray-300" onClick={onFinished}>Cancel</button>
-            <button class="bg-indigo-700 text-white" onClick={handleOKClick}>OK</button>
+            <button class="bg-gray-300 active:bg-gray-500" onClick={onFinished}>Cancel</button>
+            <button class="bg-indigo-700 text-white active:bg-indigo-950" onClick={handleOKClick}>OK</button>
         </div>
     </>
 }

@@ -65,7 +65,7 @@ export default ({showTips, showDialog}: ISigninProps) => {
             onInput={handleStateChange}
         /></div>
         <div>
-            <button class="w-64 p-2 bg-indigo-700 active:shadow-lg text-white rounded"
+            <button class="w-64 p-2 rounded bg-indigo-700 active:shadow-lg text-white active:bg-indigo-950"
                 onClick={handleClickSignup}>OK</button>
         </div>
     </div>;

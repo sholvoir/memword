@@ -21,7 +21,7 @@ export default ({ showDialog }: IIssueProps) => {
             {issue.value}
         </textarea>
         <div class="flex mt-2 justify-end">
-            <button class="px-2 bg-indigo-700 text-white" onClick={handleSubmitClick}>Submit</button>
+            <button class="px-2 bg-indigo-700 text-white active:bg-indigo-950" onClick={handleSubmitClick}>Submit</button>
         </div>
     </div>
 }
