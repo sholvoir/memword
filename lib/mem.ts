@@ -141,6 +141,12 @@ export const getTask = (type: TaskType, word: string) => new Promise<ITask>((res
     request.onsuccess = () => resolve(request.result);
 });
 
+const deleteTask = (type: TaskType, word: string) => new Promise((resolve, reject) => {
+    const request = userDB!.transaction('task', 'readwrite').objectStore('task').delete([type, word]);
+    request.onerror = reject;
+    request.onsuccess = resolve;
+})
+
 const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last, true));
     request.onerror = reject;
@@ -172,6 +178,11 @@ export const syncTasks = async () => {
     const ntasks = await resp.json();
     await putTasks(ntasks);
     setSyncTime(thisTime);
+}
+
+export const removeTask = async (type: TaskType, word: string) => {
+    await deleteTask(type, word);
+    await fetch(`/task?type=${encodeURIComponent(type)}&word=${encodeURIComponent(word)}`, { method: 'DELETE' });
 }
 
 const traversingTask = (

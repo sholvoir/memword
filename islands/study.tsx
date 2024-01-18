@@ -1,10 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { useEffect, useRef } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
+import { IStudy } from "../lib/istudy.ts";
 import * as mem from '../lib/mem.ts';
+import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
-import { IStudy } from "../lib/istudy.ts";
 
 interface StudyProps {
     studies: Signal<Array<IStudy>>;
@@ -63,6 +64,10 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
+    const handleDelteTask = async () => {
+        await mem.removeTask(study.value.type, study.value.word);
+        studies.value = [...studies.value.slice(0, index.value), ...studies.value.slice(index.value+1)];
+    }
     useEffect(() => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
@@ -73,6 +78,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <div>{index.value+1}/{studies.value.length}</div>
             <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
             <div class="grow"/>
+            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-5 h-5" /></button>
             <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-5 h-5" /></button>
             <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-5 h-5"/></button>
             <div>Level: {study.value.level}</div>

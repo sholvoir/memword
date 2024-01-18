@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
 import { ITask } from "../../../lib/itask.ts";
-import { MemState, internalServerError, jsonHeader } from "../../../lib/mem-server.ts";
+import { MemState, badRequest, internalServerError, jsonHeader } from "../../../lib/mem-server.ts";
 import mongorun from '../../../lib/mongo.ts';
 
 export const handler: Handlers<any, MemState> = {
@@ -26,5 +26,19 @@ export const handler: Handlers<any, MemState> = {
             }
         })} catch { return internalServerError }
         return new Response(JSON.stringify(otasks), { headers: jsonHeader });
+    },
+    async DELETE(req, ctx) {
+        const params = new URL(req.url).searchParams;
+        const rawType = params.get('type');
+        const rawWord = params.get('word');
+        if (!rawType || !rawWord) return badRequest;
+        const type = decodeURIComponent(rawType);
+        const word = decodeURIComponent(rawWord);
+        let result;
+        try { await mongorun(async client => {
+            const collection = client.db('task').collection(ctx.state.user);
+            result = await collection.deleteOne({ type, word });
+        })} catch { return internalServerError }
+        return new Response(JSON.stringify(result), { headers: jsonHeader });
     }
 };
