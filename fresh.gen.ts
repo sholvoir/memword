@@ -20,6 +20,7 @@ import * as $issue from "./islands/issue.tsx";
 import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
 import * as $signin from "./islands/signin.tsx";
+import * as $signout from "./islands/signout.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
 import * as $tasks from "./islands/tasks.tsx";
@@ -48,6 +49,7 @@ const manifest = {
     "./islands/root.tsx": $root,
     "./islands/setting.tsx": $setting,
     "./islands/signin.tsx": $signin,
+    "./islands/signout.tsx": $signout,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
     "./islands/tasks.tsx": $tasks,

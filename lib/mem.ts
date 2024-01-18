@@ -48,8 +48,21 @@ export const signup = async (email: string) => await fetch(`/signup?email=${enco
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 
-export const removeAuth = async () => {
+export const removeAuth = async (cleanall = false) => {
     await fetch('/setting', fetchInit(setting));
+    if (cleanall) {
+        close();
+        await new Promise((resolve, reject) => {
+            const request = indexedDB.deleteDatabase('dict');
+            request.onerror = reject;
+            request.onsuccess = resolve;
+        });
+        await new Promise((resolve, reject) => {
+            const request = indexedDB.deleteDatabase(setting.user);
+            request.onerror = reject;
+            request.onsuccess = resolve;
+        });
+    }
     Cookies.remove('auth');
     localStorage.clear();
 }
@@ -120,7 +133,7 @@ const openUserDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     };
 });
 
-export const close = () => userDB?.close();
+export const close = () => { userDB?.close(); dictDB?.close(); }
 
 export const getTask = (type: TaskType, word: string) => new Promise<ITask>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readonly').objectStore('task').get([type, word]);

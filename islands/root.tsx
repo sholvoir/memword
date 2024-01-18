@@ -3,7 +3,7 @@ import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
-import { ITask, TaskType } from "../lib/itask.ts";
+import { TaskType } from "../lib/itask.ts";
 import { IStudy } from "../lib/istudy.ts";
 import { BLevel } from "../lib/istat.ts";
 import * as mem from '../lib/mem.ts';
@@ -11,6 +11,7 @@ import * as mem from '../lib/mem.ts';
 import Stats from './stats.tsx';
 import About from './about.tsx';
 import Signin from './signin.tsx';
+import Signout from './signout.tsx';
 import Study from './study.tsx';
 import Setting from './setting.tsx';
 import Dialog from './dialog.tsx';
@@ -19,7 +20,7 @@ import Issue from './issue.tsx';
 import Dict from './dict.tsx';
 import Waiting from './waiting.tsx';
 
-export type Loca = 'waiting'|'about'|'login'|'stats'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
+export type Loca = 'waiting'|'about'|'login'|'logout'|'stats'|'study'|'setting'|'dialog'|'tasks'|'issue'|'dict';
 export type ShowDialog = (content: string, backLoca: Loca) => void;
 
 export default () => {
@@ -52,21 +53,9 @@ export default () => {
         isMenuToggle.value = false;
         removeEventListener('click', handleClickBlank);
     };
-    const handleClickLogo = () => {
-        loca.value = 'about';
-    }
     const handleClickMenuStatis = async () => {
         loca.value = 'stats';
         stats.value = await mem.updateStats();
-    };
-    const handleClickMenuSetting = () => {
-        loca.value = 'setting';
-    };
-    const handleClickMenuLogout = async () => {
-        isLogin.value = false;
-        isMenuToggle.value = false;
-        loca.value = 'about';
-        await mem.removeAuth();
     };
     const handleClickStatBar = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
         loca.value = 'waiting';
@@ -87,6 +76,7 @@ export default () => {
             case 'waiting': return <Waiting/>
             case 'about': return <About/>;
             case 'login': return <Signin showTips={showTips} showDialog={showDialog}/>;
+            case 'logout': return <Signout isLogin={isLogin} loca={loca}/>
             case 'stats': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
             case 'study': return <Study studies={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
             case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
@@ -108,7 +98,7 @@ export default () => {
     return <div class="h-full flex flex-col">
         <div class="absolute top-0 inset-x-[10%] bg-[rgba(255,255,0,0.5)] text-center rounded-md" onClick={hideTips}>{tips.value}</div>
         <div class={`flex bg-gray-200 px-2 py-1 justify-between`}>
-            <img class="h-12" src="/favicon.svg" onClick={handleClickLogo}/>
+            <img class="h-12" src="/favicon.svg" onClick={() => loca.value = 'about'}/>
             {isLogin.value ? <div class="relative">
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
@@ -118,11 +108,11 @@ export default () => {
                     <menu onClick={() => handleClickStatBar()}>Study</menu>
                     <menu onClick={() => loca.value = 'dict'}>Dict</menu>
                     <div/>
-                    <menu onClick={handleClickMenuSetting}>Setting</menu>
+                    <menu onClick={() => loca.value = 'setting'}>Setting</menu>
                     <div/>
                     <menu onClick={() => loca.value = 'issue'}>Report Issue</menu>
                     <div/>
-                    <menu onClick={handleClickMenuLogout}>Logout</menu>
+                    <menu onClick={() => loca.value = 'logout'}>Logout</menu>
                 </div>
             </div> : <button class="px-4 ml-2 bg-indigo-700 text-white rounded" onClick={() => loca.value = 'login'}>Login</button>}
         </div>
