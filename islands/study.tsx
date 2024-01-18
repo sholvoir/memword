@@ -73,15 +73,15 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    return <div class="flex flex-col flex-1 h-full pb-3">
-        <div class="flex gap-2">
-            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
+    return <div class="flex flex-col flex-1 h-full">
+        <div class="flex gap-2 text-lg">
+            <a class="disabled:opacity-50 hover:underline text-blue-800 active:bg-pink-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
             <div>{index.value+1}/{studies.value.length}</div>
-            <a class="disabled:opacity-50 hover:underline text-blue-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
+            <a class="disabled:opacity-50 hover:underline text-blue-800 active:bg-pink-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
             <div class="grow"/>
-            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-5 h-5" /></button>
-            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-5 h-5" /></button>
-            <button type="button" class="disabled:opacity-50" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-5 h-5"/></button>
+            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6" /></button>
+            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6" /></button>
+            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></button>
             <div>Level: {study.value.level}</div>
         </div>
         <div class="grow text-2xl">
@@ -90,12 +90,12 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && study.value.pic && <img src={study.value.pic} />}
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
-        <div class="flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
-            <button type="button" onClick={handleShowAnswer} class="disabled:opacity-50" disabled={isPhaseAnswer.value}>Answer(_)</button>
-            <button type="button" onClick={handleSpeakIt} class="disabled:opacity-50" disabled={!shouldSound.value}>Read(B/C)</button>
-            <button type="button" onClick={handleDontKnow} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
-            <button type="button" onClick={handleIKnown} class="disabled:opacity-50" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
-        </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
+        <div class="fixed left-2 bottom-3 right-2 flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
+            <button type="button" onClick={handleShowAnswer} class="disabled:opacity-50 active:shadow-lg" disabled={isPhaseAnswer.value}>Answer(_)</button>
+            <button type="button" onClick={handleSpeakIt} class="disabled:opacity-50 active:shadow-lg" disabled={!shouldSound.value}>Read(B/C)</button>
+            <button type="button" onClick={handleDontKnow} class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
+            <button type="button" onClick={handleIKnown} class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
+        </div>
     </div>;
 }

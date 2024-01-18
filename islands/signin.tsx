@@ -24,20 +24,18 @@ export default ({showTips, showDialog}: ISigninProps) => {
     const handleSend = async () => {
         if (!emailPattern.test(state.email.value)) showTips('Invalid email address!');
         else {
+            canSendEmail.value = false;
+            counter.value = 60;
+            timer = setInterval(() => {
+                if (--counter.value <= 0) {
+                    clearInterval(timer);
+                    timer = undefined;
+                    canSendEmail.value = true;
+                }
+            }, 1000);
             const resp = await mem.signup(state.email.value);
             if (!resp.ok) showDialog(await resp.text(), 'login');
-            else {
-                showTips('Temporary password sent!');
-                canSendEmail.value = false;
-                counter.value = 60;
-                timer = setInterval(() => {
-                    if (--counter.value <= 0) {
-                        clearInterval(timer);
-                        timer = undefined;
-                        canSendEmail.value = true;
-                    }
-                }, 1000);
-            }
+            else showTips('Temporary password sent!');
         }
     };
     const handleClickSignup = async () => {
@@ -53,7 +51,6 @@ export default ({showTips, showDialog}: ISigninProps) => {
         <div class="flex flex-col">
             <input type="email" name="email" placeholder="Email"
                 class="w-64 p-2 rounded border border-gray-500 block disabled:opacity-50"
-                disabled={!canSendEmail.value}
                 value={state.email.value} onInput={handleStateChange}/>
             <a class="block text-right underline text-blue-700 cursor-pointer aria-disabled:opacity-50"
                 onClick={handleSend} aria-disabled={!canSendEmail.value}>
@@ -68,7 +65,7 @@ export default ({showTips, showDialog}: ISigninProps) => {
             onInput={handleStateChange}
         /></div>
         <div>
-            <button class="w-64 p-2 bg-indigo-700 text-white rounded"
+            <button class="w-64 p-2 bg-indigo-700 active:shadow-lg text-white rounded"
                 onClick={handleClickSignup}>OK</button>
         </div>
     </div>;

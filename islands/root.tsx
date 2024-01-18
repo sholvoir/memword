@@ -96,9 +96,9 @@ export default () => {
     };
     useEffect(() => (init().catch(console.error), mem.close), []);
     return <div class="h-full flex flex-col">
-        <div class="absolute top-0 inset-x-[10%] bg-[rgba(255,255,0,0.5)] text-center rounded-md" onClick={hideTips}>{tips.value}</div>
-        <div class={`flex bg-gray-200 px-2 py-1 justify-between`}>
+        <div class={`flex bg-gray-200 px-2 py-1 gap-2`}>
             <img class="h-12" src="/favicon.svg" onClick={() => loca.value = 'about'}/>
+            <div class="grow text-center" style={tips.value ? 'background-color: #ff08' : ''} onClick={hideTips}>{tips.value}</div>
             {isLogin.value ? <div class="relative">
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
