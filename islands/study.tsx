@@ -6,6 +6,8 @@ import * as mem from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
+import NButton from './button-normal.tsx';
+import AButton from './button-anti-shake.tsx';
 
 interface StudyProps {
     studies: Signal<Array<IStudy>>;
@@ -79,9 +81,9 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <div>{index.value+1}/{studies.value.length}</div>
             <a class="disabled:opacity-50 hover:underline text-blue-800 active:bg-pink-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
             <div class="grow"/>
-            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6" /></button>
-            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6" /></button>
-            <button type="button" class="disabled:opacity-50 active:shadow-lg" disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></button>
+            <AButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></AButton>
+            <AButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></AButton>
+            <AButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></AButton>
             <div>Level: {study.value.level}</div>
         </div>
         <div class="grow text-2xl">
@@ -91,11 +93,11 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="fixed left-2 bottom-3 right-2 flex gap-1 [&>button]:text-center [&>button]:grow [&>button]:px-px [&>button]:py-2 [&>button]:rounded [&>button]:bg-gray-300">
-            <button type="button" onClick={handleShowAnswer} class="disabled:opacity-50 active:bg-gray-500" disabled={isPhaseAnswer.value}>Answer(_)</button>
-            <button type="button" onClick={handleSpeakIt} class="disabled:opacity-50 active:bg-gray-500" disabled={!shouldSound.value}>Read(B/C)</button>
-            <button type="button" onClick={handleDontKnow} class="disabled:opacity-50 active:bg-gray-500" disabled={!isPhaseAnswer.value}>Don't(Z/M)</button>
-            <button type="button" onClick={handleIKnown} class="disabled:opacity-50 active:bg-gray-500" disabled={!isPhaseAnswer.value}>Known(X/N)</button>
+        <div class="fixed left-2 bottom-3 right-2 flex gap-1 [&>button]:grow [&>button]:px-px [&>button]:py-2">
+            <NButton onClick={handleShowAnswer} disabled={isPhaseAnswer.value}>Answer(_)</NButton>
+            <NButton /*onClick={handleSpeakIt}*/ disabled={!shouldSound.value}>Read(B/C)</NButton>
+            <NButton onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</NButton>
+            <NButton onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</NButton>
         </div>
     </div>;
 }

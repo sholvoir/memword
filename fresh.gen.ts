@@ -14,6 +14,10 @@ import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
 import * as $vocabulary from "./routes/vocabulary.ts";
 import * as $about from "./islands/about.tsx";
+import * as $button_anti_shake from "./islands/button-anti-shake.tsx";
+import * as $button_normal from "./islands/button-normal.tsx";
+import * as $button_prime from "./islands/button-prime.tsx";
+import * as $button_ripple from "./islands/button-ripple.tsx";
 import * as $dialog from "./islands/dialog.tsx";
 import * as $dict from "./islands/dict.tsx";
 import * as $issue from "./islands/issue.tsx";
@@ -43,6 +47,10 @@ const manifest = {
   },
   islands: {
     "./islands/about.tsx": $about,
+    "./islands/button-anti-shake.tsx": $button_anti_shake,
+    "./islands/button-normal.tsx": $button_normal,
+    "./islands/button-prime.tsx": $button_prime,
+    "./islands/button-ripple.tsx": $button_ripple,
     "./islands/dialog.tsx": $dialog,
     "./islands/dict.tsx": $dict,
     "./islands/issue.tsx": $issue,
