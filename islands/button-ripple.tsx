@@ -12,9 +12,8 @@ export default (props: JSX.HTMLAttributes<HTMLButtonElement>) => {
         const radius = diameter / 2;
         rippleStyle.value = `width: ${diameter}px; height: ${diameter}px; left: ${
             e.offsetX - radius}px; top: ${e.offsetY - radius}px`;
-        console.log(e.clientY, btn.offsetTop)
         showRipple.value = true;
-        setTimeout(()=>showRipple.value = false, 60000);
+        setTimeout(()=>showRipple.value = false, 610);
         if (onClick) await onClick(e);
     }
     return <AntiShakeButton

@@ -6,8 +6,9 @@ import * as mem from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
+import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
-import AButton from './button-anti-shake.tsx';
+import AButton from './button-anchor.tsx';
 
 interface StudyProps {
     studies: Signal<Array<IStudy>>;
@@ -77,13 +78,13 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
     }, []);
     return <div class="flex flex-col flex-1 h-full">
         <div class="flex gap-2 text-lg">
-            <a class="disabled:opacity-50 hover:underline text-blue-800 active:bg-pink-800" onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</a>
+            <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
             <div>{index.value+1}/{studies.value.length}</div>
-            <a class="disabled:opacity-50 hover:underline text-blue-800 active:bg-pink-800" onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</a>
+            <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
             <div class="grow"/>
-            <AButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></AButton>
-            <AButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></AButton>
-            <AButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></AButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
             <div>Level: {study.value.level}</div>
         </div>
         <div class="grow text-2xl">
@@ -93,11 +94,11 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="fixed left-2 bottom-3 right-2 flex gap-1 [&>button]:grow [&>button]:px-px [&>button]:py-2">
-            <NButton onClick={handleShowAnswer} disabled={isPhaseAnswer.value}>Answer(_)</NButton>
-            <NButton /*onClick={handleSpeakIt}*/ disabled={!shouldSound.value}>Read(B/C)</NButton>
-            <NButton onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</NButton>
-            <NButton onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</NButton>
+        <div class="fixed left-2 bottom-3 right-2 flex gap-1">
+            <NButton class="grow" onClick={handleShowAnswer} disabled={isPhaseAnswer.value}>Answer(_)</NButton>
+            <NButton class="grow" onClick={handleSpeakIt} disabled={!shouldSound.value}>Read(B/C)</NButton>
+            <NButton class="grow" onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</NButton>
+            <NButton class="grow" onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</NButton>
         </div>
     </div>;
 }

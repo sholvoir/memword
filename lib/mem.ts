@@ -286,6 +286,14 @@ export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel
     return studies;
 };
 
+export const searchWord = async (word: string) => {
+    if (!vocabulary[word]) return undefined;
+    const task = await getTask('R', word);
+    if (!task) return undefined;
+    const dict = await getDiction(task.word);
+    return { ...task, ...dict } as IStudy;
+}
+
 export const init = async () => {
     dictDB = await openDictDB();
     const resp = await fetch('/vocabulary');

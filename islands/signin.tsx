@@ -1,6 +1,9 @@
 import { Signal, useSignal } from "@preact/signals";
 import { Loca } from "./root.tsx";
 import * as mem from '../lib/mem.ts';
+import PButton from './button-prime.tsx';
+import AButton from './button-anchor.tsx';
+import TInput from './input-text.tsx';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 
@@ -10,19 +13,13 @@ interface ISigninProps {
 }
 
 export default ({showTips, showDialog}: ISigninProps) => {
-    const state: Record<string, Signal> = {
-        email: useSignal(mem.setting.user ? atob(mem.setting.user) : ''),
-        password: useSignal('')
-    };
+    const email = useSignal(mem.setting.user ? atob(mem.setting.user) : '');
+    const password = useSignal('');
     const counter = useSignal(0);
     const canSendEmail = useSignal(true);
-    const handleStateChange = (ev: Event) => {
-        const target = ev.target as HTMLInputElement;
-        state[target.name].value = target.value;
-    };
     let timer: number|undefined;
     const handleSend = async () => {
-        if (!emailPattern.test(state.email.value)) showTips('Invalid email address!');
+        if (!emailPattern.test(email.value)) showTips('Invalid email address!');
         else {
             canSendEmail.value = false;
             counter.value = 60;
@@ -33,13 +30,13 @@ export default ({showTips, showDialog}: ISigninProps) => {
                     canSendEmail.value = true;
                 }
             }, 1000);
-            const resp = await mem.signup(state.email.value);
+            const resp = await mem.signup(email.value);
             if (!resp.ok) showDialog(await resp.text(), 'login');
             else showTips('Temporary password sent!');
         }
     };
     const handleClickSignup = async () => {
-        const resp = await mem.login(state.email.value, state.password.value);
+        const resp = await mem.login(email.value, password.value);
         if (!resp.ok) showTips('Invail email or password');
         else {
             mem.setSetting(await resp.json());
@@ -49,24 +46,12 @@ export default ({showTips, showDialog}: ISigninProps) => {
     };
     return <div class="h-full w-64 mx-auto grid grid-cols-1 gap-4 content-center">
         <div class="flex flex-col">
-            <input type="email" name="email" placeholder="Email"
-                class="w-64 p-2 rounded border border-gray-500 block disabled:opacity-50"
-                value={state.email.value} onInput={handleStateChange}/>
-            <a class="block text-right underline text-blue-700 cursor-pointer aria-disabled:opacity-50"
-                onClick={handleSend} aria-disabled={!canSendEmail.value}>
-                Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}</a>
+            <TInput name="email" placeholder="Email" class="w-64 p-2" binding={email} />
+            <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
+                Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
+            </AButton>
         </div>
-        <div><input
-            type="text"
-            name="password"
-            placeholder="Password"
-            class="w-64 p-2 rounded border border-gray-500"
-            value={state.password.value}
-            onInput={handleStateChange}
-        /></div>
-        <div>
-            <button class="w-64 p-2 rounded bg-indigo-700 active:shadow-lg text-white active:bg-indigo-950"
-                onClick={handleClickSignup}>OK</button>
-        </div>
+        <div><TInput name="password" placeholder="Password" class="w-64 p-2" binding={password} /></div>
+        <div><PButton class="w-64" onClick={handleClickSignup}>OK</PButton></div>
     </div>;
 }

@@ -83,7 +83,7 @@ export default () => {
             case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
             case 'tasks': return <Tasks/>
             case 'issue': return <Issue showDialog={showDialog} />
-            case 'dict': return <Dict showDialog={showDialog} startStudy={startStudy}/>
+            case 'dict': return <Dict showTips={showTips} startStudy={startStudy}/>
         }
     };
     const init = async () => {
@@ -103,7 +103,7 @@ export default () => {
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
                     onClick={handleClickMenu}></button>
-                <div class={`absolute ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
+                <div class={`absolute z-50 ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
                     <menu onClick={handleClickMenuStatis}>Status</menu>
                     <menu onClick={() => handleClickStatBar()}>Study</menu>
                     <menu onClick={() => loca.value = 'dict'}>Dict</menu>

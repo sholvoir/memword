@@ -3,6 +3,10 @@ import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { TagName, Tags } from "vocabulary/tag.ts";
 import { useSignal } from "@preact/signals";
 import * as mem from "../lib/mem.ts";
+import NButton from './button-normal.tsx';
+import PButton from './button-prime.tsx';
+import TInput from './input-text.tsx';
+import CInput from './input-checkbox.tsx';
 
 interface ISettingProps {
     onFinished: () => void;
@@ -15,16 +19,9 @@ export default ({onFinished}: ISettingProps) => {
 
     const handleCheckboxChange = (e: Event) => {
         const target = e.target as HTMLInputElement;
-        checkBoxs[target.name].value = setting.wordBooks[target.name] = target.checked;
+        setting.wordBooks[target.name] = checkBoxs[target.name].value;
     }
-    const handleLableClick = (e: Event) => {
-        const target = e.target as HTMLLabelElement;
-        checkBoxs[target.htmlFor].value = setting.wordBooks[target.htmlFor] = !setting.wordBooks[target.htmlFor];
-    }
-    const handleSprintNuberChange = (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        sprintNumber.value = setting.sprintNumber = Number.parseInt(target.value);
-    }
+    const handleSprintNuberChange = () => setting.sprintNumber = sprintNumber.value;
     const handleOKClick = () => {
         mem.setSetting(setting);
         onFinished();
@@ -33,22 +30,20 @@ export default ({onFinished}: ISettingProps) => {
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const id = `${taskType}${tag}`;
         checkBoxs[id] = useSignal(setting.wordBooks[id]);
-        result.push(<div><input type="checkbox" name={id} checked={checkBoxs[id].value} onChange={handleCheckboxChange}/>
-            <label for={id} onClick={handleLableClick}> {TaskTypeName[taskType]} {TagName[tag]}</label></div>)
+        result.push(<CInput name={id} class="w-40" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]} ${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
     return <>
-        <div class="flex">
+        <div class="flex gap-2">
             <label for="sprintNumber">Sprint Number:</label>
-            <input type="text" name="sprintNumber" value={sprintNumber.value}
-                class="grow px-2 rounded border border-gray-500" onInput={handleSprintNuberChange}/>
+            <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
         </div>
-        <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap [&>div]:min-w-40">
+        <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap gap-2">
             <legend>Select Your Word Books</legend>
             {result}
         </fieldset>
-        <div class="m-2 flex justify-end [&>button]:w-32 [&>button]:p-2 [&>button]:rounded">
-            <button class="bg-gray-300 active:bg-gray-500" onClick={onFinished}>Cancel</button>
-            <button class="bg-indigo-700 text-white active:bg-indigo-950" onClick={handleOKClick}>OK</button>
+        <div class="m-2 flex justify-end gap-2">
+            <NButton class="w-32" onClick={onFinished}>Cancel</NButton>
+            <PButton class="w-32" onClick={handleOKClick}>OK</PButton>
         </div>
     </>
 }

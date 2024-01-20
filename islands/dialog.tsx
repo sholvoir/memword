@@ -1,14 +1,16 @@
-interface DialogProps {
+import PButton from './button-prime.tsx';
+
+interface IDialogProps {
     content: string;
     onFinish: () => void;
 };
 
-export default ({content, onFinish}: DialogProps) => {
+export default ({content, onFinish}: IDialogProps) => {
     return <div class="flex justify-center items-center">
     <div class="size-fit max-w-[80%] p-3 rounded-md">
         <div class="m-6 leading-loose text-center">{content}</div>
         <div class="m-6 text-center">
-            <button class="w-32 p-2 bg-indigo-700 text-white active:bg-indigo-950 rounded" onClick={onFinish}>OK</button>
+            <PButton class="w-32" onClick={onFinish}>OK</PButton>
         </div>
     </div>
 </div>;
