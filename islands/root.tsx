@@ -6,6 +6,7 @@ import { Tag } from "vocabulary/tag.ts";
 import { TaskType } from "../lib/itask.ts";
 import { IStudy } from "../lib/istudy.ts";
 import { BLevel } from "../lib/istat.ts";
+import { ISetting } from "../lib/isetting.ts";
 import * as mem from '../lib/mem.ts';
 
 import Stats from './stats.tsx';
@@ -25,15 +26,17 @@ export type ShowDialog = (content: string, backLoca: Loca) => void;
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
-    const isLogin = useSignal(false);
+    const user = useSignal<string|undefined>(mem.getUser());
+    const setting = useSignal<ISetting>(mem.getSetting());
     const isMenuToggle = useSignal(false);
     const loca = useSignal<Loca>('about');
     const stats  = useSignal(mem.getStats());
-    const tasks = useSignal<Array<IStudy>>([]);
+    const studies = useSignal<Array<IStudy>>([]);
     const dialogContent = useSignal('');
     const preLoca = useSignal<Loca>('stats');
     const tips = useSignal('');
 
+    const goBack = () => loca.value = preLoca.value;
     const showDialog = (content: string, backLoca: Loca = 'stats') => {
         dialogContent.value = content;
         preLoca.value = backLoca;
@@ -53,44 +56,45 @@ export default () => {
         isMenuToggle.value = false;
         removeEventListener('click', handleClickBlank);
     };
-    const handleClickMenuStatis = async () => {
+    const handleClickMenuStatus = async () => {
         loca.value = 'stats';
         stats.value = await mem.updateStats();
     };
     const handleClickStatBar = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
         loca.value = 'waiting';
-        const ts = await mem.getEpisode(taskType, tag, blevel);
+        const ts = await mem.getEpisode(setting.value.sprintNumber, taskType, tag, blevel);
         if (ts.length) return startStudy(ts);
         showDialog('Congratulations! There are no more task need to do. You can click one word book\'s NEVER BAR to study some new word!', 'stats');
     };
     const handleStudyFinish = async () => {
-        await handleClickMenuStatis();
+        await handleClickMenuStatus();
         await mem.syncTasks();
     };
     const startStudy = async (ts: Array<IStudy>) => {
-        tasks.value = ts;
+        studies.value = ts;
         loca.value = 'study';
     }
     const home = () => {
         switch (loca.value) {
             case 'waiting': return <Waiting/>
             case 'about': return <About/>;
-            case 'login': return <Signin showTips={showTips} showDialog={showDialog}/>;
-            case 'logout': return <Signout isLogin={isLogin} loca={loca}/>
-            case 'stats': return <Stats stats={stats} onClickStatBar={handleClickStatBar} />;
-            case 'study': return <Study studies={tasks} showTips={showTips} onFinish={handleStudyFinish}/>;
-            case 'setting': return <Setting onFinished={handleClickMenuStatis}/>;
-            case 'dialog': return <Dialog content={dialogContent.value} onFinish={() => loca.value = preLoca.value }/>;
+            case 'login': return <Signin user={user} showTips={showTips} showDialog={showDialog}/>;
+            case 'logout': return <Signout user={user} loca={loca}/>
+            case 'stats': return <Stats setting={setting} stats={stats} onClickStatBar={handleClickStatBar} />;
+            case 'study': return <Study studies={studies} showTips={showTips} onFinish={handleStudyFinish}/>;
+            case 'setting': return <Setting setting={setting} onFinished={goBack}/>;
+            case 'dialog': return <Dialog content={dialogContent.value} onFinish={goBack}/>;
             case 'tasks': return <Tasks/>
             case 'issue': return <Issue showDialog={showDialog} />
             case 'dict': return <Dict showTips={showTips} startStudy={startStudy}/>
         }
     };
     const init = async () => {
-        if (!mem.getSetting().user) return loca.value = 'about';
-        isLogin.value = true;
+        if (!user.value) return loca.value = 'about';
         loca.value = 'stats';
-        await mem.init();
+        await mem.init(user.value);
+        const s = await mem.updateSetting();
+        if (s) setting.value = s;
         await mem.syncTasks();
         stats.value = await mem.updateStats();
     };
@@ -99,12 +103,12 @@ export default () => {
         <div class={`flex bg-gray-200 px-2 py-1 gap-2`}>
             <img class="h-12" src="/favicon.svg" onClick={() => loca.value = 'about'}/>
             <div class="grow text-center" style={tips.value ? 'background-color: #ff08' : ''} onClick={hideTips}>{tips.value}</div>
-            {isLogin.value ? <div class="relative">
+            {user.value ? <div class="relative">
                 <button id="appbardropdown"
                     class="w-12 h-full bg-[url('/head.svg')]"
                     onClick={handleClickMenu}></button>
                 <div class={`absolute z-50 ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
-                    <menu onClick={handleClickMenuStatis}>Status</menu>
+                    <menu onClick={handleClickMenuStatus}>Status</menu>
                     <menu onClick={() => handleClickStatBar()}>Study</menu>
                     <menu onClick={() => loca.value = 'dict'}>Dict</menu>
                     <div/>

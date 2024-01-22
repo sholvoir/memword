@@ -1,15 +1,29 @@
 // deno-lint-ignore-file no-explicit-any
-import { MemState, internalServerError } from '../../../lib/mem-server.ts';
+import { MemState, notFound } from '../../../lib/mem-server.ts';
 import { Handlers } from "$fresh/server.ts";
 import { ISetting } from "../../../lib/isetting.ts";
-import mongorun from "../../../lib/mongo.ts";
+import { jsonHeader, ok, internalServerError } from "../../../lib/mem-server.ts";
+
+const catalog = 'setting';
 
 export const handler: Handlers<any, MemState> = {
-    async POST(req, ctx) {
-        const setting = await req.json() as ISetting;
-        try { await mongorun(async (client) => {
-            await client.db('user').collection('setting').updateOne({ user: ctx.state.user }, { $set: setting }, { upsert: true });
-        })} catch { return internalServerError }
-        return new Response();
+    async GET(_req, ctx) {
+        try {
+            const kv = await Deno.openKv();
+            const res = await kv.get([catalog, ctx.state.user]);
+            const value = res.value as ISetting;
+            kv.close();
+            if (!value) return notFound;
+            return new Response(JSON.stringify(value), { headers: jsonHeader });
+        } catch { return internalServerError; }
+    },
+    async PUT(req, ctx) {
+        try {
+            const setting = await req.json() as ISetting;
+            const kv = await Deno.openKv();
+            await kv.set([catalog, ctx.state.user], setting);
+            kv.close();
+            return ok;
+        } catch { return internalServerError; }
     }
 };

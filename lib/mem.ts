@@ -48,49 +48,36 @@ export const signup = async (email: string) => await fetch(`/signup?email=${enco
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 
-export const removeAuth = async (cleanall = false) => {
-    await fetch('/setting', fetchInit(setting));
-    if (cleanall) {
-        close();
-        await new Promise((resolve, reject) => {
-            const request = indexedDB.deleteDatabase('dict');
-            request.onerror = reject;
-            request.onsuccess = resolve;
-        });
-        await new Promise((resolve, reject) => {
-            const request = indexedDB.deleteDatabase(setting.user);
-            request.onerror = reject;
-            request.onsuccess = resolve;
-        });
-    }
-    Cookies.remove('auth');
-    localStorage.clear();
-}
-
-export let setting: ISetting;
 let vocabulary: Record<string, Array<Tag>>;
 let dictDB: IDBDatabase;
 let userDB: IDBDatabase;
 
-export const setSetting = (s: ISetting) => {
-    if (s) localStorage.setItem('_setting', JSON.stringify(setting = s));
-};
-export const getSetting = () => {
-    let s: ISetting;
-    const result = localStorage.getItem('_setting');
-    if (result) s = JSON.parse(result);
-    s = { user: '', sprintNumber: 10, wordBooks: {} };
-    for (const taskType of TaskTypes) s.wordBooks[`${taskType}OG`] = true;
+export const getUser = () => {
     const token = Cookies.get('auth');
-    if (token) {
-        const [_, payload] = jwtDecode(token) as [unknown, Payload, Uint8Array];
-        s.user = payload.aud as string;
-    }
-    return setting = s;
+    if (token) return (jwtDecode(token)[1] as Payload).aud as string;
+}
+
+export const setSetting = async (setting: ISetting) => {
+    if (!setting) return;
+    localStorage.setItem('_setting', JSON.stringify(setting));
+    return await fetch('/setting', fetchInit(setting, 'PUT'));
 };
 
-const setSyncTime = (time: number) => localStorage.setItem('_sync-time', `${time}`);
-const getSyncTime = () => +(localStorage.getItem('_sync-time') ?? 0);
+export const getSetting = () => {
+    const result = localStorage.getItem('_setting');
+    if (result) return JSON.parse(result) as ISetting;
+    const s: ISetting = { sprintNumber: 10, wordBooks: {} };
+    for (const taskType of TaskTypes) s.wordBooks[`${taskType}OG`] = true;
+    return s;
+};
+
+export const updateSetting = async () => {
+    const resp = await fetch('/setting');
+    if (!resp.ok) return undefined;
+    const setting = await resp.json() as ISetting;
+    localStorage.setItem('_setting', JSON.stringify(setting));
+    return setting;
+}
 
 const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open('dict', 1);
@@ -119,12 +106,14 @@ export const getDiction = async (word: string, check = true): Promise<IDiction|u
     return dict;
 }
 
-const openUserDB = () => new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(setting.user!, 1);
+const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(user, 1);
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
     request.onupgradeneeded = () => {
         const db = request.result;
+        const kvStore = db.createObjectStore('kv', { keyPath: 'key' });
+        kvStore.put({ key: '_sync-time', value: 0 });
         const taskStore = db.createObjectStore('task', { keyPath: ['type', 'word'] });
         taskStore.createIndex('last', 'last');
         taskStore.createIndex('next', 'next');
@@ -134,6 +123,34 @@ const openUserDB = () => new Promise<IDBDatabase>((resolve, reject) => {
 });
 
 export const close = () => { userDB?.close(); dictDB?.close(); }
+
+export const removeAuth = async (user?: string, cleanDict = false) => {
+    close();
+    if (cleanDict) await new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase('dict');
+        request.onerror = reject;
+        request.onsuccess = resolve;
+    });
+    if (user) await new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase(user);
+        request.onerror = reject;
+        request.onsuccess = resolve;
+    });
+    Cookies.remove('auth');
+    localStorage.clear();
+}
+
+const getSyncTime = async () => await new Promise<number>((resolve, reject) => {
+    const request = userDB!.transaction('kv', 'readonly').objectStore('kv').get('_sync-time');
+    request.onerror = reject;
+    request.onsuccess = () => resolve(request.result.value);
+});
+
+const setSyncTime = async (time: number) => await new Promise<void>((resolve, reject) => {
+    const request = userDB!.transaction('kv', 'readwrite').objectStore('kv').put({key: '_sync-time', value: time});
+    request.onerror = reject;
+    request.onsuccess = () => resolve();
+})
 
 export const getTask = (type: TaskType, word: string) => new Promise<ITask>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readonly').objectStore('task').get([type, word]);
@@ -171,13 +188,13 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
 
 export const syncTasks = async () => {
     const thisTime = now();
-    const lastTime = getSyncTime();
+    const lastTime = await getSyncTime();
     const otasks = await getTasks(lastTime);
     const resp = await fetch(`/task?lastgt=${lastTime}`, fetchInit(otasks));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
     const ntasks = await resp.json();
     await putTasks(ntasks);
-    setSyncTime(thisTime);
+    await setSyncTime(thisTime);
 }
 
 export const removeTask = async (type: TaskType, word: string) => {
@@ -262,10 +279,9 @@ export const updateStats = async () => {
     return stats;
 };
 
-export const getEpisode = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
+export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
     const tasks: Array<ITask> = [];
     const ctime = now();
-    const sprintNumber = setting!.sprintNumber;
     const query = blevel == 'never' ? undefined : IDBKeyRange.upperBound(ctime);
     await traversingTask(
         cursor => {
@@ -294,9 +310,9 @@ export const searchWord = async (word: string) => {
     return { ...task, ...dict } as IStudy;
 }
 
-export const init = async () => {
+export const init = async (user: string) => {
     dictDB = await openDictDB();
     const resp = await fetch('/vocabulary');
     if (resp.ok) vocabulary = await resp.json();
-    if (setting.user) userDB = await openUserDB();
+    userDB = await openUserDB(user);
 };

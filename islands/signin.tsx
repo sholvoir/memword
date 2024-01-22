@@ -8,12 +8,13 @@ import TInput from './input-text.tsx';
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 
 interface ISigninProps {
+    user: Signal<string|undefined>;
     showTips: (content: string) => void;
     showDialog: (content: string, backLoca: Loca) => void
 }
 
-export default ({showTips, showDialog}: ISigninProps) => {
-    const email = useSignal(mem.setting.user ? atob(mem.setting.user) : '');
+export default ({user, showTips, showDialog}: ISigninProps) => {
+    const email = useSignal(user.value ? atob(user.value) : '');
     const password = useSignal('');
     const counter = useSignal(0);
     const canSendEmail = useSignal(true);
@@ -39,7 +40,6 @@ export default ({showTips, showDialog}: ISigninProps) => {
         const resp = await mem.login(email.value, password.value);
         if (!resp.ok) showTips('Invail email or password');
         else {
-            mem.setSetting(await resp.json());
             if (timer) clearInterval(timer);
             location.reload();
         }

@@ -2,19 +2,20 @@ import { Signal } from "@preact/signals";
 import { Tag, TagName, Tags } from "vocabulary/tag.ts";
 import { BLevel, BLevels, Stats } from "../lib/istat.ts";
 import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";
-import * as mem from '../lib/mem.ts'
+import { ISetting } from '../lib/isetting.ts';
 
 interface IStatsProps {
+    setting: Signal<ISetting>;
     stats: Signal<Stats>;
     onClickStatBar: (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => void;
 };
 
-export default ({ stats, onClickStatBar}: IStatsProps) => {
+export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
     const result = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const stat = stats.value[taskType][tag];
         const all = BLevels.reduce((s,b) => s + stat.all[b], 0);
-        if (mem.setting.wordBooks[`${taskType}${tag}`]) {
+        if (setting.value.wordBooks[`${taskType}${tag}`]) {
             result.push(<table>
                 <colgroup>
                     <col class="pr-1"/>

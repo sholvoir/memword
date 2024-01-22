@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { TagName, Tags } from "vocabulary/tag.ts";
-import { useSignal } from "@preact/signals";
+import { Signal, useSignal } from "@preact/signals";
+import { ISetting } from "../lib/isetting.ts";
 import * as mem from "../lib/mem.ts";
 import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
@@ -9,12 +10,13 @@ import TInput from './input-text.tsx';
 import CInput from './input-checkbox.tsx';
 
 interface ISettingProps {
+    setting: Signal<ISetting>;
     onFinished: () => void;
 };
 
-export default ({onFinished}: ISettingProps) => {
+export default (props: ISettingProps) => {
     const setting = mem.getSetting();
-    const sprintNumber = useSignal(mem.setting.sprintNumber);
+    const sprintNumber = useSignal(setting.sprintNumber);
     const checkBoxs = {} as any;
 
     const handleCheckboxChange = (e: Event) => {
@@ -24,7 +26,8 @@ export default ({onFinished}: ISettingProps) => {
     const handleSprintNuberChange = () => setting.sprintNumber = sprintNumber.value;
     const handleOKClick = () => {
         mem.setSetting(setting);
-        onFinished();
+        props.setting.value = setting;
+        props.onFinished();
     }
     const result = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
@@ -42,7 +45,7 @@ export default ({onFinished}: ISettingProps) => {
             {result}
         </fieldset>
         <div class="m-2 flex justify-end gap-2">
-            <NButton class="w-32" onClick={onFinished}>Cancel</NButton>
+            <NButton class="w-32" onClick={props.onFinished}>Cancel</NButton>
             <PButton class="w-32" onClick={handleOKClick}>OK</PButton>
         </div>
     </>
