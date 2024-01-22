@@ -76,12 +76,13 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    return <div class="flex flex-col flex-1 h-full">
+    return <div class="flex flex-col flex-1 h-full relative">
         <div class="flex gap-2 text-lg">
             <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
             <div>{index.value+1}/{studies.value.length}</div>
             <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
             <div class="grow"/>
+            <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><img src="/sound.svg" class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
@@ -94,11 +95,10 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="fixed left-2 bottom-3 right-2 flex gap-1">
-            <NButton class="grow" onClick={handleShowAnswer} disabled={isPhaseAnswer.value}>Answer(_)</NButton>
-            <NButton class="grow" onClick={handleSpeakIt} disabled={!shouldSound.value}>Read(B/C)</NButton>
-            <NButton class="grow" onClick={handleDontKnow} disabled={!isPhaseAnswer.value}>Don't(Z/M)</NButton>
-            <NButton class="grow" onClick={handleIKnown} disabled={!isPhaseAnswer.value}>Known(X/N)</NButton>
+        <div class="absolute bottom-3 right-2 flex flex-col gap-1">
+            <NButton class="grow" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>Answer</NButton>
+            <NButton class="grow" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>Known</NButton>
+            <NButton class="grow" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>Don't</NButton>
         </div>
     </div>;
 }
