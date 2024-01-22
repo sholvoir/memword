@@ -6,6 +6,7 @@ import * as mem from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
+import IconCircleCaretRight from "tabler_icons/circle-caret-right.tsx";
 import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import AButton from './button-anchor.tsx';
@@ -82,7 +83,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <div>{index.value+1}/{studies.value.length}</div>
             <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
             <div class="grow"/>
-            <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><img src="/sound.svg" class="w-6 h-6"/></SButton>
+            <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
