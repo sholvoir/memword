@@ -77,7 +77,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    return <div class="flex flex-col flex-1 h-full relative">
+    return <div class="flex flex-col flex-1 h-full">
         <div class="flex gap-2 text-lg">
             <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
             <div>{index.value+1}/{studies.value.length}</div>
@@ -96,7 +96,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="absolute bottom-1/3 right-2 flex flex-col gap-2 text-lg">
+        <div class="fixed bottom-1/3 right-2 flex flex-col gap-2 text-lg">
             <NButton class="grow py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>Answer</NButton>
             <NButton class="grow py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>Known</NButton>
             <NButton class="grow py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>Don't</NButton>
