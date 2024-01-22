@@ -96,7 +96,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="absolute bottom-3 right-2 flex flex-col gap-1">
+        <div class="absolute bottom-1/3 right-2 flex flex-col gap-1">
             <NButton class="grow" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>Answer</NButton>
             <NButton class="grow" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>Known</NButton>
             <NButton class="grow" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>Don't</NButton>
