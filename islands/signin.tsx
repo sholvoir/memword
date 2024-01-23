@@ -44,14 +44,14 @@ export default ({user, showTips, showDialog}: ISigninProps) => {
             location.reload();
         }
     };
-    return <div class="h-full w-64 mx-auto grid grid-cols-1 gap-4 content-center">
+    return <div class="h-full w-64 mx-auto flex flex-col gap-4 justify-center">
         <div class="flex flex-col">
-            <TInput name="email" placeholder="Email" class="w-64 p-2" binding={email} />
+            <TInput name="email" placeholder="Email" binding={email} />
             <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
                 Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
             </AButton>
         </div>
-        <TInput name="password" placeholder="Password" class="w-64 p-2" binding={password} />
+        <TInput name="password" placeholder="Password" binding={password} />
         <PButton onClick={handleClickSignup}>确定</PButton>
     </div>;
 }

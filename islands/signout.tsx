@@ -2,6 +2,7 @@ import { Signal, useSignal } from "@preact/signals";
 import { Loca } from './root.tsx';
 import * as mem from '../lib/mem.ts';
 import CInput from './input-checkbox.tsx';
+import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
 
 interface ISignoutProps {
@@ -18,11 +19,13 @@ export default ({user, loca}: ISignoutProps) => {
         loca.value = 'about';
         await mem.removeAuth(cleanUser.value ? u : undefined, cleanDict.value);
     };
-    return <div class="h-full w-64 mx-auto grid grid-cols-1 gap-4 content-center">
-        <CInput name="cleanUser" label="Delete My Study Record" binding={cleanUser} />
-        <CInput name="cleanDict" label="Delete Dictionary Cache" binding={cleanDict} />
+    return <div class="h-full w-64 mx-auto flex flex-col gap-4 justify-center">
+        <div class="flex flex-col">
+            <CInput name="cleanUser" label="删除我的学习记录" binding={cleanUser} />
+            <CInput name="cleanDict" label="删除缓存的词典" binding={cleanDict} />
+        </div>
         <div class="flex gap-2">
-            <PButton class="grow" onClick={handleCancelClick}>取消</PButton>
+            <NButton class="grow" onClick={handleCancelClick}>取消</NButton>
             <PButton class="grow" onClick={handleSignoutClick}>登出</PButton>
         </div>
     </div>;

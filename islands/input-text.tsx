@@ -14,5 +14,5 @@ export default (props: ITextInputProps) => {
         else if (number) binding.value = number;
     }
     return <input type={type ?? 'text'} {...rest} value={binding.value} onInput={handleInput}
-        class={`ml-2 px-2 rounded border border-gray-500 disabled:opacity-50 ${className ?? ''}`}/>;
+        class={`px-2 rounded border border-gray-500 disabled:opacity-50 ${className ?? ''}`}/>;
 }
