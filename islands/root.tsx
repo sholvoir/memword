@@ -110,11 +110,11 @@ export default () => {
                 <div class={`absolute z-50 ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
                     <menu onClick={handleClickMenuStatus}>学习情况</menu>
                     <menu onClick={() => handleClickStatBar()}>开始学习</menu>
+                    <menu onClick={() => loca.value = 'issue'}>报告问题</menu>
+                    <div/>
                     <menu onClick={() => loca.value = 'dict'}>词典</menu>
                     <div/>
                     <menu onClick={() => loca.value = 'setting'}>设置</menu>
-                    <div/>
-                    <menu onClick={() => loca.value = 'issue'}>报告问题</menu>
                     <div/>
                     <menu onClick={() => loca.value = 'logout'}>登出</menu>
                 </div>

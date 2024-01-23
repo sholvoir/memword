@@ -37,7 +37,7 @@ export default (props: ISettingProps) => {
         result.push(<CInput name={id} class="w-[330px]" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
     return <>
-        <div class="flex gap-2">
+        <div class="flex gap-2 py-1">
             <label for="sprintNumber">每次学习单词数:</label>
             <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
         </div>
