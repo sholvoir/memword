@@ -51,7 +51,7 @@ export default ({user, showTips, showDialog}: ISigninProps) => {
                 Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
             </AButton>
         </div>
-        <div><TInput name="password" placeholder="Password" class="w-64 p-2" binding={password} /></div>
-        <div><PButton class="w-64" onClick={handleClickSignup}>OK</PButton></div>
+        <TInput name="password" placeholder="Password" class="w-64 p-2" binding={password} />
+        <PButton onClick={handleClickSignup}>确定</PButton>
     </div>;
 }

@@ -1,5 +1,4 @@
 import { useSignal } from "@preact/signals";
-import { ShowDialog } from "./root.tsx";
 import { IStudy } from "../lib/istudy.ts";
 import * as mem from '../lib/mem.ts'
 import PButton from './button-prime.tsx';
@@ -18,6 +17,6 @@ export default ({showTips, startStudy}: DictProps) => {
     }
     return <div class="flex gap-2">
         <TInput type="search" name="word" placeholder="word" class="grow" binding={word} onSearch={handleSearchClick}/>
-        <PButton class="w-20" onClick={handleSearchClick}>Search</PButton>
+        <PButton class="w-20" onClick={handleSearchClick}>查找</PButton>
     </div>
 }

@@ -10,6 +10,6 @@ export interface ITask {
 }
 
 export const TaskTypeName: Record<TaskType, string> = {
-    'L': 'Listen',
-    'R': 'Read'
+    L: '听力',
+    R: '阅读'
 };

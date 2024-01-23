@@ -1,1 +1,1 @@
-export default () => <div class="flex h-full justify-center items-center"><div>Please Waiting...</div></div>;
+export default () => <div class="flex h-full justify-center items-center"><div>请稍候...</div></div>;

@@ -108,17 +108,17 @@ export default () => {
                     class="w-12 h-full bg-[url('/head.svg')]"
                     onClick={handleClickMenu}></button>
                 <div class={`absolute z-50 ${isMenuToggle.value ? 'block' : 'hidden'} w-32 right-0 bg-gray-200 rounded p-2 mt-[-2px] [&>menu]:p-2 [&>menu]:hover:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300`}>
-                    <menu onClick={handleClickMenuStatus}>Status</menu>
-                    <menu onClick={() => handleClickStatBar()}>Study</menu>
-                    <menu onClick={() => loca.value = 'dict'}>Dict</menu>
+                    <menu onClick={handleClickMenuStatus}>学习情况</menu>
+                    <menu onClick={() => handleClickStatBar()}>开始学习</menu>
+                    <menu onClick={() => loca.value = 'dict'}>词典</menu>
                     <div/>
-                    <menu onClick={() => loca.value = 'setting'}>Setting</menu>
+                    <menu onClick={() => loca.value = 'setting'}>设置</menu>
                     <div/>
-                    <menu onClick={() => loca.value = 'issue'}>Report Issue</menu>
+                    <menu onClick={() => loca.value = 'issue'}>报告问题</menu>
                     <div/>
-                    <menu onClick={() => loca.value = 'logout'}>Logout</menu>
+                    <menu onClick={() => loca.value = 'logout'}>登出</menu>
                 </div>
-            </div> : <button class="px-4 ml-2 rounded bg-indigo-700 text-white active:bg-indigo-950" onClick={() => loca.value = 'login'}>Login</button>}
+            </div> : <button class="px-4 ml-2 rounded bg-indigo-700 text-white active:bg-indigo-950" onClick={() => loca.value = 'login'}>登录</button>}
         </div>
         <div class="grow p-2 overflow-y-auto">{home()}</div>
     </div>;

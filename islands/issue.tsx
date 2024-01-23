@@ -20,7 +20,7 @@ export default ({ showDialog }: IIssueProps) => {
         <label for="issue">Please describe your problem or the only a word with issue:</label>
         <TAInput name="issue" class="w-full grow" binding={issue}>{issue.value}</TAInput>
         <div class="flex mt-2 justify-end">
-            <PButton onClick={handleSubmitClick}>Submit</PButton>
+            <PButton onClick={handleSubmitClick}>提交</PButton>
         </div>
     </div>
 }

@@ -10,7 +10,7 @@ export default ({content, onFinish}: IDialogProps) => {
     <div class="size-fit max-w-[80%] p-3 rounded-md">
         <div class="m-6 leading-loose text-center">{content}</div>
         <div class="m-6 text-center">
-            <PButton class="w-32" onClick={onFinish}>OK</PButton>
+            <PButton class="w-32" onClick={onFinish}>确定</PButton>
         </div>
     </div>
 </div>;

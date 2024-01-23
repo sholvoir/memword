@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
-import { TagName, Tags } from "vocabulary/tag.ts";
+import { Tags } from "vocabulary/tag.ts";
+import { TagName } from '../lib/tag.ts';
 import { Signal, useSignal } from "@preact/signals";
 import { ISetting } from "../lib/isetting.ts";
 import * as mem from "../lib/mem.ts";
@@ -33,20 +34,20 @@ export default (props: ISettingProps) => {
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const id = `${taskType}${tag}`;
         checkBoxs[id] = useSignal(setting.wordBooks[id]);
-        result.push(<CInput name={id} class="w-40" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]} ${TagName[tag]}`} onChange={handleCheckboxChange}/>);
+        result.push(<CInput name={id} class="w-96" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
     return <>
         <div class="flex gap-2">
-            <label for="sprintNumber">Sprint Number:</label>
+            <label for="sprintNumber">每次学习单词数:</label>
             <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
         </div>
         <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap gap-2">
-            <legend>Select Your Word Books</legend>
+            <legend>选择您关注的词书</legend>
             {result}
         </fieldset>
         <div class="m-2 flex justify-end gap-2">
-            <NButton class="w-32" onClick={props.onFinished}>Cancel</NButton>
-            <PButton class="w-32" onClick={handleOKClick}>OK</PButton>
+            <NButton class="w-32" onClick={props.onFinished}>取消</NButton>
+            <PButton class="w-32" onClick={handleOKClick}>确定</PButton>
         </div>
     </>
 }

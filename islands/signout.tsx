@@ -22,8 +22,8 @@ export default ({user, loca}: ISignoutProps) => {
         <CInput name="cleanUser" label="Delete My Study Record" binding={cleanUser} />
         <CInput name="cleanDict" label="Delete Dictionary Cache" binding={cleanDict} />
         <div class="flex gap-2">
-            <PButton class="grow" onClick={handleCancelClick}>Cancel</PButton>
-            <PButton class="grow" onClick={handleSignoutClick}>Logout</PButton>
+            <PButton class="grow" onClick={handleCancelClick}>取消</PButton>
+            <PButton class="grow" onClick={handleSignoutClick}>登出</PButton>
         </div>
     </div>;
 }
