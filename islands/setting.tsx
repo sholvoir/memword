@@ -34,7 +34,7 @@ export default (props: ISettingProps) => {
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const id = `${taskType}${tag}`;
         checkBoxs[id] = useSignal(setting.wordBooks[id]);
-        result.push(<CInput name={id} class="w-96" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
+        result.push(<CInput name={id} class="w-[330px]" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
     return <>
         <div class="flex gap-2">

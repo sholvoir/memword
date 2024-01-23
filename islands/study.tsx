@@ -7,6 +7,7 @@ import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconCircleCaretRight from "tabler_icons/circle-caret-right.tsx";
+import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import AButton from './button-anchor.tsx';
@@ -45,6 +46,10 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         await mem.study(study.value);
         handleNext();
     };
+    const handleFinish = async () => {
+        study.value.level = 15;
+        await handleIKnown();
+    }
     const handleDontKnow = () => {
         study.value.level = 0;
         handleIKnown();
@@ -84,6 +89,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
             <div class="grow"/>
             <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleFinish}><IconCircleLetterF class="w-6 h-6" /></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
@@ -97,9 +103,9 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
         <div class="fixed bottom-1/3 right-2 flex flex-col gap-2 text-lg">
-            <NButton class="grow py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
-            <NButton class="grow py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>
-            <NButton class="grow py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
+            <NButton class="grow" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
+            <NButton class="grow" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>
+            <NButton class="grow" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
         </div>
     </div>;
 }
