@@ -100,7 +100,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {shouldSpell.value && <div class="text-4xl font-bold">{study.value.word}</div>}
             {isPhaseAnswer.value && <div>{study.value.phonetic}</div>}
             {isPhaseAnswer.value && study.value.pic && <img src={study.value.pic} />}
-            {isPhaseAnswer.value && <div><pre>{study.value.trans}</pre></div>}
+            {isPhaseAnswer.value && <div>{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
         <div class="fixed bottom-1/3 right-2 flex flex-col gap-2 text-lg">
