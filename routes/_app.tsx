@@ -20,7 +20,7 @@ export default function App({ Component }: PageProps) {
         <link rel="stylesheet" href="/styles.css" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" />
       </head>
-      <body class="h-[100dvh]" style="font-family: 'Roboto', sans-serif;">
+      <body class="h-[100dvh] bg-gray-100" style="font-family: 'Roboto', sans-serif;">
         <Component />
       </body>
     </html>

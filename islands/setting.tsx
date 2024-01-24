@@ -9,10 +9,11 @@ import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
 import CInput from './input-checkbox.tsx';
+import Dialog from './dialog.tsx';
 
 interface ISettingProps {
     setting: Signal<ISetting>;
-    onFinished: () => void;
+    onFinish: () => void;
 };
 
 export default (props: ISettingProps) => {
@@ -28,7 +29,7 @@ export default (props: ISettingProps) => {
     const handleOKClick = () => {
         mem.setSetting(setting);
         props.setting.value = setting;
-        props.onFinished();
+        props.onFinish();
     }
     const result = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
@@ -36,18 +37,18 @@ export default (props: ISettingProps) => {
         checkBoxs[id] = useSignal(setting.wordBooks[id]);
         result.push(<CInput name={id} class="w-[330px]" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
-    return <>
+    return <Dialog title="设置" onFinish={props.onFinish}>
         <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap gap-2">
             <legend>选择您关注的词书</legend>
             {result}
         </fieldset>
-        <div class="my-2 flex">
+        <div class="my-2 flex gap-1">
             <label for="sprintNumber">每次学习单词数:</label>
             <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
         </div>
         <div class="flex justify-end gap-2">
-            <NButton class="w-32" onClick={props.onFinished}>取消</NButton>
+            <NButton class="w-32" onClick={props.onFinish}>取消</NButton>
             <PButton class="w-32" onClick={handleOKClick}>确定</PButton>
         </div>
-    </>
+    </Dialog>
 }

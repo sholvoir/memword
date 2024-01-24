@@ -8,7 +8,7 @@ export const handler: Handlers<any, MemState> = {
         return await sendEmail({
             from: ctx.state.user,
             to: 'sovar.he@gmail.com',
-            subject: `Issue Report from ${ctx.state.user}`,
+            subject: `Issue Report from ${atob(ctx.state.user)}`,
             content: await req.text()
         })
     }

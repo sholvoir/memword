@@ -11,6 +11,7 @@ import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import AButton from './button-anchor.tsx';
+import Dialog from './dialog.tsx';
 
 interface StudyProps {
     studies: Signal<Array<IStudy>>;
@@ -46,8 +47,8 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         await mem.study(study.value);
         handleNext();
     };
-    const handleFinish = async () => {
-        study.value.level = 15;
+    const handleSkilled = async () => {
+        study.value.level = 14;
         await handleIKnown();
     }
     const handleDontKnow = () => {
@@ -82,14 +83,14 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    return <div class="flex flex-col flex-1 h-full">
+    return <Dialog title="学习" onFinish={onFinish}>
         <div class="flex gap-2 text-lg">
             <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
             <div>{index.value+1}/{studies.value.length}</div>
             <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
             <div class="grow"/>
             <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleFinish}><IconCircleLetterF class="w-6 h-6" /></SButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}><IconCircleLetterF class="w-6 h-6" /></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
@@ -107,5 +108,5 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <NButton class="grow" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>
             <NButton class="grow" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
         </div>
-    </div>;
+    </Dialog>;
 }

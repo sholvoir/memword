@@ -1,22 +1,23 @@
 import { useSignal } from "@preact/signals";
-import { IStudy } from "../lib/istudy.ts";
 import * as mem from '../lib/mem.ts'
 import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
+import Tab from './tab.tsx';
 
 interface DictProps {
     showTips: (content: string) => void;
-    startStudy: (studies: Array<IStudy>) => void;
+    handleSearchWord: (word: string) => void;
 }
-export default ({showTips, startStudy}: DictProps) => {
+export default ({showTips, handleSearchWord}: DictProps) => {
     const word = useSignal('');
-    const handleSearchClick = async () => {
-        const study = await mem.searchWord(word.value);
-        if (!study) showTips('Not Found!');
-        else startStudy([study]);
+    const handleSearchClick = () => {
+        if (mem.isInVocabulary(word.value)) handleSearchWord(word.value);
+        else showTips('Not Found!');
     }
-    return <div class="flex gap-2">
-        <TInput type="search" name="word" placeholder="word" class="grow" binding={word} onSearch={handleSearchClick}/>
-        <PButton class="w-20" onClick={handleSearchClick}>查找</PButton>
-    </div>
+    return <Tab title="词典">
+        <div class="flex gap-2">
+            <TInput type="search" name="word" placeholder="word" class="grow" binding={word} onSearch={handleSearchClick}/>
+            <PButton class="w-20" onClick={handleSearchClick}>查找</PButton>
+        </div>
+    </Tab>;
 }

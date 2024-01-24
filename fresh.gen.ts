@@ -25,12 +25,14 @@ import * as $input_checkbox from "./islands/input-checkbox.tsx";
 import * as $input_text from "./islands/input-text.tsx";
 import * as $input_textarea from "./islands/input-textarea.tsx";
 import * as $issue from "./islands/issue.tsx";
+import * as $menu from "./islands/menu.tsx";
 import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
 import * as $signin from "./islands/signin.tsx";
 import * as $signout from "./islands/signout.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
+import * as $tab from "./islands/tab.tsx";
 import * as $tasks from "./islands/tasks.tsx";
 import * as $waiting from "./islands/waiting.tsx";
 import { type Manifest } from "$fresh/server.ts";
@@ -62,12 +64,14 @@ const manifest = {
     "./islands/input-text.tsx": $input_text,
     "./islands/input-textarea.tsx": $input_textarea,
     "./islands/issue.tsx": $issue,
+    "./islands/menu.tsx": $menu,
     "./islands/root.tsx": $root,
     "./islands/setting.tsx": $setting,
     "./islands/signin.tsx": $signin,
     "./islands/signout.tsx": $signout,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
+    "./islands/tab.tsx": $tab,
     "./islands/tasks.tsx": $tasks,
     "./islands/waiting.tsx": $waiting,
   },

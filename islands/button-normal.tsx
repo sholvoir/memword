@@ -4,6 +4,6 @@ import RippleButton from './button-ripple.tsx';
 export default (props: JSX.HTMLAttributes<HTMLButtonElement>) => {
     const { class: className, children, ...rest} = props;
     return <RippleButton {...rest}
-        class={`bg-gray-300 hover:bg-gray-400 hover:disabled:bg-gray-300 ${className ?? ''}`}>{children}
+        class={`bg-gray-300 ${className ?? ''}`}>{children}
     </RippleButton>;
 }

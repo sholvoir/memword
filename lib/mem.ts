@@ -52,6 +52,8 @@ let vocabulary: Record<string, Array<Tag>>;
 let dictDB: IDBDatabase;
 let userDB: IDBDatabase;
 
+export const isInVocabulary = (word: string) => vocabulary?.[word] ? true : false;
+
 export const getUser = () => {
     const token = Cookies.get('auth');
     if (token) return (jwtDecode(token)[1] as Payload).aud as string;
@@ -303,7 +305,6 @@ export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?
 };
 
 export const searchWord = async (word: string) => {
-    if (!vocabulary[word]) return undefined;
     const task = await getTask('R', word);
     if (!task) return undefined;
     const dict = await getDiction(task.word);

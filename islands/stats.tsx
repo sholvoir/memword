@@ -4,6 +4,7 @@ import { TagName } from '../lib/tag.ts';
 import { BLevel, BLevelName, BLevels, Stats } from "../lib/istat.ts";
 import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { ISetting } from '../lib/isetting.ts';
+import Tab from './tab.tsx';
 
 interface IStatsProps {
     setting: Signal<ISetting>;
@@ -39,5 +40,7 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
             </div>);
         }
     }
-    return <div class="flex flex-wrap justify-between gap-5">{result}</div>;
+    return <Tab title="学习进度">
+        <div class="flex flex-wrap justify-between gap-5 overflow-y-auto">{result}</div>;
+    </Tab>
 }

@@ -1,17 +1,16 @@
-import PButton from './button-prime.tsx';
+import { JSX } from "preact";
+import SButton from './button-anti-shake.tsx';
+import IconChevronLeft from "tabler_icons/chevron-left.tsx";
 
-interface IDialogProps {
-    content: string;
+interface IDialogProps extends JSX.HTMLAttributes<HTMLDivElement> {
     onFinish: () => void;
 };
-
-export default ({content, onFinish}: IDialogProps) => {
-    return <div class="flex justify-center items-center">
-    <div class="size-fit max-w-[80%] p-3 rounded-md">
-        <div class="m-6 leading-loose text-center">{content}</div>
-        <div class="m-6 text-center">
-            <PButton class="w-32" onClick={onFinish}>确定</PButton>
+export default ({title, onFinish, children}: IDialogProps) => {
+    return <div class="fixed inset-0 bg-gray-100 flex flex-col [&>div]:p-2">
+        <div class="flex justify-between bg-gray-800 text-white">
+            <SButton onClick={onFinish}><IconChevronLeft class="w-6 h-6"/></SButton>
+            <span class="font-bold">{title}</span><span></span>
         </div>
+        <div class="overflow-y-auto">{children}</div>
     </div>
-</div>;
 }

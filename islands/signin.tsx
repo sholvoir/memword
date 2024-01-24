@@ -4,16 +4,16 @@ import * as mem from '../lib/mem.ts';
 import PButton from './button-prime.tsx';
 import AButton from './button-anchor.tsx';
 import TInput from './input-text.tsx';
+import Dialog from './dialog.tsx';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 
 interface ISigninProps {
     user: Signal<string|undefined>;
     showTips: (content: string) => void;
-    showDialog: (content: string, backLoca: Loca) => void
+    onFinish: () => void;
 }
-
-export default ({user, showTips, showDialog}: ISigninProps) => {
+export default ({user, showTips, onFinish}: ISigninProps) => {
     const email = useSignal(user.value ? atob(user.value) : '');
     const password = useSignal('');
     const counter = useSignal(0);
@@ -32,26 +32,28 @@ export default ({user, showTips, showDialog}: ISigninProps) => {
                 }
             }, 1000);
             const resp = await mem.signup(email.value);
-            if (!resp.ok) showDialog(await resp.text(), 'login');
-            else showTips('Temporary password sent!');
+            if (!resp.ok) showTips('网络错误!');
+            else showTips('临时密码已发送!');
         }
     };
     const handleClickSignup = async () => {
         const resp = await mem.login(email.value, password.value);
-        if (!resp.ok) showTips('Invail email or password');
+        if (!resp.ok) showTips('Email或密码验证错误');
         else {
             if (timer) clearInterval(timer);
             location.reload();
         }
     };
-    return <div class="h-full w-64 mx-auto flex flex-col gap-4 justify-center">
-        <div class="flex flex-col">
-            <TInput name="email" placeholder="Email" binding={email} />
-            <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
-                Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
-            </AButton>
-        </div>
-        <TInput name="password" placeholder="Password" binding={password} />
-        <PButton onClick={handleClickSignup}>确定</PButton>
-    </div>;
+    return <Dialog title="登录" onFinish={onFinish}>
+        <div class="w-64 mx-auto flex flex-col gap-4">
+            <div class="flex flex-col">
+                <TInput name="email" placeholder="Email" binding={email} />
+                <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
+                    Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
+                </AButton>
+            </div>
+            <TInput name="password" placeholder="Password" binding={password} />
+            <PButton onClick={handleClickSignup}>确定</PButton>
+        </div>;
+    </Dialog>
 }
