@@ -188,14 +188,18 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
     }
 });
 
-export const addTasks = async (types: TaskType[], tag: Tag) => await traversingTask(cursor => {
-    const task = cursor.value as ITask;
-    if (types.includes(task.type) && vocabulary[task.word].includes(tag) && task.level == 0) {
-        task.next = 0;
-        cursor.update(task);
-    }
-    return true;
-}, 'readwrite');
+export const addTasks = async (types: TaskType[], tag: Tag) => {
+    const time = now();
+    await traversingTask(cursor => {
+        const task = cursor.value as ITask;
+        if (types.includes(task.type) && vocabulary[task.word].includes(tag) && task.level == 0) {
+            task.next = 0;
+            task.last = time;
+            cursor.update(task);
+        }
+        return true;
+    }, 'readwrite');
+}
 
 export const syncTasks = async () => {
     const thisTime = now();
