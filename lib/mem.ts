@@ -68,7 +68,7 @@ export const setSetting = async (setting: ISetting) => {
 export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) return JSON.parse(result) as ISetting;
-    const s: ISetting = { sprintNumber: 10, wordBooks: {} };
+    const s: ISetting = { sprintNumber: 10, wordBooks: {}, showStartPage: true };
     for (const taskType of TaskTypes) s.wordBooks[`${taskType}OG`] = true;
     return s;
 };
@@ -188,6 +188,15 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
     }
 });
 
+export const addTasks = async (types: TaskType[], tag: Tag) => await traversingTask(cursor => {
+    const task = cursor.value as ITask;
+    if (types.includes(task.type) && vocabulary[task.word].includes(tag) && task.level == 0) {
+        task.next = 0;
+        cursor.update(task);
+    }
+    return true;
+}, 'readwrite');
+
 export const syncTasks = async () => {
     const thisTime = now();
     const lastTime = await getSyncTime();
@@ -206,17 +215,18 @@ export const removeTask = async (type: TaskType, word: string) => {
 
 const traversingTask = (
     each: (cursor: IDBCursorWithValue) => boolean,
+    mode?: IDBTransactionMode,
     indexName?: string,
     query?: IDBValidKey | IDBKeyRange,
     direction?: IDBCursorDirection
 ) => new Promise<void>((resolve, reject) => {
-    const objectStore = userDB!.transaction('task', 'readonly').objectStore('task');
+    const objectStore = userDB!.transaction('task', mode).objectStore('task');
     const request = indexName ?
         objectStore.index(indexName).openCursor(query, direction) :
         objectStore.openCursor(query, direction);
     request.onerror = reject;
     request.onsuccess = () => {
-        const cursor = request.result!;
+        const cursor = request.result;
         if (!cursor) return resolve();
         if (each(cursor)) cursor.continue();
         else resolve();
@@ -294,7 +304,7 @@ export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?
             tasks.push(task);
             return tasks.length < sprintNumber;
         },
-        'next', query, "prev"
+        'readonly', 'next', query, "prev"
     );
     const studies: Array<IStudy> = [];
     for (const task of tasks) {

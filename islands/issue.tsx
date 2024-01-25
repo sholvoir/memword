@@ -2,21 +2,17 @@ import { useSignal } from "@preact/signals";
 import { submitIssue } from "../lib/mem.ts";
 import PButton from './button-prime.tsx'
 import TAInput from './input-textarea.tsx';
-import Dialog from './dialog.tsx';
+import Dialog, { IDialogProps } from './dialog.tsx';
 
-interface IIssueProps {
-    onFinish: () => void;
-    showTips: (content: string) => void;
-}
-export default ({ onFinish, showTips }: IIssueProps) => {
+export default ({ onCancel, showTips }: IDialogProps) => {
     const issue = useSignal('');
     const handleSubmitClick = async () => {
         const resp = await submitIssue(issue.value);
-        if (!resp.ok) return showTips('网络错误，未提交成功!');
-        showTips('提交成功!');
-        onFinish();
+        if (!resp.ok) return showTips!('网络错误，未提交成功!');
+        showTips!('提交成功!');
+        onCancel();
     }
-    return <Dialog title="提交问题" onFinish={onFinish}>
+    return <Dialog title="提交问题" onCancel={onCancel}>
         <div class="h-full flex flex-col">
             <label for="issue">请在这里描述你的问题:</label>
             <TAInput name="issue" class="w-full grow" binding={issue}>{issue.value}</TAInput>

@@ -9,14 +9,12 @@ import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
 import CInput from './input-checkbox.tsx';
-import Dialog from './dialog.tsx';
+import Dialog, { IDialogProps } from './dialog.tsx';
 
 interface ISettingProps {
     setting: Signal<ISetting>;
-    onFinish: () => void;
 };
-
-export default (props: ISettingProps) => {
+export default (props: ISettingProps & IDialogProps) => {
     const setting = mem.getSetting();
     const sprintNumber = useSignal(setting.sprintNumber);
     const checkBoxs = {} as any;
@@ -27,9 +25,8 @@ export default (props: ISettingProps) => {
     }
     const handleSprintNuberChange = () => setting.sprintNumber = sprintNumber.value;
     const handleOKClick = () => {
-        mem.setSetting(setting);
-        props.setting.value = setting;
-        props.onFinish();
+        mem.setSetting(props.setting.value = setting);
+        props.onCancel();
     }
     const result = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
@@ -37,7 +34,7 @@ export default (props: ISettingProps) => {
         checkBoxs[id] = useSignal(setting.wordBooks[id]);
         result.push(<CInput name={id} class="w-[330px]" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
     }
-    return <Dialog title="设置" onFinish={props.onFinish}>
+    return <Dialog title="设置" onCancel={props.onCancel}>
         <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap gap-2">
             <legend>选择您关注的词书</legend>
             {result}
@@ -47,7 +44,7 @@ export default (props: ISettingProps) => {
             <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
         </div>
         <div class="flex justify-end gap-2">
-            <NButton class="w-32" onClick={props.onFinish}>取消</NButton>
+            <NButton class="w-32" onClick={props.onCancel}>取消</NButton>
             <PButton class="w-32" onClick={handleOKClick}>确定</PButton>
         </div>
     </Dialog>

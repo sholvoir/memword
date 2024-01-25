@@ -1,1 +1,1 @@
-export default () => <div class="flex h-full justify-center items-center"><div>请稍候...</div></div>;
+export default () => <div class="fixed inset-0 bg-gray-100 flex justify-center items-center"><div>请稍候...</div></div>;
