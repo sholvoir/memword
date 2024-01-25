@@ -48,7 +48,7 @@ export default () => {
         goBack();
         if (!ts.length) {
             showTips('Congratulations! There are no more task need to do.');
-            openDialog('start');
+            if (!taskType && !tag && !blevel) openDialog('start');
         } else {
             studies.value = ts;
             openDialog('study')
