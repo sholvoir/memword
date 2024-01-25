@@ -28,8 +28,8 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
                     return <>
                         <div class="text-left">{BLevelName[blevel]}</div>
                         <div onClick={(ev: Event) => (ev.stopPropagation(), onClickStatBar(taskType, tag, blevel))}>
-                            <div class="bg-gray-300 h-5 w-full hover:cursor-pointer">
-                                <div class="h-full bg-gray-500" style={`width: ${value * 100 / all}%`}>
+                            <div class="bg-gray-200 h-6 py-1 w-full hover:cursor-pointer">
+                                <div class="my-auto h-4 bg-gray-400" style={`width: ${value * 100 / all}%`}>
                                     <div class="ml-auto h-full bg-red-400" style={`width: ${value ? (task * 100 / value) : 0}%`}/>
                                 </div>
                             </div>
@@ -41,6 +41,6 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
         }
     }
     return <Tab title="学习进度">
-        <div class="flex flex-wrap justify-between gap-5 overflow-y-auto">{result}</div>;
+        <div class="flex flex-wrap justify-between gap-5">{result}</div>
     </Tab>
 }
