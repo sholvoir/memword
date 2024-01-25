@@ -78,6 +78,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         await mem.removeTask(study.value.type, study.value.word);
         studies.value = [...studies.value.slice(0, index.value), ...studies.value.slice(index.value+1)];
         study.value = studies.value[index.value];
+        isPhaseAnswer.value = false;
     }
     useEffect(() => {
         addEventListener('keypress', handleKeyPress);
