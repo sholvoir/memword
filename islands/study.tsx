@@ -105,9 +105,9 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         </div>
         <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
         <div class="fixed bottom-1/3 right-2 flex flex-col gap-4 text-lg">
-            <RButton class="grow bg-[#fff2] py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</RButton>
-            <RButton class="grow bg-[#fff2] py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</RButton>
-            <RButton class="grow bg-[#fff2] py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</RButton>
+            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</RButton>
+            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</RButton>
+            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</RButton>
         </div>
     </Dialog>;
 }
