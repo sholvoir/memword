@@ -3,6 +3,7 @@ import { Handlers } from "$fresh/server.ts";
 import { ITask } from "../../../lib/itask.ts";
 import { MemState, badRequest, internalServerError, jsonHeader } from "../../../lib/mem-server.ts";
 import mongorun from '../../../lib/mongo.ts';
+import { Int32 } from "mongodb";
 
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
@@ -20,7 +21,7 @@ export const handler: Handlers<any, MemState> = {
                     await collection.insertOne(ntask);
                 }
                 else if (ntask.last > otask.last) {
-                    const $set = { last: ntask.last, next: ntask.next, level: ntask.level };
+                    const $set = { last: new Int32(ntask.last), next: new Int32(ntask.next), level: new Int32(ntask.level) };
                     await collection.updateOne(filter, { $set })
                 }
             }

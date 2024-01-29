@@ -13,28 +13,22 @@ const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 3 * 24 * 60 * 60;
 const now = () => Math.floor(Date.now() / 1000);
-// times: 1m, 5m, 30m, 90m, 6h, 24h, 42h, 72h, 7d, 13d, 25d, 49d, 97d, 191d, 367d
-const times = [60, 5 * 60, 30 * 60, 90 * 60, 6 * 60 * 60, 24 * 60 * 60, 42 * 60 * 60, 72 * 60 * 60, 7 * 24 * 60 * 60,
+// times: 1m, 5m, 30m, 3h, 18h, 36h, 3d, 7d, 13d, 25d, 49d, 97d, 191d, 367d
+const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 * 24 * 60 * 60, 7 * 24 * 60 * 60,
     13 * 24 * 60 * 60, 25 * 24 * 60 * 60, 49 * 24 * 60 * 60, 97 * 24 * 60 * 60, 191 * 24 * 60 * 60, 367 * 24 * 60 * 60
 ];
 
 /**
  * map level to blevel
  * @param {number} level 0 ~ 16
- * @returns {number} blevel:
- *    finished: >= 16
- *    skilled: 14, 15
- *    familiar: 11, 12, 13
- *    medium: 7, 8, 9, 10
- *    start: 1,2,3,4,5,6
- *    never: 0
+ * @returns {number} blevel:finished(>=15),skilled(13,14),familiar(10,11,12),medium(6,7,8,9),start(1,2,3,4,5),never(0)
  */
 const toBLevel = (level: number): BLevel => {
-    if (level > 15) return 'finished';
-    if (level > 13) return 'skilled';
-    if (level > 10) return 'familiar';
-    if (level > 6) return 'medium';
-    if (level > 0) return 'start';
+    if (level >= 15) return 'finished';
+    if (level >= 13) return 'skilled';
+    if (level >= 10) return 'familiar';
+    if (level >= 6) return 'medium';
+    if (level >= 1) return 'start';
     return 'never';
 };
 
@@ -91,7 +85,7 @@ const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     request.onupgradeneeded = () => request.result.createObjectStore('dict', { keyPath: 'word' });
 });
 
-export const getFreshDiction = async (word: string): Promise<IDiction|undefined> => {
+export const getFreshDiction = async (word: string): Promise<IDiction | undefined> => {
     const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'no-cache' });
     if (!resp.ok) return await getDiction(word, false);
     const dict = await resp.json() as IDiction;
@@ -101,7 +95,7 @@ export const getFreshDiction = async (word: string): Promise<IDiction|undefined>
     return dict;
 }
 
-export const getDiction = async (word: string, check = true): Promise<IDiction|undefined> => {
+export const getDiction = async (word: string, check = true): Promise<IDiction | undefined> => {
     const dict = await new Promise<IDiction>((resolve, reject) => {
         const request = dictDB.transaction('dict', 'readonly').objectStore('dict').get(word);
         request.onerror = reject;
@@ -152,7 +146,7 @@ const getSyncTime = async () => await new Promise<number>((resolve, reject) => {
 });
 
 const setSyncTime = async (time: number) => await new Promise<void>((resolve, reject) => {
-    const request = userDB!.transaction('kv', 'readwrite').objectStore('kv').put({key: '_sync-time', value: time});
+    const request = userDB!.transaction('kv', 'readwrite').objectStore('kv').put({ key: '_sync-time', value: time });
     request.onerror = reject;
     request.onsuccess = () => resolve();
 })
@@ -316,7 +310,7 @@ export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?
     const studies: Array<IStudy> = [];
     for (const task of tasks) {
         const dict = await getDiction(task.word);
-        studies.push({...task, ...dict} as IStudy);
+        studies.push({ ...task, ...dict } as IStudy);
     }
     return studies;
 };
