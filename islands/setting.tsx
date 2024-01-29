@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { Tags } from "vocabulary/tag.ts";
 import { TagName } from '../lib/tag.ts';
@@ -8,43 +7,33 @@ import * as mem from "../lib/mem.ts";
 import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
-import CInput from './input-checkbox.tsx';
+import MSelect from './select-multi.tsx';
 import Dialog, { IDialogProps } from './dialog.tsx';
 
 interface ISettingProps {
     setting: Signal<ISetting>;
 };
-export default (props: ISettingProps & IDialogProps) => {
-    const setting = mem.getSetting();
-    const sprintNumber = useSignal(setting.sprintNumber);
-    const checkBoxs = {} as any;
+export default ({setting, onCancel}: ISettingProps & IDialogProps) => {
+    const sprintNumber = useSignal(setting.value.sprintNumber);
+    const wordBooks = useSignal<string[]>(setting.value.wordBooks);
 
-    const handleCheckboxChange = (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        setting.wordBooks[target.name] = checkBoxs[target.name].value;
-    }
-    const handleSprintNuberChange = () => setting.sprintNumber = sprintNumber.value;
     const handleOKClick = () => {
-        mem.setSetting(props.setting.value = setting);
-        props.onCancel();
+        mem.setSetting(setting.value = { sprintNumber: sprintNumber.value, wordBooks: wordBooks.value });
+        onCancel();
     }
-    const result = [];
+    const options = [];
     for (const taskType of TaskTypes) for (const tag of Tags) {
         const id = `${taskType}${tag}`;
-        checkBoxs[id] = useSignal(setting.wordBooks[id]);
-        result.push(<CInput name={id} class="w-[330px]" binding={checkBoxs[id]} label={`${TaskTypeName[taskType]}-${TagName[tag]}`} onChange={handleCheckboxChange}/>);
+        options.push({value: id, label: `${TaskTypeName[taskType]}-${TagName[tag]}`});
     }
-    return <Dialog title="设置" onCancel={props.onCancel}>
-        <fieldset class="border border-solid border-gray-300 p-3 flex flex-wrap gap-2">
-            <legend>选择您关注的词书</legend>
-            {result}
-        </fieldset>
+    return <Dialog title="设置" onCancel={onCancel}>
+        <MSelect class="h-96" binding={wordBooks} options={options} title="选择您关注的词书"/>
         <div class="my-2 flex gap-1">
             <label for="sprintNumber">每次学习单词数:</label>
-            <TInput num name="sprintNumber" binding={sprintNumber} class="grow" onChange={handleSprintNuberChange}/>
+            <TInput num name="sprintNumber" binding={sprintNumber} class="grow"/>
         </div>
         <div class="flex justify-end gap-2">
-            <NButton class="w-32" onClick={props.onCancel}>取消</NButton>
+            <NButton class="w-32" onClick={onCancel}>取消</NButton>
             <PButton class="w-32" onClick={handleOKClick}>确定</PButton>
         </div>
     </Dialog>

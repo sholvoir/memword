@@ -5,7 +5,7 @@ interface IMenuProps {
 }
 export default ({ handleMenuClick }: IMenuProps) => {
     return <Tab title="菜单">
-        <div class="[&>menu]:p-2 [&>menu]:cursor-pointer [&>div]:h-px [&>div]:bg-gray-300">
+        <div class="[&>menu]:p-2 [&>menu]:cursor-pointer [&>div]:h-px [&>div]:bg-slate-500">
             <menu title="issue" onClick={handleMenuClick}>报告问题</menu>
             <div/>
             <menu title="start" onClick={handleMenuClick}>学习词书</menu>

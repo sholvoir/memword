@@ -25,5 +25,13 @@ export const handler: Handlers<any, MemState> = {
             kv.close();
             return ok;
         } catch { return internalServerError; }
+    },
+    async DELETE(_req, ctx) {
+        try {
+            const kv = await Deno.openKv();
+            await kv.delete([catalog, ctx.state.user]);
+            kv.close();
+            return ok;
+        } catch { return internalServerError; }
     }
 };

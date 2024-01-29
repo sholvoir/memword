@@ -68,8 +68,7 @@ export const setSetting = async (setting: ISetting) => {
 export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) return JSON.parse(result) as ISetting;
-    const s: ISetting = { sprintNumber: 10, wordBooks: {}, showStartPage: true };
-    for (const taskType of TaskTypes) s.wordBooks[`${taskType}OG`] = true;
+    const s: ISetting = { sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true };
     return s;
 };
 

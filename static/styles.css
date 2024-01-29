@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  input, textarea {
+    background-color: transparent;
+  }
+}
 @keyframes ripple {
   from  { transform: scale(0); opacity: 1; }
   to { transform: scale(4); opacity: 0; }

@@ -5,7 +5,8 @@ import { TagName } from "../lib/tag.ts";
 import { ISetting } from '../lib/isetting.ts';
 import * as mem from "../lib/mem.ts";
 import Dialog, { IDialogProps } from './dialog.tsx';
-import CInput from './input-checkbox.tsx';
+import Checkbox from './checkbox.tsx';
+import Select from './select-single.tsx';
 import PButton from './button-prime.tsx';
 
 interface IStartProps extends IDialogProps {
@@ -17,7 +18,6 @@ export default ({setting, showTips, onCancel, onStartOKClick}: IStartProps) => {
     for (const type of TaskTypes) checkTaskTypes[type] = useSignal(false);
     const sTag = useSignal<Tag>('OG');
     const showThisAtStart = useSignal(!!setting.value.showStartPage);
-    const handleTagInput = (e: Event) => sTag.value = (e.target as HTMLSelectElement).value as Tag;
     const handleOkClick = async () => {
         if (showThisAtStart.value == !setting.value.showStartPage) {
             if (showThisAtStart.value) setting.value.showStartPage = true;
@@ -31,19 +31,14 @@ export default ({setting, showTips, onCancel, onStartOKClick}: IStartProps) => {
         onStartOKClick(types, sTag.value);
     }
     return <Dialog title="开始学习" onCancel={onCancel}>
-        <div class="w-fit mx-auto flex flex-col gap-4">
-            <fieldset class="border border-solid border-gray-300 p-2">
-                <legend>让我们选择一本词书开始学习吧</legend>
-                <select class="p-2" size={1} name="tag" value={sTag.value} onInput={handleTagInput} >
-                    {Tags.map(tag => <option value={tag}>{TagName[tag]}</option>)}
-                </select>
-                <div class="flex gap-3">
-                    <CInput label="听力" binding={checkTaskTypes['L']}/>
-                    <CInput label="阅读" binding={checkTaskTypes['R']}/>
-                </div>
-            </fieldset>
+        <div class="w-fit mx-auto flex flex-col gap-2">
+            <Select class="h-48" binding={sTag} options={Tags.map(tag=>({value: tag, label: TagName[tag]}))} title="让我们选择一本词书开始学习吧"/>
+            <div class="flex gap-5">
+                <Checkbox label="听力" binding={checkTaskTypes['L']}/>
+                <Checkbox label="阅读" binding={checkTaskTypes['R']}/>
+            </div>
             <PButton onClick={handleOkClick}>确定</PButton>
         </div>
-        <CInput class="fixed bottom-2 right-3" label="启动时显示本页" binding={showThisAtStart}/>
+        <Checkbox class="fixed bottom-2 right-3" label="启动时显示本页" binding={showThisAtStart}/>
     </Dialog>;
 }

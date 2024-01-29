@@ -19,14 +19,16 @@ import * as $button_anti_shake from "./islands/button-anti-shake.tsx";
 import * as $button_normal from "./islands/button-normal.tsx";
 import * as $button_prime from "./islands/button-prime.tsx";
 import * as $button_ripple from "./islands/button-ripple.tsx";
+import * as $checkbox from "./islands/checkbox.tsx";
 import * as $dialog from "./islands/dialog.tsx";
 import * as $dict from "./islands/dict.tsx";
-import * as $input_checkbox from "./islands/input-checkbox.tsx";
 import * as $input_text from "./islands/input-text.tsx";
 import * as $input_textarea from "./islands/input-textarea.tsx";
 import * as $issue from "./islands/issue.tsx";
 import * as $menu from "./islands/menu.tsx";
 import * as $root from "./islands/root.tsx";
+import * as $select_multi from "./islands/select-multi.tsx";
+import * as $select_single from "./islands/select-single.tsx";
 import * as $setting from "./islands/setting.tsx";
 import * as $signin from "./islands/signin.tsx";
 import * as $signout from "./islands/signout.tsx";
@@ -59,14 +61,16 @@ const manifest = {
     "./islands/button-normal.tsx": $button_normal,
     "./islands/button-prime.tsx": $button_prime,
     "./islands/button-ripple.tsx": $button_ripple,
+    "./islands/checkbox.tsx": $checkbox,
     "./islands/dialog.tsx": $dialog,
     "./islands/dict.tsx": $dict,
-    "./islands/input-checkbox.tsx": $input_checkbox,
     "./islands/input-text.tsx": $input_text,
     "./islands/input-textarea.tsx": $input_textarea,
     "./islands/issue.tsx": $issue,
     "./islands/menu.tsx": $menu,
     "./islands/root.tsx": $root,
+    "./islands/select-multi.tsx": $select_multi,
+    "./islands/select-single.tsx": $select_single,
     "./islands/setting.tsx": $setting,
     "./islands/signin.tsx": $signin,
     "./islands/signout.tsx": $signout,

@@ -9,5 +9,5 @@ export default (props: ITextAreaInputProps) => {
     const handleInput = (e: JSX.TargetedInputEvent<HTMLTextAreaElement>) =>
         binding.value = (e.target as HTMLTextAreaElement).value;
     return <textarea {...rest} value={binding.value} onInput={handleInput}
-        class={`p-2 rounded border border-gray-500 disabled:opacity-50 ${className ?? ''}`}/>;
+        class={`px-2 rounded border border-gray-500 [outline:none] disabled:opacity-50 ${className ?? ''}`}/>;
 }
