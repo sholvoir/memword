@@ -52,6 +52,6 @@ export default ({user, showTips, onCancel}: ISigninProps & IDialogProps) => {
             </div>
             <TInput name="password" placeholder="Password" binding={password} />
             <PButton onClick={handleClickSignup}>确定</PButton>
-        </div>;
+        </div>
     </Dialog>
 }

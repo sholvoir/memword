@@ -29,7 +29,7 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
                         return <>
                             <div class="text-left">{BLevelName[blevel]}</div>
                             <div onClick={(ev: Event) => (ev.stopPropagation(), onClickStatBar(taskType, tag, blevel))}>
-                                <div class="bg-slate-200 dark:bg-slate-700 h-6 py-1 w-full hover:cursor-pointer">
+                                <div class="bg-slate-300 dark:bg-slate-700 h-6 py-1 w-full hover:cursor-pointer">
                                     <div class="my-auto h-4 bg-slate-400" style={`width: ${value * 100 / all}%`}>
                                         <div class="ml-auto h-full bg-orange-500" style={`width: ${value ? (task * 100 / value) : 0}%`}/>
                                     </div>

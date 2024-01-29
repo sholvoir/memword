@@ -7,6 +7,7 @@ import * as mem from "../lib/mem.ts";
 import Dialog, { IDialogProps } from './dialog.tsx';
 import Checkbox from './checkbox.tsx';
 import Select from './select-single.tsx';
+import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
 
 interface IStartProps extends IDialogProps {
@@ -37,7 +38,10 @@ export default ({setting, showTips, onCancel, onStartOKClick}: IStartProps) => {
                 <Checkbox label="听力" binding={checkTaskTypes['L']}/>
                 <Checkbox label="阅读" binding={checkTaskTypes['R']}/>
             </div>
-            <PButton onClick={handleOkClick}>确定</PButton>
+            <div class="flex gap-2 justify-end">
+                <NButton class="w-32" onClick={onCancel}>取消</NButton>
+                <PButton class="w-32" onClick={handleOkClick}>确定</PButton>
+            </div>
         </div>
         <Checkbox class="fixed bottom-2 right-3" label="启动时显示本页" binding={showThisAtStart}/>
     </Dialog>;

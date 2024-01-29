@@ -1,5 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { submitIssue } from "../lib/mem.ts";
+import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx'
 import TAInput from './input-textarea.tsx';
 import Dialog, { IDialogProps } from './dialog.tsx';
@@ -16,8 +17,9 @@ export default ({ onCancel, showTips }: IDialogProps) => {
         <div class="h-full flex flex-col">
             <label for="issue">请在这里描述你的问题:</label>
             <TAInput name="issue" class="w-full h-96 grow" binding={issue}>{issue.value}</TAInput>
-            <div class="flex mt-2 justify-end">
-                <PButton class="px-4" onClick={handleSubmitClick}>提交</PButton>
+            <div class="flex gap-2 mt-2 justify-end">
+                <NButton class="w-32" onClick={onCancel}>取消</NButton>
+                <PButton class="w-32" onClick={handleSubmitClick}>提交</PButton>
             </div>
         </div>
     </Dialog>
