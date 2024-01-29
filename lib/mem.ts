@@ -67,7 +67,11 @@ export const setSetting = async (setting: ISetting) => {
 
 export const getSetting = () => {
     const result = localStorage.getItem('_setting');
-    if (result) return JSON.parse(result) as ISetting;
+    if (result) {
+        const p = JSON.parse(result) as ISetting;
+        if (!Array.isArray(p.wordBooks)) p.wordBooks = Object.keys(p.wordBooks);
+        return p;
+    }
     const s: ISetting = { sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true };
     return s;
 };
