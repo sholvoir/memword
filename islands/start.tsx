@@ -32,8 +32,8 @@ export default ({setting, showTips, onCancel, onStartOKClick}: IStartProps) => {
         onStartOKClick(types, sTag.value);
     }
     return <Dialog title="开始学习" onCancel={onCancel}>
-        <div class="w-fit mx-auto flex flex-col gap-2">
-            <Select class="h-48" binding={sTag} options={Tags.map(tag=>({value: tag, label: TagName[tag]}))} title="让我们选择一本词书开始学习吧"/>
+        <div class="flex flex-col gap-2">
+            <Select class="h-[640px]" binding={sTag} options={Tags.map(tag=>({value: tag, label: TagName[tag]}))} title="让我们选择一本词书开始学习吧"/>
             <div class="flex gap-5">
                 <Checkbox label="听力" binding={checkTaskTypes['L']}/>
                 <Checkbox label="阅读" binding={checkTaskTypes['R']}/>
