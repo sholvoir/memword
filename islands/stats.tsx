@@ -19,7 +19,7 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
             const stat = stats.value[taskType][tag];
             const all = BLevels.reduce((s,b) => s + stat.all[b], 0);
             if (setting.value.wordBooks.includes(`${taskType}${tag}`)) {
-                result.push(<div class="grow grid gap-x-1 grid-cols-[max-content_1fr_max-content] items-center">
+                result.push(<div class="grow min-w-80 grid gap-x-1 grid-cols-[max-content_1fr_max-content] items-center">
                     <div class="col-span-3 text-center font-bold">
                         <a class="hover:cursor-pointer hover:underline" onClick={() => onClickStatBar(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {all}</a>
                     </div>
@@ -44,6 +44,6 @@ export default ({ setting, stats, onClickStatBar}: IStatsProps) => {
         return result;
     }
     return <Tab title="学习进度">
-        <div class="flex flex-wrap justify-between gap-5">{getResult()}</div>
+        <div class="p-2 flex flex-wrap justify-between gap-5">{getResult()}</div>
     </Tab>
 }

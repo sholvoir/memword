@@ -18,7 +18,7 @@ export default (props: JSX.HTMLAttributes<HTMLButtonElement>) => {
     }
     return <AntiShakeButton
         {...rest}
-        class={`rounded p-2 min-w-max overflow-hidden relative ${className ?? ''}`}
+        class={`rounded-md p-2 min-w-max overflow-hidden relative ${className ?? ''}`}
         onClick={handleClick} >
             {children}
             {showRipple.value && <span style={rippleStyle.value}
