@@ -5,7 +5,7 @@ import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconCircleCaretRight from "tabler_icons/circle-caret-right.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 
-export default () => <Tab title="帮助"><ol class="list-decimal p-2 pl-8">
+export default () => <Tab title="帮助"><ol class="list-decimal py-2 pr-2 pl-8">
     <li>如何使用本软件？
         <br/>答：点击「学习」，开始学习即可；在学习界面，会显示一个单词，或播放一小段声音，取决于你正在练习听力还是阅读，在心里默想一个概念（意思），点击「答案」，检查是否和自己默想的答案一致，如果一致，点击「知道」，否则点击「不会」。记住，要快速完成，不要在一个词上长时间停留，那样只会降低效率，我们的方法是快速/多次，从记忆效率来讲，次数的作用远远大于时长。这个方法称为大脑按摩，直接在拼写/声音和概念之间建立反射弧，所以不要犹豫，快速完成一个小冲刺。
     </li>
@@ -19,7 +19,10 @@ export default () => <Tab title="帮助"><ol class="list-decimal p-2 pl-8">
         <br/><IconCircleCaretRight class="w-6 h-6 inline-block"/>: 再播一遍声音；
         <br/><IconCircleLetterF class="w-6 h-6 inline-block"/>: 这个词我已经掌握，直接标记为「已完成」；
         <br/><IconCut class="w-6 h-6 inline-block"/>: 这个词是生僻词，从我的任务列表中删除；
-        <br/><IconAlertCircleFilled class="w-6 h-6 inline-block"/>: 这个词的翻译/声音/音标，有问题，报告，请人工处理。
+        <br/><IconAlertCircleFilled class="w-6 h-6 inline-block"/>: 这个词的翻译/声音/音标，有问题/错误，请人工处理。
         <br/><IconRefresh class="w-6 h-6 inline-block"/>: 忽略本地词典缓冲，从服务器重新下载这个词的翻译/声音/音标。
+    </li>
+    <li>关于「学习词书」
+        <br/>答：学习词书将一本词书的全部词添加进我的学习任务。但我们通常并不会直接开始学这些新词，而是优先复习旧词，掌握巩固一个旧词比学习一批新词更重要，这些新加的任务将会成为优先级最低的任务。
     </li>
 </ol></Tab>
