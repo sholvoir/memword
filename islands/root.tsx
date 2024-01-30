@@ -12,6 +12,7 @@ import * as mem from '../lib/mem.ts';
 import Start from './start.tsx';
 import Stats from './stats.tsx';
 import About from './about.tsx';
+import Help from './help.tsx';
 import Signin from './signin.tsx';
 import Signout from './signout.tsx';
 import Study from './study.tsx';
@@ -23,8 +24,8 @@ import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 import RButton from './button-ripple.tsx';
 
-export type Loca = 'about'|'start'|'stats'|'dict'|'tasks'|'menu';
-export type Dial = 'waiting'|'start'|'issue'|'study'|'setting'|'login'|'logout'
+export type Loca = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help';
+export type Dial = 'waiting'|'start'|'issue'|'study'|'setting'|'login'|'logout';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
@@ -97,6 +98,7 @@ export default () => {
     };
     const home = () => { switch (loca.value) {
         case 'about': return <About handleMenuClick={handleMenuClick}/>;
+        case 'help': return <Help/>;
         case 'stats': return <Stats setting={setting} stats={stats} onClickStatBar={handleStudyClick} />;
         case 'dict': return <Dict showTips={showTips} handleSearchWord={handleSearchWord}/>;
         case 'tasks': return <Tasks/>;
