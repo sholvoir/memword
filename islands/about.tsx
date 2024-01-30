@@ -8,11 +8,11 @@ export default ({handleMenuClick}: IAboutProps) => <Tab title="MemWord">
     <div class="[&>div]:w-full [&>div]:min-h-80 [&>div]:p-5 [&>div]:flex [&>div]:flex-col [&>div]:justify-center [&>div>h1]:mb-4 [&>div>h1]:text-5xl [&>div>p]:text-2xl font-extrabold">
         <div class="bg-slate-200 text-slate-800">
             <h1>语言基础</h1>
-            <p>词汇是语言的基础，学习语言应该掌握一定数量的基础词汇词汇是语言的基础。</p>
+            <p>词汇是语言的基础，学习语言应该掌握一定数量的基础词汇。</p>
         </div>
         <div class="bg-slate-800 text-slate-300">
             <h1>高频词汇</h1>
-            <p>每个词汇的重要程度是不一样的，越是使用<b>频率高的词汇</b>，其重要程度越高，本工具提供多种词频工具统计的结果。</p>
+            <p>每个词汇的重要程度是不一样的，越是使用<b>频率高的词汇</b>，其重要程度越高，本工具提供多种词频工具统计的结果词书。</p>
         </div>
         <div class="bg-slate-200 text-slate-800">
             <h1>遗忘曲线</h1>
