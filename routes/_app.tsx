@@ -8,7 +8,8 @@ export default function App({ Component }: PageProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <title>MemWord</title>
-        <link rel="icon" href="/favicon.svg" />
+        <link rel="icon" href="/favicon-light.svg" media="(prefers-color-scheme: light)"/>
+        <link rel="icon" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)"/>
         <link rel="apple-touch-icon" sizes="57x57" href="/icon/icon-57.png"/>
         <link rel="apple-touch-icon" sizes="60x60" href="/icon/icon-60.png"/>
         <link rel="apple-touch-icon" sizes="72x72" href="/icon/icon-72.png"/>
