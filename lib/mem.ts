@@ -93,10 +93,6 @@ export const getFreshDiction = async (word: string): Promise<IDiction | undefine
     const dict = await resp.json() as IDiction;
     dict.word = word;
     dict.version = now();
-    if (dict.sound) {
-        const sound = await urlToDataUrl(dict.sound);
-        if (sound) dict.sound = sound;
-    }
     if (dict.pic) {
         const pic = await urlToDataUrl(dict.pic);
         if (pic) dict.pic = pic;

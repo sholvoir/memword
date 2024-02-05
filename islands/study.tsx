@@ -85,29 +85,30 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={onFinish}>
-        <div class="flex gap-2 text-lg">
-            <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
-            <div>{index.value+1}/{studies.value.length}</div>
-            <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
-            <div class="grow"/>
-            <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}><IconCircleLetterF class="w-6 h-6" /></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="w-6 h-6"/></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
-            <div>{study.value.level}</div>
-        </div>
-        <div class="grow text-2xl">
+        <div class="h-full p-2 flex flex-col bg-contain bg-bottom bg-no-repeat" style={isPhaseAnswer.value ? `background-image: url(${study.value.pic});` : ''}>
+            <div class="flex gap-2 text-lg">
+                <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
+                <div>{index.value+1}/{studies.value.length}</div>
+                <AButton onClick={handleNext} disabled={index.value >= studies.value.length}>{'>>'}</AButton>
+                <div class="grow"/>
+                <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}><IconCircleLetterF class="w-6 h-6" /></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="w-6 h-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
+                <div>{study.value.level}</div>
+            </div>
             {shouldSpell.value && <div class="text-4xl font-bold">{study.value.word}</div>}
-            {isPhaseAnswer.value && <div>{study.value.phonetic}</div>}
-            {isPhaseAnswer.value && study.value.pic && <img src={study.value.pic} />}
-            {isPhaseAnswer.value && <div>{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
-        </div>
-        <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-        <div class="fixed bottom-1/3 right-2 flex flex-col gap-4 text-lg">
-            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</RButton>
-            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</RButton>
-            <RButton class="grow bg-[#0002] dark:bg-[#fff2] py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</RButton>
+            {isPhaseAnswer.value && <div class="grow text-2xl [text-shadow:0_0_10px_#E2E8F0] dark:[text-shadow:0_0_10px_#1E293B]">
+                    <div>{study.value.phonetic}</div>
+                    <div>{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
+            </div>}
+            <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
+            <div class="fixed bottom-1/3 right-2 flex flex-col gap-4 text-lg">
+                <RButton class="grow bg-[#FFF4] dark:bg-[#0004] py-3" onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</RButton>
+                <RButton class="grow bg-[#FFF4] dark:bg-[#0004] py-3" onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</RButton>
+                <RButton class="grow bg-[#FFF4] dark:bg-[#0004] py-3" onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</RButton>
+            </div>
         </div>
     </Dialog>;
 }
