@@ -74,7 +74,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
-    const handleDelteTask = async () => {
+    const handleDeleteTask = async () => {
         await mem.removeTask(study.value.type, study.value.word);
         studies.value = [...studies.value.slice(0, index.value), ...studies.value.slice(index.value+1)];
         study.value = studies.value[index.value];
@@ -92,7 +92,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             <div class="grow"/>
             <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconCircleCaretRight class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}><IconCircleLetterF class="w-6 h-6" /></SButton>
-            <SButton disabled={!isPhaseAnswer.value} onClick={handleDelteTask}><IconCut class="w-6 h-6"/></SButton>
+            <SButton disabled={!isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="w-6 h-6"/></SButton>
             <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
             <div>{study.value.level}</div>

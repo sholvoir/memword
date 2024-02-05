@@ -100,7 +100,7 @@ export default () => {
         case 'about': return <About handleMenuClick={handleMenuClick}/>;
         case 'help': return <Help/>;
         case 'stats': return <Stats setting={setting} stats={stats} onClickStatBar={handleStudyClick} />;
-        case 'dict': return <Dict showTips={showTips} handleSearchWord={handleSearchWord}/>;
+        case 'dict': return <Dict handleSearchWord={handleSearchWord}/>;
         case 'tasks': return <Tasks/>;
         case 'menu': return <Menu handleMenuClick={handleMenuClick}/>;
     }};

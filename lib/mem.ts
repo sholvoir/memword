@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import { parse as yamlParse } from '$std/yaml/parse.ts';
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
@@ -9,6 +10,7 @@ import { ISetting } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
 
+const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.1/revision.yaml';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 3 * 24 * 60 * 60;
@@ -43,10 +45,9 @@ export const login = async (email: string, password: string) => await fetch('/lo
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 
 let vocabulary: Record<string, Array<Tag>>;
+let revision: Record<string, string>;
 let dictDB: IDBDatabase;
 let userDB: IDBDatabase;
-
-export const isInVocabulary = (word: string) => vocabulary?.[word] ? true : false;
 
 export const getUser = () => {
     const token = Cookies.get('auth');
@@ -156,6 +157,12 @@ export const getTask = (type: TaskType, word: string) => new Promise<ITask>((res
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
+
+export const putTask = (task: ITask) => new Promise<void>((resolve, reject) => {
+    const request = userDB!.transaction('task', 'readwrite').objectStore('task').put(task);
+    request.onerror = reject;
+    request.onsuccess = () => resolve();
+})
 
 const deleteTask = (type: TaskType, word: string) => new Promise((resolve, reject) => {
     const request = userDB!.transaction('task', 'readwrite').objectStore('task').delete([type, word]);
@@ -316,15 +323,21 @@ export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?
 };
 
 export const searchWord = async (word: string) => {
-    const task = await getTask('R', word);
-    if (!task) return undefined;
+    if (!vocabulary?.[word] && !(word = revision[word])) return undefined;
+    let task = await getTask('R', word);
+    if (!task) {
+        task = { type: 'R', word, last: 0, next: MAX_NEXT, level: 0 };
+        await putTask(task);
+    }
     const dict = await getDiction(task.word);
     return { ...task, ...dict } as IStudy;
 }
 
 export const init = async (user: string) => {
     dictDB = await openDictDB();
-    const resp = await fetch('/vocabulary');
-    if (resp.ok) vocabulary = await resp.json();
+    const res1 = await fetch('/vocabulary');
+    if (res1.ok) vocabulary = await res1.json();
+    const res2 = await fetch(revisionUrl);
+    if (res2.ok) revision = yamlParse(await res2.text()) as Record<string, string>;
     userDB = await openUserDB(user);
 };
