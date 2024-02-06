@@ -2,7 +2,7 @@
     "name": "MemWord",
     "short_name": "MemWord",
     "start_url": "/",
-    "display": "fullscreen",
+    "display": "standalone",
     "icons": [{
             "src": "/icon/icon-57.png",
             "sizes": "57x57",
