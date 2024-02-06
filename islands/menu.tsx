@@ -10,6 +10,8 @@ export default ({ handleMenuClick }: IMenuProps) => {
             <div/>
             <menu title="start" onClick={handleMenuClick}>学习词书</menu>
             <div/>
+            <menu title="clearTask" onClick={handleMenuClick}>清理任务</menu>
+            <div/>
             <menu title="setting" onClick={handleMenuClick}>设置</menu>
             <div/>
             <menu title="about" onClick={handleMenuClick}>关于</menu>

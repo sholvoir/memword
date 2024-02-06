@@ -196,13 +196,23 @@ export const addTasks = async (types: TaskType[], tag: Tag) => {
     const time = now();
     await traversingTask(cursor => {
         const task = cursor.value as ITask;
-        if (types.includes(task.type) && vocabulary[task.word].includes(tag) && task.level == 0) {
+        if (types.includes(task.type) && vocabulary[task.word]?.includes(tag) && task.level == 0) {
             task.next = 0;
             task.last = time;
             cursor.update(task);
         }
         return true;
     }, 'readwrite');
+}
+
+export const clearTasks = async () => {
+    const needRemove = [] as Array<ITask>;
+    await traversingTask(cursor => {
+        const task = cursor.value as ITask;
+        if (!vocabulary![task.word]) needRemove.push(task);
+        return true;
+    });
+    for (const task of needRemove) await removeTask(task.type, task.word);
 }
 
 export const syncTasks = async () => {

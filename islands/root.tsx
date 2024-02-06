@@ -1,5 +1,6 @@
 // deno-lint-ignore-file
 import { IS_BROWSER } from "$fresh/runtime.ts";
+import { JSX } from "preact/jsx-runtime";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { Tag } from "vocabulary/tag.ts";
@@ -25,7 +26,7 @@ import Menu from './menu.tsx';
 import RButton from './button-ripple.tsx';
 
 export type Loca = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help';
-export type Dial = 'waiting'|'start'|'issue'|'study'|'setting'|'login'|'logout';
+export type Dial = 'waiting'|'start'|'issue'|'study'|'setting'|'login'|'logout'|'clearTask';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
@@ -83,16 +84,23 @@ export default () => {
         goBack();
         handleStudyClick();
     };
+    const handleClearTasks = async () => {
+        openDialog('waiting');
+        await mem.clearTasks();
+        goBack();
+    };
     const handleMenuClick = (ev: Event) => openDialog((ev.target as HTMLMenuElement).title as Dial|Loca);
+    const addLayer = (element: JSX.Element) => layers.value = [...layers.value, element];
     const openDialog = (title: Dial|Loca) => {
         switch (title) {
-            case 'waiting': return layers.value = [...layers.value, <Waiting/>];
-            case 'start': return layers.value = [...layers.value, <Start setting={setting} onCancel={goBack} onStartOKClick={handleStartOKClick}/>];
-            case 'issue': return layers.value = [...layers.value, <Issue showTips={showTips} onCancel={goBack}/>];
-            case 'study': return layers.value = [...layers.value, <Study studies={studies} showTips={showTips} onFinish={handleStudyFinish}/>];
-            case 'setting': return layers.value = [...layers.value, <Setting setting={setting} onCancel={goBack}/>];
-            case 'login': return layers.value = [...layers.value, <Signin user={user} showTips={showTips} onCancel={goBack}/>];
-            case 'logout': return layers.value = [...layers.value, <Signout onCancel={goBack} handleSignoutClick={handleSignoutClick}/>];
+            case 'waiting': addLayer(<Waiting/>); return;
+            case 'start': addLayer(<Start setting={setting} onCancel={goBack} onStartOKClick={handleStartOKClick}/>); return;
+            case 'issue': addLayer(<Issue showTips={showTips} onCancel={goBack}/>); return;
+            case 'study': addLayer(<Study studies={studies} showTips={showTips} onFinish={handleStudyFinish}/>); return;
+            case 'setting': addLayer(<Setting setting={setting} onCancel={goBack}/>); return;
+            case 'login': addLayer(<Signin user={user} showTips={showTips} onCancel={goBack}/>); return;
+            case 'logout': addLayer(<Signout onCancel={goBack} handleSignoutClick={handleSignoutClick}/>); return;
+            case "clearTask": handleClearTasks(); return;
             default: loca.value = title as Loca;
         }
     };
