@@ -32,7 +32,7 @@ export default ({handleMenuClick}: IAboutProps) => <Tab title="MemWord">
         </div>
         <div class="bg-slate-300 text-slate-800">
             <h1>桌面</h1>
-            <p>*提示二：请使用「共享」-「添加到桌面」将本页安装成 <b>Web App</b>，以便下次直接点击进入。</p>
+            <p>*提示二：请使用「共享」-「添加到主屏幕」（iOS）或「...」-「安装应用」（Android）安装 <b>Web应用</b>，以便下次直接点击进入。</p>
         </div>
     </div>
 </Tab>;
