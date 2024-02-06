@@ -1,0 +1,40 @@
+{
+    "name": "MemWord",
+    "short_name": "MemWord",
+    "start_url": "/",
+    "display": "fullscreen",
+    "icons": [{
+            "src": "/icon/icon-57.png",
+            "sizes": "57x57",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-60.png",
+            "sizes": "60x60",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-76.png",
+            "sizes": "76x76",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-120.png",
+            "sizes": "120x120",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-152.png",
+            "sizes": "152x152",
+            "type": "image/png"
+        }, {
+            "src": "/icon/icon-180.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
