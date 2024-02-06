@@ -6,12 +6,12 @@ export default function App({ Component }: PageProps) {
       <head>
         <meta charSet="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>MemWord</title>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes"/>
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
         <meta name="theme-color" content="#CBD5E1" media="(prefers-color-scheme: light)"/>
         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)"/>
-        <title>MemWord</title>
         <link rel="icon" href="/favicon-light.svg" media="(prefers-color-scheme: light)"/>
         <link rel="icon" href="/favicon-dark.svg" media="(prefers-color-scheme: dark)"/>
         <link rel="stylesheet" href="/styles.css"/>
