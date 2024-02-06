@@ -312,7 +312,7 @@ export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?
         cursor => {
             const task = cursor.value as ITask;
             if (taskType && task.type != taskType) return true;
-            if (tag && !vocabulary![task.word].includes(tag)) return true;
+            if (tag && !vocabulary![task.word]?.includes(tag)) return true;
             if (blevel && toBLevel(task.level) != blevel) return true;
             tasks.push(task);
             return tasks.length < sprintNumber;
