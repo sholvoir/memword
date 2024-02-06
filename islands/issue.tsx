@@ -14,7 +14,7 @@ export default ({ onCancel, showTips }: IDialogProps) => {
         onCancel();
     }
     return <Dialog title="提交问题" onCancel={onCancel}>
-        <div class="h-full flex flex-col">
+        <div class="p-2 h-full flex flex-col">
             <label for="issue">请在这里描述你的问题:</label>
             <TAInput name="issue" class="w-full h-96 grow" binding={issue}>{issue.value}</TAInput>
             <div class="flex gap-2 mt-2 justify-end">

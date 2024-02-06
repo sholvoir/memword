@@ -12,7 +12,7 @@ export default ({onCancel, handleSignoutClick}: ISignoutProps & IDialogProps) =>
     const cleanDict = useSignal(false);
     
     return <Dialog title="登出" onCancel={onCancel}>
-        <div class="h-full w-64 mx-auto flex flex-col gap-4">
+        <div class="p-2 h-full w-64 mx-auto flex flex-col gap-4">
             <div class="flex flex-col">
                 <Checkbox name="cleanUser" label="删除我的学习记录" binding={cleanUser} />
                 <Checkbox name="cleanDict" label="删除缓存的词典" binding={cleanDict} />

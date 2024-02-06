@@ -43,7 +43,7 @@ export default ({user, showTips, onCancel}: ISigninProps & IDialogProps) => {
         }
     };
     return <Dialog title="登录" onCancel={onCancel}>
-        <div class="w-64 mx-auto flex flex-col gap-4">
+        <div class="p-2 h-full w-64 mx-auto flex flex-col gap-4">
             <div class="flex flex-col">
                 <TInput name="email" placeholder="Email" binding={email} />
                 <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>

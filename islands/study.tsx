@@ -85,7 +85,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={onFinish}>
-        <div class="h-full p-2 flex flex-col bg-contain bg-bottom bg-no-repeat" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
+        <div class="p-2 h-full flex flex-col bg-contain bg-bottom bg-no-repeat" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
                 <div>{index.value+1}/{studies.value.length}</div>
