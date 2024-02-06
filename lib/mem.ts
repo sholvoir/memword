@@ -9,7 +9,6 @@ import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
-import { urlToDataUrl } from './blob.ts';
 
 const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.1/revision.yaml';
 const dictApi = 'https://dict.sholvoir.com/api';
@@ -93,10 +92,6 @@ export const getFreshDiction = async (word: string): Promise<IDiction | undefine
     const dict = await resp.json() as IDiction;
     dict.word = word;
     dict.version = now();
-    if (dict.pic) {
-        const pic = await urlToDataUrl(dict.pic);
-        if (pic) dict.pic = pic;
-    }
     dictDB.transaction('dict', 'readwrite').objectStore('dict').put(dict);
     return dict;
 }
