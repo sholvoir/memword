@@ -13,7 +13,7 @@ import { IStudy } from "./istudy.ts";
 const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.1/revision.yaml';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
-const dictExpire = 360 * 24 * 60 * 60;
+const dictExpire = 7 * 24 * 60 * 60;
 const now = () => Math.floor(Date.now() / 1000);
 // times: 1m, 5m, 30m, 3h, 18h, 36h, 3d, 7d, 13d, 25d, 49d, 97d, 191d, 367d
 const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 * 24 * 60 * 60, 7 * 24 * 60 * 60,
