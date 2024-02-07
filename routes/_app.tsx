@@ -7,12 +7,13 @@ export default function App({ Component }: PageProps) {
         <meta charSet="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>MemWord</title>
+        <link rel="icon" type="image/png" sizes="48x48" href="/icon/icon-48.png"/>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes"/>
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon/icon-192.png"></link>
         <meta name="theme-color" content="#CBD5E1" media="(prefers-color-scheme: light)"/>
         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)"/>
-        <link rel="icon" href="/favicon.svg"/>
         <link rel="stylesheet" href="/styles.css"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"/>
       </head>
