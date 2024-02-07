@@ -4,7 +4,7 @@ import RButton from './button-ripple.tsx';
 interface IAboutProps {
     handleMenuClick: (e: Event) => void
 }
-export default ({handleMenuClick}: IAboutProps) => <Tab title="MemWord">
+export default ({handleMenuClick}: IAboutProps) => <Tab title="快乐背单词">
     <div class="[&>div]:w-full [&>div]:min-h-80 [&>div]:p-5 [&>div]:flex [&>div]:flex-col [&>div]:justify-center [&>div>h1]:mb-4 [&>div>h1]:text-5xl [&>div>p]:text-2xl font-extrabold">
         <div class="bg-slate-200 text-slate-800">
             <h1>语言基础</h1>
@@ -30,7 +30,7 @@ export default ({handleMenuClick}: IAboutProps) => <Tab title="MemWord">
             <h1>微信</h1>
             <p>*提示一：请使用<b>除微信以外</b>的其他浏览器，如果是微信，点击屏幕右上(...)，然后选择「在默认浏览器中打开」。</p>
         </div>
-        <div class="bg-slate-300 text-slate-800">
+        <div class="bg-slate-200 text-slate-800">
             <h1>桌面</h1>
             <p>*提示二：请使用「共享」-「添加到主屏幕」（iOS）或「...」-「安装应用」（Android）安装 <b>Web应用</b>，以便下次直接点击进入。</p>
         </div>
