@@ -3,11 +3,26 @@
 @tailwind utilities;
 
 @layer base {
-  input, textarea {
-    background-color: transparent;
-  }
+    input, textarea {
+        border-color: #888;
+        background-color: transparent;
+        outline: none;
+    }
+    @media (prefers-color-scheme: dark) {
+        input:-webkit-autofill {
+            box-shadow: 0 0 0 1000px #292524 inset;
+            -webkit-text-fill-color: #E7E5E4;
+        }
+    }
 }
+
 @keyframes ripple {
-  from  { transform: scale(0); opacity: 1; }
-  to { transform: scale(4); opacity: 0; }
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
