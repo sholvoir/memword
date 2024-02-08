@@ -3,7 +3,6 @@
     "short_name": "MemWord",
     "start_url": "/",
     "display": "standalone",
-    "display_override": ["window-controls-overlay"],
     "icons": [
         { "src": "/icon/icon-48.png", "sizes": "48x48", "type": "image/png", "purpose": "any" },
         { "src": "/icon/icon-57.png", "sizes": "57x57", "type": "image/png", "purpose": "any" },
