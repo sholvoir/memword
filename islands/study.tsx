@@ -101,7 +101,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             {shouldSpell.value && <div class="text-4xl font-bold">{study.value.word}</div>}
             {isPhaseAnswer.value && <div class="grow text-2xl [text-shadow:0_0_5px_#E2E8F0] dark:[text-shadow:0_0_5px_#1E293B]">
                     <div>{study.value.phonetic}</div>
-                    <div>{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
+                    <div class="mr-16">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
             </div>}
             <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
             <div class="fixed bottom-1/3 right-2 flex flex-col gap-4 text-lg">
