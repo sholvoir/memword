@@ -100,10 +100,10 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
                 {shouldSpell.value && <span class="text-4xl font-bold">{study.value.word}</span>}
             </div>
             <div class="grow flex bg-cover bg-center" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
-                <div class="grow text-2xl">
+                <div class="grow text-2xl [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]">
                     {isPhaseAnswer.value && <>
                         <div class="pl-2 pt-2">{study.value.phonetic}</div>
-                        <div class="pl-2 pb-2 text-2xl [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
+                        <div class="pl-2 pb-2">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
                     </>}
                 </div>
                 <div class="shrink-0 p-2 flex flex-col gap-4 text-lg justify-center">
