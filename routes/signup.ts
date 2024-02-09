@@ -5,6 +5,7 @@ import { badRequest, internalServerError } from '../lib/mem-server.ts';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 const catalog = 'password';
+const kvPath = Deno.env.get('DENO_KV_PATH');
 
 export const handler: Handlers = {
     async GET(req) {
@@ -15,7 +16,7 @@ export const handler: Handlers = {
             if (!emailPattern.test(email)) return badRequest;
             const password = Math.random().toString(36).slice(7);
             const pass: IPass = { password, expire: Math.round(Date.now() / 1000) + 5 * 60 };
-            const kv = await Deno.openKv();
+            const kv = await Deno.openKv(kvPath);
             await kv.set([catalog, btoa(email).replaceAll('=', '')], pass);
             kv.close();
             const mail = {

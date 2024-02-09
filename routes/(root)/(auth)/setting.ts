@@ -5,11 +5,12 @@ import { ISetting } from "../../../lib/isetting.ts";
 import { jsonHeader, ok, internalServerError } from "../../../lib/mem-server.ts";
 
 const catalog = 'setting';
+const kvPath = Deno.env.get('DENO_KV_PATH');
 
 export const handler: Handlers<any, MemState> = {
     async GET(_req, ctx) {
         try {
-            const kv = await Deno.openKv();
+            const kv = await Deno.openKv(kvPath);
             const res = await kv.get([catalog, ctx.state.user]);
             const value = res.value as ISetting;
             kv.close();
@@ -20,7 +21,7 @@ export const handler: Handlers<any, MemState> = {
     async PUT(req, ctx) {
         try {
             const setting = await req.json() as ISetting;
-            const kv = await Deno.openKv();
+            const kv = await Deno.openKv(kvPath);
             await kv.set([catalog, ctx.state.user], setting);
             kv.close();
             return ok;
@@ -28,7 +29,7 @@ export const handler: Handlers<any, MemState> = {
     },
     async DELETE(_req, ctx) {
         try {
-            const kv = await Deno.openKv();
+            const kv = await Deno.openKv(kvPath);
             await kv.delete([catalog, ctx.state.user]);
             kv.close();
             return ok;
