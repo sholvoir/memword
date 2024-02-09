@@ -96,18 +96,20 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
                 <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="w-6 h-6"/></SButton>
                 <div>{study.value.level}</div>
             </div>
-            {shouldSpell.value && <div class="px-2 text-4xl font-bold">{study.value.word}</div>}
-            {isPhaseAnswer.value && <div class="grow text-2xl bg-cover bg-center [text-shadow:2px_2px_2px_#E2E8F0,-2px_2px_2px_#E2E8F0,2px_-2px_2px_#E2E8F0,-2px_-2px_2px_#E2E8F0] dark:[text-shadow:2px_2px_2px_#1E293B,-2px_2px_2px_#1E293B,2px_-2px_2px_#1E293B,-2px_-2px_2px_#1E293B]" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
-                    <div class="px-2">{study.value.phonetic}</div>
-                    <div class="px-2 mr-16">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
-            </div>}
-            <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
-            <div class="fixed bottom-1/3 right-2 flex flex-col gap-4 text-lg">
-                <NButton onClick={handleSpeakIt} title="_" disabled={!shouldSound.value}>播放</NButton>
-                <NButton onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
-                <NButton onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>
-                <NButton onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
+            <div class="px-2 h-10">
+                {shouldSpell.value && <span class="text-4xl font-bold">{study.value.word}</span>}
+                {isPhaseAnswer.value && <span class="text-lg">&nbsp;&nbsp;&nbsp;&nbsp;{study.value.phonetic}</span>}
             </div>
+            <div class="grow flex bg-cover bg-center" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
+                <div class="grow">{isPhaseAnswer.value && <div class="pl-2 pb-2 text-2xl [text-shadow:2px_2px_2px_#E2E8F0,-2px_2px_2px_#E2E8F0,2px_-2px_2px_#E2E8F0,-2px_-2px_2px_#E2E8F0] dark:[text-shadow:2px_2px_2px_#1E293B,-2px_2px_2px_#1E293B,2px_-2px_2px_#1E293B,-2px_-2px_2px_#1E293B]">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}</div>
+                <div class="p-2 flex flex-col gap-4 text-lg justify-center">
+                    <NButton onClick={handleSpeakIt} title="_" disabled={!shouldSound.value}>播放</NButton>
+                    <NButton onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
+                    <NButton onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>
+                    <NButton onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
+                </div>
+            </div>
+            <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
         </div>
     </Dialog>;
 }
