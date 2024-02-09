@@ -85,7 +85,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={onFinish}>
-        <div class="p-2 h-full flex flex-col bg-contain bg-bottom bg-no-repeat" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
+        <div class="p-2 h-full flex flex-col">
             <div class="flex gap-2 text-lg">
                 <AButton onClick={handlePrevious} disabled={index.value <= 0 }>{'<<'}</AButton>
                 <div>{index.value+1}/{studies.value.length}</div>
@@ -99,7 +99,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
                 <div>{study.value.level}</div>
             </div>
             {shouldSpell.value && <div class="text-4xl font-bold">{study.value.word}</div>}
-            {isPhaseAnswer.value && <div class="grow text-2xl [text-shadow:0_0_5px_#E2E8F0] dark:[text-shadow:0_0_5px_#1E293B]">
+            {isPhaseAnswer.value && <div class="grow text-2xl bg-cover bg-center [text-shadow:2px_2px_2px_#E2E8F0,-2px_2px_2px_#E2E8F0,2px_-2px_2px_#E2E8F0,-2px_-2px_2px_#E2E8F0] dark:[text-shadow:2px_2px_2px_#1E293B,-2px_2px_2px_#1E293B,2px_-2px_2px_#1E293B,-2px_-2px_2px_#1E293B]" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
                     <div>{study.value.phonetic}</div>
                     <div class="mr-16">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
             </div>}
