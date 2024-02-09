@@ -98,7 +98,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
             </div>
             <div class="px-2 h-10">
                 {shouldSpell.value && <span class="text-4xl font-bold">{study.value.word}</span>}
-                {isPhaseAnswer.value && <span class="text-lg">&nbsp;&nbsp;&nbsp;&nbsp;{study.value.phonetic}</span>}
+                {isPhaseAnswer.value && <span class="text-2xl">&nbsp;&nbsp;&nbsp;&nbsp;{study.value.phonetic}</span>}
             </div>
             <div class="grow flex bg-cover bg-center" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
                 <div class="grow">
