@@ -101,7 +101,10 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
                 {isPhaseAnswer.value && <span class="text-lg">&nbsp;&nbsp;&nbsp;&nbsp;{study.value.phonetic}</span>}
             </div>
             <div class="grow flex bg-cover bg-center" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
-                <div class="grow">{isPhaseAnswer.value && <div class="pl-2 pb-2 text-2xl [text-shadow:2px_2px_2px_#E2E8F0,-2px_2px_2px_#E2E8F0,2px_-2px_2px_#E2E8F0,-2px_-2px_2px_#E2E8F0] dark:[text-shadow:2px_2px_2px_#1E293B,-2px_2px_2px_#1E293B,2px_-2px_2px_#1E293B,-2px_-2px_2px_#1E293B]">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}</div>
+                <div class="grow">
+                    {isPhaseAnswer.value && <div class="pl-2 pb-2 pt-2 text-2xl [text-shadow:2px_2px_2px_#E2E8F0,-2px_2px_2px_#E2E8F0,2px_-2px_2px_#E2E8F0,-2px_-2px_2px_#E2E8F0] dark:[text-shadow:2px_2px_2px_#1E293B,-2px_2px_2px_#1E293B,2px_-2px_2px_#1E293B,-2px_-2px_2px_#1E293B]">
+                    {study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
+                </div>
                 <div class="p-2 flex flex-col gap-4 text-lg justify-center">
                     <NButton onClick={handleSpeakIt} title="_" disabled={!shouldSound.value}>播放</NButton>
                     <NButton onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
