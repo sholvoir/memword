@@ -1,1 +1,1 @@
-export default () => <div class="fixed inset-0 bg-slate-200 dark:bg-slate-800 flex justify-center items-center"><div>请稍候...</div></div>;
+export default () => <div class="fixed inset-0 bg-slate-300 dark:bg-slate-900 flex justify-center items-center"><div>请稍候...</div></div>;
