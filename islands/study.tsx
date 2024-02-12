@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "preact/hooks";
 import { Signal, useSignal, useComputed } from "@preact/signals";
 import { IStudy } from "../lib/istudy.ts";
+import { IStats } from '../lib/istat.ts'
 import * as mem from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
@@ -14,18 +15,20 @@ import NButton from './button-normal.tsx';
 import Dialog from './dialog.tsx';
 
 interface StudyProps {
+    stats: Signal<IStats>;
     studies: Signal<Array<IStudy>>;
     showTips: (content: string) => void;
     onFinish: () => void;
 };
 
-export default ({ studies, showTips, onFinish }: StudyProps) => {
+export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
     const index = useSignal(0);
     const isPhaseAnswer = useSignal(false);
     const study = useSignal(studies.value[index.value]);
     const shouldSound = useComputed(() => isPhaseAnswer.value || study.value.type == 'L');
     const shouldSpell = useComputed(() => isPhaseAnswer.value || study.value.type == 'R');
-    if (!study.value) return (onFinish(), <div/>);
+    const finish = () => { stats.value = { ...stats.value }; onFinish() }
+    if (!study.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
 
     const handleKeyPress = (event: any) => {
@@ -44,7 +47,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
     };
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
-        await mem.study(study.value);
+        await mem.study(study.value, stats.value);
         handleNext();
     };
     const handleSkilled = async () => {
@@ -56,17 +59,17 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         handleIKnown();
     };
     const handleNext = () => {
-        if (index.value >= studies.value.length) return onFinish();
+        if (index.value >= studies.value.length) return finish();
         study.value = studies.value[++index.value];
         isPhaseAnswer.value = false;
     };
     const handlePrevious = () => {
-        if (index.value <= 0) return onFinish();
+        if (index.value <= 0) return finish();
         study.value = studies.value[--index.value];
         isPhaseAnswer.value = false;
     };
     const handleRefresh = async () => {
-        const dict: any = await mem.getFreshDiction(study.value.word);
+        const dict: any = await mem.getDiction(study.value.word, true);
         study.value = { ...study.value, ...dict };
     };
     const handleReportIssue = async () => {
@@ -84,7 +87,7 @@ export default ({ studies, showTips, onFinish }: StudyProps) => {
         addEventListener('keypress', handleKeyPress);
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
-    return <Dialog title="学习" onCancel={onFinish}>
+    return <Dialog title="学习" onCancel={finish}>
         <div class="pt-2 h-full flex flex-col bg-cover bg-center [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
             <div class="px-2 flex gap-2 text-lg">
                 <SButton disabled={index.value <= 0} onClick={handlePrevious}>

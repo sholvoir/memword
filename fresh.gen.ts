@@ -12,7 +12,6 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
-import * as $vocabulary from "./routes/vocabulary.ts";
 import * as $about from "./islands/about.tsx";
 import * as $button_anchor from "./islands/button-anchor.tsx";
 import * as $button_anti_shake from "./islands/button-anti-shake.tsx";
@@ -53,7 +52,6 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/login.ts": $login,
     "./routes/signup.ts": $signup,
-    "./routes/vocabulary.ts": $vocabulary,
   },
   islands: {
     "./islands/about.tsx": $about,

@@ -18,7 +18,7 @@ export default ({setting, onCancel}: ISettingProps & IDialogProps) => {
     const wordBooks = useSignal<string[]>(setting.value.wordBooks);
 
     const handleOKClick = () => {
-        mem.setSetting(setting.value = { sprintNumber: sprintNumber.value, wordBooks: wordBooks.value });
+        mem.setSetting(setting.value = { ...setting.value, sprintNumber: sprintNumber.value, wordBooks: wordBooks.value });
         onCancel();
     }
     const options = [];

@@ -26,7 +26,7 @@ import Menu from './menu.tsx';
 import RButton from './button-ripple.tsx';
 
 export type Loca = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help';
-export type Dial = 'waiting'|'start'|'issue'|'study'|'setting'|'login'|'logout'|'clearTask';
+export type Dial = 'start'|'issue'|'study'|'setting'|'login'|'logout';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
@@ -45,7 +45,7 @@ export default () => {
         setTimeout(hideTips, 3000);
     };
     const handleStudyClick = async (taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
-        openDialog('waiting');
+        showWaiting('请稍候...');
         const ts = await mem.getEpisode(setting.value.sprintNumber, taskType, tag, blevel);
         goBack();
         if (!ts.length) {
@@ -57,7 +57,7 @@ export default () => {
         }
     };
     const handleSearchWord = async (word: string) => {
-        openDialog('waiting');
+        showWaiting('请稍候...');
         const ts = await mem.searchWord(word);
         goBack();
         if (!ts) showTips('Not Found!'); else {
@@ -67,7 +67,7 @@ export default () => {
     }
     const handleStudyFinish = async () => {
         goBack();
-        stats.value = await mem.updateStats();
+        stats.value = await mem.updateStats(stats.value);
         await mem.syncTasks();
     };
     const handleSignoutClick = async (cleanUser: boolean, cleanDict: boolean) => {
@@ -79,28 +79,22 @@ export default () => {
     };
     const handleStartOKClick = async (types: TaskType[], tag: Tag) => {
         goBack();
-        openDialog('waiting');
+        showWaiting('请稍候...');
         await mem.addTasks(types, tag);
         goBack();
         handleStudyClick();
     };
-    const handleClearTasks = async () => {
-        openDialog('waiting');
-        await mem.clearTasks();
-        goBack();
-    };
     const handleMenuClick = (ev: Event) => openDialog((ev.target as HTMLMenuElement).title as Dial|Loca);
     const addLayer = (element: JSX.Element) => layers.value = [...layers.value, element];
+    const showWaiting = (prompt: string) => addLayer(<Waiting prompt={prompt}/>);
     const openDialog = (title: Dial|Loca) => {
         switch (title) {
-            case 'waiting': addLayer(<Waiting/>); return;
             case 'start': addLayer(<Start setting={setting} onCancel={goBack} onStartOKClick={handleStartOKClick}/>); return;
             case 'issue': addLayer(<Issue showTips={showTips} onCancel={goBack}/>); return;
-            case 'study': addLayer(<Study studies={studies} showTips={showTips} onFinish={handleStudyFinish}/>); return;
+            case 'study': addLayer(<Study studies={studies} stats={stats} showTips={showTips} onFinish={handleStudyFinish}/>); return;
             case 'setting': addLayer(<Setting setting={setting} onCancel={goBack}/>); return;
             case 'login': addLayer(<Signin user={user} showTips={showTips} onCancel={goBack}/>); return;
             case 'logout': addLayer(<Signout onCancel={goBack} handleSignoutClick={handleSignoutClick}/>); return;
-            case "clearTask": handleClearTasks(); return;
             default: loca.value = title as Loca;
         }
     };
@@ -120,7 +114,7 @@ export default () => {
         if (s) setting.value = s;
         if (setting.value.showStartPage && totalTask(stats.value) == 0) openDialog('start');
         await mem.syncTasks();
-        stats.value = await mem.updateStats();
+        stats.value = await mem.totalStats();
     };
     useEffect(() => (init().catch(console.error), mem.close), []);
     return <>

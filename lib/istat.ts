@@ -13,16 +13,40 @@ export const BLevelName: Record<BLevel, string> = {
     finished: '完成'
 }
 
-export interface IStat {
-    all: Record<BLevel, number>;
-    task: Record<BLevel, number>;
+export const bLevelIncludes = (blevel: BLevel, level: number) => {
+    switch (blevel) {
+        case 'never': return level <= 0;
+        case 'start': return level >=1 && level <= 5;
+        case 'medium': return level >= 6 && level <= 9;
+        case 'familiar': return level >= 10 && level <= 12;
+        case 'skilled': return level >= 13 && level <= 14;
+        case 'finished': return level >= 15;
+    }
 }
 
-export type Stats = Record<TaskType, Record<Tag, IStat>>;
+export type IBStat = Record<BLevel, number>;
 
-export const totalTask = (stats: Stats) => {
+export type IStat = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+
+export interface IStats {
+    format: string;
+    time: number;
+    all: Record<TaskType, Record<Tag, IStat>>;
+    task: Record<TaskType, Record<Tag, IStat>>;
+}
+
+export const totalTask = (stats: IStats) => {
     let s = 0;
-    for (const type of TaskTypes) for (const tag of Tags) for (const blevel of BLevels)
-        s += stats[type][tag].task[blevel];
+    for (const type of TaskTypes) for (const tag of Tags) for (let i = 0; i < 16; i++)
+        s += stats.task[type][tag][i];
     return s;
 }
+
+export const iStatToIBStat = (stat: IStat): IBStat => ({
+    never: stat[0],
+    start: stat[1]+stat[2]+stat[3]+stat[4]+stat[5],
+    medium: stat[6]+stat[7]+stat[8]+stat[9],
+    familiar: stat[10]+stat[11]+stat[12],
+    skilled: stat[13]+stat[14],
+    finished: stat[15]
+})

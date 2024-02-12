@@ -3,14 +3,17 @@ import { parse as yamlParse } from '$std/yaml/parse.ts';
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
-import { BLevel, BLevels, Stats } from "./istat.ts";
+import { BLevel, IStats, bLevelIncludes } from "./istat.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
 
-const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.1/revision.yaml';
+const settingFormat = '0.0.2';
+const statsFormat = '0.0.2';
+const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.2/vocabulary.txt';
+const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.2/revision.yaml';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
@@ -19,20 +22,6 @@ const now = () => Math.floor(Date.now() / 1000);
 const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 * 24 * 60 * 60, 7 * 24 * 60 * 60,
     13 * 24 * 60 * 60, 25 * 24 * 60 * 60, 49 * 24 * 60 * 60, 97 * 24 * 60 * 60, 191 * 24 * 60 * 60, 367 * 24 * 60 * 60
 ];
-
-/**
- * map level to blevel
- * @param {number} level 0 ~ 16
- * @returns {number} blevel:finished(>=15),skilled(13,14),familiar(10,11,12),medium(6,7,8,9),start(1,2,3,4,5),never(0)
- */
-const toBLevel = (level: number): BLevel => {
-    if (level >= 15) return 'finished';
-    if (level >= 13) return 'skilled';
-    if (level >= 10) return 'familiar';
-    if (level >= 6) return 'medium';
-    if (level >= 1) return 'start';
-    return 'never';
-};
 
 const fetchInit = (body: any, method: HTTPMethod = 'POST') => ({
     method,
@@ -52,7 +41,10 @@ let userDB: IDBDatabase;
 export const getUser = () => {
     const token = Cookies.get('auth');
     if (token) return (jwtDecode(token)[1] as Payload).aud as string;
-}
+};
+
+const setVocabularyUrl = (url: string) => localStorage.setItem('_vocabulary_url', url);
+const getVocabularyUrl = () => localStorage.getItem('_vocabulary_url');
 
 export const setSetting = async (setting: ISetting) => {
     if (!setting) return;
@@ -64,11 +56,9 @@ export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) {
         const p = JSON.parse(result) as ISetting;
-        if (!Array.isArray(p.wordBooks)) p.wordBooks = Object.keys(p.wordBooks);
-        return p;
+        if (p.format == settingFormat) return p;
     }
-    const s: ISetting = { sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true };
-    return s;
+    return { format: settingFormat, sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true } as ISetting;
 };
 
 export const updateSetting = async () => {
@@ -77,7 +67,7 @@ export const updateSetting = async () => {
     const setting = await resp.json() as ISetting;
     localStorage.setItem('_setting', JSON.stringify(setting));
     return setting;
-}
+};
 
 const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open('dict', 1);
@@ -86,25 +76,26 @@ const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     request.onupgradeneeded = () => request.result.createObjectStore('dict', { keyPath: 'word' });
 });
 
-export const getFreshDiction = async (word: string): Promise<IDiction | undefined> => {
-    const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'no-cache' });
-    if (!resp.ok) return await getDiction(word, false);
-    const dict = await resp.json() as IDiction;
-    dict.word = word;
-    dict.version = now();
-    dictDB.transaction('dict', 'readwrite').objectStore('dict').put(dict);
+export const getDiction = async (word: string, refresh?: boolean): Promise<IDiction|undefined> => {
+    let dict: IDiction|undefined = undefined;
+    if (!refresh) {
+        dict = await new Promise<IDiction>((resolve, reject) => {
+            const request = dictDB.transaction('dict', 'readonly').objectStore('dict').get(word);
+            request.onerror = reject;
+            request.onsuccess = () => resolve(request.result);
+        });
+        if ((refresh === false) && dict) return dict;
+    };
+    if (refresh || !dict || dict.version + dictExpire < now()) {
+        const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'no-cache' });
+        if (!resp.ok) return dict;
+        dict = await resp.json() as IDiction;
+        dict.word = word;
+        dict.version = now();
+        dictDB.transaction('dict', 'readwrite').objectStore('dict').put(dict);
+    }
     return dict;
-}
-
-export const getDiction = async (word: string, check = true): Promise<IDiction | undefined> => {
-    const dict = await new Promise<IDiction>((resolve, reject) => {
-        const request = dictDB.transaction('dict', 'readonly').objectStore('dict').get(word);
-        request.onerror = reject;
-        request.onsuccess = () => resolve(request.result);
-    });
-    if (check && (!dict || dict.version + dictExpire < now())) return await getFreshDiction(word);
-    return dict;
-}
+};
 
 const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(user, 1);
@@ -117,12 +108,10 @@ const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) 
         const taskStore = db.createObjectStore('task', { keyPath: ['type', 'word'] });
         taskStore.createIndex('last', 'last');
         taskStore.createIndex('next', 'next');
-        for (const word in vocabulary) for (const type of TaskTypes)
-            taskStore.put({ type, word, last: 0, next: MAX_NEXT, level: 0 });
     };
 });
 
-export const close = () => { userDB?.close(); dictDB?.close(); }
+export const close = () => { userDB?.close(); dictDB?.close() };
 
 export const removeAuth = async (user?: string, cleanDict = false) => {
     close();
@@ -138,7 +127,7 @@ export const removeAuth = async (user?: string, cleanDict = false) => {
     });
     Cookies.remove('auth');
     localStorage.clear();
-}
+};
 
 const getSyncTime = async () => await new Promise<number>((resolve, reject) => {
     const request = userDB!.transaction('kv', 'readonly').objectStore('kv').get('_sync-time');
@@ -150,7 +139,7 @@ const setSyncTime = async (time: number) => await new Promise<void>((resolve, re
     const request = userDB!.transaction('kv', 'readwrite').objectStore('kv').put({ key: '_sync-time', value: time });
     request.onerror = reject;
     request.onsuccess = () => resolve();
-})
+});
 
 export const getTask = (type: TaskType, word: string) => new Promise<ITask>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readonly').objectStore('task').get([type, word]);
@@ -162,16 +151,16 @@ export const putTask = (task: ITask) => new Promise<void>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readwrite').objectStore('task').put(task);
     request.onerror = reject;
     request.onsuccess = () => resolve();
-})
+});
 
-const deleteTask = (type: TaskType, word: string) => new Promise((resolve, reject) => {
+const deleteTask = (type: TaskType, word: string) => new Promise<void>((resolve, reject) => {
     const request = userDB!.transaction('task', 'readwrite').objectStore('task').delete([type, word]);
     request.onerror = reject;
-    request.onsuccess = resolve;
-})
+    request.onsuccess = () => resolve();
+});
 
 const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
-    const request = userDB!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last, true));
+    const request = userDB!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
@@ -181,39 +170,44 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
-    for (const task of tasks) {
-        const req = objectStore.get([task.type, task.word]);
-        req.onsuccess = () => {
-            const otask = req.result as ITask;
-            if (!otask || task.last > otask.last) {
-                objectStore.put(task);
-            }
-        };
+    for (const task of tasks) objectStore.get([task.type, task.word]).onsuccess = (e) => {
+        const otask = (e.target as IDBRequest).result as ITask;
+        if (!otask || task.last > otask.last) {
+            objectStore.put(task);
+        }
+    };
+});
+
+export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((resolve, reject) => {
+    const time = now();
+    const transaction = userDB!.transaction('task', 'readwrite');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => resolve();
+    const objectStore = transaction.objectStore('task');
+    for (const type of types) for (const word in vocabulary!) {
+        if (vocabulary![word]?.includes(tag)) objectStore.get([type, word]).onsuccess = (e) => {
+            const task = (e.target as IDBRequest).result as ITask;
+            if (!task) objectStore.add({type, word, last: time, next: 0, level: 0})
+        }
     }
 });
 
-export const addTasks = async (types: TaskType[], tag: Tag) => {
-    const time = now();
-    await traversingTask(cursor => {
-        const task = cursor.value as ITask;
-        if (types.includes(task.type) && vocabulary[task.word]?.includes(tag) && task.level == 0) {
-            task.next = 0;
-            task.last = time;
-            cursor.update(task);
-        }
-        return true;
-    }, 'readwrite');
-}
-
 export const clearTasks = async () => {
-    const needRemove = [] as Array<ITask>;
-    await traversingTask(cursor => {
-        const task = cursor.value as ITask;
-        if (!vocabulary![task.word]) needRemove.push(task);
-        return true;
+    const needRemove = new Set<ITask>();
+    await new Promise<void>((resolve, reject) => {
+        const request = userDB!.transaction('task', 'readonly').objectStore('task').openCursor();
+        request.onerror = reject;
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return resolve();
+            const task = cursor.value as ITask;
+            if (task.last == 0 && task.level == 0 && task.next == MAX_NEXT) needRemove.add(task);
+            if (!vocabulary![task.word]) needRemove.add(task);
+            return true;
+        }
     });
     for (const task of needRemove) await removeTask(task.type, task.word);
-}
+};
 
 export const syncTasks = async () => {
     const thisTime = now();
@@ -224,106 +218,120 @@ export const syncTasks = async () => {
     const ntasks = await resp.json();
     await putTasks(ntasks);
     await setSyncTime(thisTime);
-}
+};
 
 export const removeTask = async (type: TaskType, word: string) => {
     await deleteTask(type, word);
     await fetch(`/task?type=${encodeURIComponent(type)}&word=${encodeURIComponent(word)}`, { method: 'DELETE' });
-}
+};
 
-const traversingTask = (
-    each: (cursor: IDBCursorWithValue) => boolean,
-    mode?: IDBTransactionMode,
-    indexName?: string,
-    query?: IDBValidKey | IDBKeyRange,
-    direction?: IDBCursorDirection
-) => new Promise<void>((resolve, reject) => {
-    const objectStore = userDB!.transaction('task', mode).objectStore('task');
-    const request = indexName ?
-        objectStore.index(indexName).openCursor(query, direction) :
-        objectStore.openCursor(query, direction);
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return resolve();
-        if (each(cursor)) cursor.continue();
-        else resolve();
-    }
-});
-
-export const study = ({ type, word, level }: ITask) => new Promise<void>((resolve, reject) => {
+export const study = ({ type, word, level }: ITask, stats: IStats) => new Promise<void>((resolve, reject) => {
     const transaction = userDB!.transaction('task', 'readwrite');
+    transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
-    transaction.onerror = (e) => reject(e);
     const objectStore = transaction.objectStore('task');
-    const request = objectStore.get([type, word]);
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const task = request.result as ITask;
-        task.level = level;
-        task.last = now();
-        const next = times[task.level++];
-        task.next = next ? task.last + next : MAX_NEXT;
-        objectStore.put(task);
+    objectStore.get([type, word]).onsuccess = (e) => {
+        const task = (e.target as IDBRequest).result as ITask;
+        if (task) {
+            removeTaskFromStats(stats, task);
+            task.level = level;
+            task.last = now();
+            const next = times[task.level++];
+            task.next = next ? task.last + next : MAX_NEXT;
+            objectStore.put(task);
+            addTaskToStats(stats, task);
+        }
     }
 });
 
 const initStats = () => {
-    const stats: Stats = {} as any;
+    const stats = { format: statsFormat, time: 0, all: {}, task: {} } as IStats;
     for (const taskType of TaskTypes) {
-        stats[taskType] = {} as any;
+        stats.all[taskType] = {} as any;
+        stats.task[taskType] = {} as any;
         for (const tag of Tags) {
-            stats[taskType][tag] = { all: {} as any, task: {} as any };
-            for (const blevel of BLevels) {
-                stats[taskType][tag].all[blevel] = 0;
-                stats[taskType][tag].task[blevel] = 0;
-            }
+            stats.all[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+            stats.task[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
         }
     }
     return stats;
 };
 
+const addTaskToStats = (stats: IStats, task: ITask) => {
+    const tags = vocabulary![task.word];
+    if (tags) for (const tag of tags) {
+        stats.all[task.type][tag][task.level]++;
+        if (task.next < stats.time) stats.task[task.type][tag][task.level]++;
+    }
+};
+const removeTaskFromStats = (stats: IStats, task: ITask) => {
+    const tags = vocabulary![task.word];
+    if (tags) for (const tag of tags) {
+        stats.all[task.type][tag][task.level]--;
+        if (task.next < stats.time) stats.task[task.type][tag][task.level]--;
+    }
+};
+
 export const getStats = () => {
     const result = localStorage.getItem('_stats');
-    if (result) return JSON.parse(result) as Stats;
+    if (result) {
+        const stats = JSON.parse(result) as IStats;
+        if (stats.format == statsFormat) return stats;
+    }
     return initStats();
 };
 
-export const updateStats = async () => {
-    const stats = initStats();
-    const ctime = now();
-    await traversingTask(
-        (cursor) => {
-            const task = cursor.value as ITask;
-            const blevel = toBLevel(task.level);
-            const tags = vocabulary![task.word];
-            if (tags) for (const tag of tags) {
-                const stat = stats[task.type][tag];
-                stat.all[blevel]++;
-                if (task.next < ctime) stat.task[blevel]++;
-            }
-            return true;
+export const updateStats = (stats: IStats) => new Promise<IStats>((resolve, reject) => {
+    const nstats: IStats = { format: stats.format, time: now(), all: stats.all, task: stats.task };
+    const request = userDB!.transaction('task', 'readonly').objectStore('task')
+        .index('next').openCursor(IDBKeyRange.bound(stats.time, nstats.time, false, true));
+    request.onerror = reject;
+    request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) {
+            localStorage.setItem('_stats', JSON.stringify(nstats));
+            return resolve(nstats);
         }
-    );
-    localStorage.setItem('_stats', JSON.stringify(stats));
-    return stats;
-};
+        const task = cursor.value as ITask;
+        removeTaskFromStats(stats, task);
+        addTaskToStats(nstats, task);
+        cursor.continue();
+    }
+});
+
+export const totalStats = () => new Promise<IStats>((resolve, reject) => {
+    const stats = initStats();
+    stats.time = now();
+    const transaction = userDB!.transaction('task', 'readonly');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => {
+        localStorage.setItem('_stats', JSON.stringify(stats));
+        resolve(stats);
+    }
+    const objectStore = transaction.objectStore('task');
+    for (const type of TaskTypes) for (const word in vocabulary!)
+        objectStore.get([type, word]).onsuccess = (e) => {
+            const task = (e.target as IDBRequest).result as ITask;
+            addTaskToStats(stats, task ?? { type, word, last: 0, next: MAX_NEXT, level: 0 });
+        }
+});
 
 export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
     const tasks: Array<ITask> = [];
-    const ctime = now();
-    const query = blevel == 'never' ? undefined : IDBKeyRange.upperBound(ctime);
-    await traversingTask(
-        cursor => {
+    await new Promise<void>((resolve, reject) => {
+        const request = userDB!.transaction('task', 'readonly').objectStore('task')
+            .index('next').openCursor(blevel == 'never' ? undefined : IDBKeyRange.upperBound(now()), "prev");
+        request.onerror = reject;
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return resolve();
             const task = cursor.value as ITask;
-            if (taskType && task.type != taskType) return true;
-            if (tag && !vocabulary![task.word]?.includes(tag)) return true;
-            if (blevel && toBLevel(task.level) != blevel) return true;
+            if ((!taskType || task.type == taskType) && (!tag || vocabulary![task.word]?.includes(tag)) && (!blevel || bLevelIncludes(blevel, task.level)))
             tasks.push(task);
-            return tasks.length < sprintNumber;
-        },
-        'readonly', 'next', query, "prev"
-    );
+            if (tasks.length < sprintNumber) cursor.continue();
+            else resolve(); 
+        }
+    });
     const studies: Array<IStudy> = [];
     for (const task of tasks) {
         const dict = await getDiction(task.word);
@@ -341,13 +349,23 @@ export const searchWord = async (word: string) => {
     }
     const dict = await getDiction(task.word);
     return { ...task, ...dict } as IStudy;
-}
+};
 
 export const init = async (user: string) => {
     dictDB = await openDictDB();
-    const res1 = await fetch('/vocabulary');
-    if (res1.ok) vocabulary = await res1.json();
-    const res2 = await fetch(revisionUrl);
+    const res1 = await fetch(vocabularyUrl, { cache: 'force-cache' });
+    if (res1.ok) {
+        vocabulary = {};
+        for (const line of (await res1.text()).split('\n')) {
+            const [word, ...tags] = line.split(/[,:] */).map(w=>w.trim());
+            vocabulary[word] = tags as Array<Tag>;
+        }
+    }
+    const res2 = await fetch(revisionUrl, { cache: 'force-cache' });
     if (res2.ok) revision = yamlParse(await res2.text()) as Record<string, string>;
     userDB = await openUserDB(user);
+    if (vocabularyUrl !== getVocabularyUrl()) {
+        clearTasks();
+        setVocabularyUrl(vocabularyUrl);
+    }
 };
