@@ -22,7 +22,7 @@ export default () => <Dialog title="快乐背单词" noback={!signals.user.value
         </div>
         <div class="bg-slate-200 text-slate-800">
             <h1>开始学习</h1>
-            <p>使用你的电子邮件，单击<RButton class="w-32 bg-orange-400 hover:bg-orange-500" title="login" onClick={() => showDialog('login')}>登录</RButton>开始免费学习吧。</p>
+            <p>使用你的电子邮件，单击<RButton class="w-32 bg-orange-400 hover:bg-orange-500" title="login" onClick={() => showDialog({dial: 'login'})}>登录</RButton>开始免费学习吧。</p>
         </div>
         <div class="bg-slate-800 text-slate-300">
             <h1>微信</h1>

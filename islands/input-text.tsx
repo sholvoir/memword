@@ -2,7 +2,7 @@ import { JSX } from "preact";
 import { Signal } from "@preact/signals";
 
 interface ITextInputProps extends JSX.HTMLAttributes<HTMLInputElement>{
-    binding: Signal<string|number>;
+    binding: Signal<string|number|undefined>;
     num?: boolean;
 }
 export default (props: ITextInputProps) => {

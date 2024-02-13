@@ -23,34 +23,33 @@ const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 *
     13 * 24 * 60 * 60, 25 * 24 * 60 * 60, 49 * 24 * 60 * 60, 97 * 24 * 60 * 60, 191 * 24 * 60 * 60, 367 * 24 * 60 * 60
 ];
 
-export type Dial = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
-
+export type Dial = 'about'|'start'|'stats'|'dict'|'dictm'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
+export interface IDialog { dial: Dial, [key: string]: any }
 interface GlobeSignals {
     user: Signal<string>;
+    admin: Signal<boolean>;
     setting: Signal<ISetting>;
-    dialogs: Signal<Array<Dial>>;
+    dialogs: Signal<Array<IDialog>>;
     stats: Signal<IStats>;
     studies: Signal<Array<IStudy>>;
     tips: Signal<string>;
-    waiting: Signal<string>;
 }
 
 export const signals = {} as GlobeSignals;
 export const hideTips = () => signals.tips.value = '';
 export const showTips = (content: string) => { signals.tips.value = content; setTimeout(hideTips, 3000) };
-export const showDialog = (dial: Dial) => signals.dialogs.value = [...signals.dialogs.value, dial];
+export const showDialog = (d: IDialog) => signals.dialogs.value = [...signals.dialogs.value, d];
 export const closeDialog = () => signals.dialogs.value = signals.dialogs.value.slice(0, -1);
-export const showWaiting = (prompt: string) => { signals.waiting.value = prompt; showDialog('wait') };
 export const startStudy = async (taskTypes?: string, tag?: Tag, blevel?: BLevel) => {
-    showWaiting('请稍候...');
+    showDialog({dial: 'wait', prompt: '请稍候...'});
     const ts = await getEpisode(signals.setting.value.sprintNumber, taskTypes, tag, blevel);
     closeDialog();
     if (!ts.length) {
         showTips('Congratulations! There are no more task need to do.');
-        if (!taskTypes && !tag && !blevel) showDialog('start');
+        if (!taskTypes && !tag && !blevel) showDialog({ dial: 'start' });
     } else {
         signals.studies.value = ts;
-        showDialog('study');
+        showDialog({ dial: 'study' });
     }
 };
 
@@ -389,7 +388,7 @@ export const init = async () => {
     const res1 = await fetch('/setting');
     if (res1.ok) setSetting(await res1.json());
     const oldVocabularyUrl = getVocabularyUrl();
-    if (vocabularyUrl !== oldVocabularyUrl) showWaiting('正在升级, 请稍候...');
+    if (vocabularyUrl !== oldVocabularyUrl) showDialog({ dial: 'wait', prompt: '正在升级, 请稍候...' });
     const res2 = await fetch(vocabularyUrl, { cache: 'force-cache' });
     if (res2.ok) {
         const delimiter = /[,:] */;
@@ -410,5 +409,5 @@ export const init = async () => {
     await syncTasks();
     signals.stats.value = await totalStats();
     if (vocabularyUrl !== oldVocabularyUrl) { setVocabularyUrl(vocabularyUrl); closeDialog(); }
-    if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) showDialog('start');
+    if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) showDialog({ dial: 'start' });
 };

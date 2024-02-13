@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, removeAuth, showDialog } from '../lib/mem.ts';
+import { showDialog, closeDialog, removeAuth } from '../lib/mem.ts';
 import Checkbox from './checkbox.tsx';
 import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx';
@@ -10,7 +10,7 @@ export default () => {
     const cleanDict = useSignal(false);
     const handleSignoutClick = () => {
         closeDialog();
-        showDialog('about');
+        showDialog({dial: 'about'});
         removeAuth(cleanUser.value, cleanDict.value);
     };
     

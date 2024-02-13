@@ -2,7 +2,7 @@ import { Signal, useSignal } from "@preact/signals";
 import { TaskType, TaskTypes } from "../lib/itask.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { TagName } from "../lib/tag.ts";
-import { signals, setSetting, closeDialog, showWaiting, showTips, addTasks, startStudy } from "../lib/mem.ts";
+import { signals, setSetting, showDialog, closeDialog, showTips, addTasks, startStudy } from "../lib/mem.ts";
 import Dialog from './dialog.tsx';
 import Checkbox from './checkbox.tsx';
 import Select from './select-single.tsx';
@@ -27,7 +27,7 @@ export default () => {
         if (checkTaskTypes['R'].value) types.push('R');
         if (!types.length) return showTips('请选择至少一种训练类型!');
         closeDialog();
-        showWaiting('请稍候...');
+        showDialog({dial: 'wait', prompt: '请稍候...' });
         await addTasks(types, sTag.value);
         closeDialog();
         startStudy(types.join(''), sTag.value);

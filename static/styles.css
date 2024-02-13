@@ -8,11 +8,23 @@
         background-color: transparent;
         outline: none;
     }
+    textarea {
+        scrollbar-width: thin;
+        scrollbar-color: #78716C transparent;
+    }
     @media (prefers-color-scheme: dark) {
         input:-webkit-autofill {
             box-shadow: 0 0 0 1000px #292524 inset;
             -webkit-text-fill-color: #E7E5E4;
         }
+    }
+}
+@layer components {
+    .bg-round-6 {
+        @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
+    }
+    .text_thick-shadow {
+        @apply [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]
     }
 }
 

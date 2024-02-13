@@ -1,13 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal, useComputed } from "@preact/signals";
-import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask } from '../lib/mem.ts';
+import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 import IconChevronsLeft from "tabler_icons/chevrons-left.tsx";
 import IconChevronsRight from "tabler_icons/chevrons-right.tsx";
+import IconBook2 from "tabler_icons/book-2.tsx";
 import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import Dialog from './dialog.tsx';
@@ -46,6 +47,9 @@ export default () => {
         await study(current.value, signals.stats.value);
         handleNext();
     };
+    const handleDictMaintain = () => {
+        showDialog({dial: 'dictm', study: current})
+    }
     const handleSkilled = async () => {
         current.value.level = 14;
         await handleIKnown();
@@ -84,41 +88,30 @@ export default () => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="pt-2 h-full flex flex-col bg-cover bg-center [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]" style={(isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
-            <div class="px-2 flex gap-2 text-lg">
-                <SButton disabled={index.value <= 0} onClick={handlePrevious}>
-                    <IconChevronsLeft class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6" />
-                </SButton>
+        <div class="p-2 h-full flex flex-col bg-cover bg-center text_thick-shadow" style={(isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+            <div class="flex gap-2 text-lg">
+                <SButton disabled={index.value <= 0} onClick={handlePrevious}><IconChevronsLeft class="bg-round-6"/></SButton>
                 <div>{index.value+1}/{signals.studies.value.length}</div>
-                <SButton disabled={index.value >= signals.studies.value.length} onClick={handleNext}>
-                    <IconChevronsRight class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6" />
-                </SButton>
+                <SButton disabled={index.value >= signals.studies.value.length} onClick={handleNext}><IconChevronsRight class="bg-round-6"/></SButton>
                 <div class="grow"/>
-                <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}>
-                    <IconCircleLetterF class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6" />
-                </SButton>
-                <SButton disabled={!isPhaseAnswer.value} onClick={handleDeleteTask}>
-                    <IconCut class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6"/>
-                </SButton>
-                <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}>
-                    <IconAlertCircleFilled class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6"/>
-                </SButton>
-                <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}>
-                    <IconRefresh class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6"/>
-                </SButton>
+                {signals.admin.value && <SButton disabled={!isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleSkilled}><IconCircleLetterF class="bg-round-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="bg-round-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="bg-round-6"/></SButton>
+                <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="bg-round-6"/></SButton>
                 <div>{current.value.level}</div>
             </div>
-            <div class="px-2 h-10">
+            <div class="h-10">
                 {shouldSpell.value && <span class="text-4xl font-bold">{current.value.word}</span>}
             </div>
-            <div class="grow flex">
+            <div class="grow flex gap-2">
                 <div class="grow text-2xl">
                     {isPhaseAnswer.value && <>
-                        <div class="pl-2 pt-2">{current.value.phonetic}</div>
-                        <div class="pl-2 pb-2">{current.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
+                        <div>{current.value.phonetic}</div>
+                        <div>{current.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
                     </>}
                 </div>
-                <div class="shrink-0 p-2 flex flex-col gap-4 text-lg justify-center">
+                <div class="shrink-0 flex flex-col gap-4 text-lg justify-center">
                     <NButton onClick={handleSpeakIt} title="_" disabled={!shouldSound.value}>播放</NButton>
                     <NButton onClick={handleShowAnswer} title="_" disabled={isPhaseAnswer.value}>答案</NButton>
                     <NButton onClick={handleIKnown} title="X/N" disabled={!isPhaseAnswer.value}>知道</NButton>

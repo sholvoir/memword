@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { signals, showWaiting, searchWord, closeDialog, showDialog, showTips } from "../lib/mem.ts";
+import { signals, searchWord, closeDialog, showDialog, showTips } from "../lib/mem.ts";
 import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
 import Dialog from './dialog.tsx';
@@ -7,12 +7,12 @@ import Dialog from './dialog.tsx';
 export default () => {
     const word = useSignal('');
     const handleSearchWord = async (word: string) => {
-        showWaiting('请稍候...');
+        showDialog({ dial: 'wait', prompt: '请稍候...' });
         const ts = await searchWord(word);
         closeDialog();
         if (!ts) showTips('Not Found!'); else {
             signals.studies.value = [ts];
-            showDialog('study');
+            showDialog({ dial: 'study' });
         }
     }
     const handleSearchClick = () => handleSearchWord(word.value);

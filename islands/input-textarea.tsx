@@ -2,7 +2,7 @@ import { JSX } from "preact";
 import { Signal } from "@preact/signals";
 
 interface ITextAreaInputProps extends JSX.HTMLAttributes<HTMLTextAreaElement>{
-    binding: Signal<string>
+    binding: Signal<string|undefined>
 }
 export default (props: ITextAreaInputProps) => {
     const { binding, value, class: className, ...rest} = props;

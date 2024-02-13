@@ -5,10 +5,10 @@ import Root from '../../islands/root.tsx';
 import { Handlers } from "$fresh/server.ts";
 
 export const handler: Handlers<any, MemState> = {
-    async GET(_req, ctx) {
+    async GET(req, ctx) {
         const resp = await ctx.render();
         if (!ctx.state.user) return resp;
-        return await setAuth(resp, ctx.state.user);
+        return await setAuth(req, resp, ctx.state.user);
     }
 }
 
