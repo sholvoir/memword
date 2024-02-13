@@ -22,7 +22,7 @@ export default (props: {study?: Signal<IStudy>}) => {
     const handleUpdateClick = async () => {
         const dict: IDict = { pic: pic.value, trans: trans.value, sound: sound.value, phonetic: phonetic.value };
         current.value = { ...current.value, ...dict };
-        const res = await fetch(`${baseApi}/${encodeURIComponent(current.value.word)}`, { method: 'PATCH', body: JSON.stringify(dict) });
+        const res = await fetch(`${baseApi}/${encodeURIComponent(current.value.word)}`, { credentials: "include", method: 'PATCH', body: JSON.stringify(dict) });
         if (res.ok) showTips(`success update word "${current.value.word}"!`);
         else showTips(`Error: ${res.status}`);
     };
