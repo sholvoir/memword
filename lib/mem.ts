@@ -10,7 +10,7 @@ import { ISetting } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
 
-const settingFormat = '0.0.2';
+const settingFormat = '0.0.3';
 const statsFormat = '0.0.2';
 const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/vocabulary.txt';
 const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/revision.txt';
@@ -89,7 +89,13 @@ export const getSetting = () => {
         const p = JSON.parse(result) as ISetting;
         if (p.format == settingFormat) return p;
     }
-    return { format: settingFormat, sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true } as ISetting;
+    return {
+        format: settingFormat,
+        sprintNumber: 10,
+        listenBooks: ['OG'],
+        readBooks: ['OG'],
+        showStartPage: true
+    } as ISetting;
 };
 
 const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
@@ -378,10 +384,8 @@ export const searchWord = async (word: string) => {
 export const init = async () => {
     db.dict = await openDictDB();
     db.user = await openUserDB(signals.user.peek());
-    if (signals.setting.peek().format != settingFormat) {
-        const res1 = await fetch('/setting');
-        if (res1.ok) setSetting(await res1.json());
-    }
+    const res1 = await fetch('/setting');
+    if (res1.ok) setSetting(await res1.json());
     const res2 = await fetch(vocabularyUrl, { cache: 'force-cache' });
     if (res2.ok) {
         const delimiter = /[,:] */;

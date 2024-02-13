@@ -1,6 +1,9 @@
+import { Tag } from "vocabulary/tag.ts";
+
 export interface ISetting {
     format: string;
     showStartPage?: true;
     sprintNumber: number;
-    wordBooks: Array<string>;
+    readBooks: Array<Tag>;
+    listenBooks: Array<Tag>;
 };
