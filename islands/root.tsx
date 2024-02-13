@@ -45,14 +45,7 @@ export default () => {
         case 'tasks': return <Tasks/>;
         case 'menu': return <Menu/>;
     }};
-    const initc = async () => {
-        if (!signals.user.peek()) return;
-        await init();
-        if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) dialog('start');
-        await syncTasks();
-        signals.stats.value = await totalStats();
-    };
-    useEffect(() => (initc().catch(console.error), close), []);
+    useEffect(() => (init().catch(console.error), close), []);
     return <>
         <div class="fixed top-0 inset-x-0 bg-slate-200 dark:bg-slate-800 flex flex-col" style={`bottom:${signals.user.value?'60px':'0'}`}>{signals.user.value && <Stats/>}</div>
         {signals.user.value && <div class="fixed inset-x-0 bottom-0 px-4 pb-2 bg-slate-300 dark:bg-slate-700 fill-slate-800 dark:fill-slate-300 flex gap-3 justify-between">

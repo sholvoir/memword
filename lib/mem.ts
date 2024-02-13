@@ -3,7 +3,7 @@ import { Signal } from "@preact/signals";
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
-import { BLevel, IStats, bLevelIncludes } from "./istat.ts";
+import { BLevel, IStats, bLevelIncludes, totalTask } from "./istat.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting } from "./isetting.ts";
@@ -382,10 +382,14 @@ export const searchWord = async (word: string) => {
 };
 
 export const init = async () => {
+    const user = signals.user.peek();
+    if (!user) return;
     db.dict = await openDictDB();
-    db.user = await openUserDB(signals.user.peek());
+    db.user = await openUserDB(user);
     const res1 = await fetch('/setting');
     if (res1.ok) setSetting(await res1.json());
+    const oldVocabularyUrl = getVocabularyUrl();
+    if (vocabularyUrl !== oldVocabularyUrl) showWaiting('正在升级, 请稍候...');
     const res2 = await fetch(vocabularyUrl, { cache: 'force-cache' });
     if (res2.ok) {
         const delimiter = /[,:] */;
@@ -402,8 +406,9 @@ export const init = async () => {
             revision[word] = replace;
         }
     }
-    if (vocabularyUrl !== getVocabularyUrl()) {
-        clearTasks();
-        setVocabularyUrl(vocabularyUrl);
-    }
+    if (vocabularyUrl !== oldVocabularyUrl) clearTasks();
+    await syncTasks();
+    signals.stats.value = await totalStats();
+    if (vocabularyUrl !== oldVocabularyUrl) { setVocabularyUrl(vocabularyUrl); closeDialog(); }
+    if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) showDialog('start');
 };
