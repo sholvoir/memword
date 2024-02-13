@@ -35,7 +35,6 @@ import * as $signout from "./islands/signout.tsx";
 import * as $start from "./islands/start.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
-import * as $tab from "./islands/tab.tsx";
 import * as $tasks from "./islands/tasks.tsx";
 import * as $waiting from "./islands/waiting.tsx";
 import { type Manifest } from "$fresh/server.ts";
@@ -77,7 +76,6 @@ const manifest = {
     "./islands/start.tsx": $start,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
-    "./islands/tab.tsx": $tab,
     "./islands/tasks.tsx": $tasks,
     "./islands/waiting.tsx": $waiting,
   },

@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { parse as yamlParse } from '$std/yaml/parse.ts';
+import { Signal } from "@preact/signals";
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
@@ -12,8 +12,8 @@ import { IStudy } from "./istudy.ts";
 
 const settingFormat = '0.0.2';
 const statsFormat = '0.0.2';
-const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.2/vocabulary.txt';
-const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.2/revision.yaml';
+const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/vocabulary.txt';
+const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/revision.txt';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
@@ -22,6 +22,37 @@ const now = () => Math.floor(Date.now() / 1000);
 const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 * 24 * 60 * 60, 7 * 24 * 60 * 60,
     13 * 24 * 60 * 60, 25 * 24 * 60 * 60, 49 * 24 * 60 * 60, 97 * 24 * 60 * 60, 191 * 24 * 60 * 60, 367 * 24 * 60 * 60
 ];
+
+export type Dial = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
+
+interface GlobeSignals {
+    user: Signal<string>;
+    setting: Signal<ISetting>;
+    dialogs: Signal<Array<Dial>>;
+    stats: Signal<IStats>;
+    studies: Signal<Array<IStudy>>;
+    tips: Signal<string>;
+    waiting: Signal<string>;
+}
+
+export const signals = {} as GlobeSignals;
+export const hideTips = () => signals.tips.value = '';
+export const showTips = (content: string) => { signals.tips.value = content; setTimeout(hideTips, 3000) };
+export const showDialog = (dial: Dial) => signals.dialogs.value = [...signals.dialogs.value, dial];
+export const closeDialog = () => signals.dialogs.value = signals.dialogs.value.slice(0, -1);
+export const showWaiting = (prompt: string) => { signals.waiting.value = prompt; showDialog('wait') };
+export const startStudy = async (taskTypes?: string, tag?: Tag, blevel?: BLevel) => {
+    showWaiting('请稍候...');
+    const ts = await getEpisode(signals.setting.value.sprintNumber, taskTypes, tag, blevel);
+    closeDialog();
+    if (!ts.length) {
+        showTips('Congratulations! There are no more task need to do.');
+        if (!taskTypes && !tag && !blevel) showDialog('start');
+    } else {
+        signals.studies.value = ts;
+        showDialog('study');
+    }
+};
 
 const fetchInit = (body: any, method: HTTPMethod = 'POST') => ({
     method,
@@ -33,14 +64,13 @@ export const signup = async (email: string) => await fetch(`/signup?email=${enco
 export const login = async (email: string, password: string) => await fetch('/login', fetchInit({ email, password }));
 export const submitIssue = async (issue: string) => await fetch(`/issue`, { method: 'POST', body: issue });
 
-let vocabulary: Record<string, Array<Tag>>;
-let revision: Record<string, string>;
-let dictDB: IDBDatabase;
-let userDB: IDBDatabase;
+const vocabulary: Record<string, Array<Tag>> = {};
+const revision: Record<string, string> = {};
+const db = {} as { dict: IDBDatabase, user: IDBDatabase };
 
 export const getUser = () => {
     const token = Cookies.get('auth');
-    if (token) return (jwtDecode(token)[1] as Payload).aud as string;
+    return token ? (jwtDecode(token)[1] as Payload).aud as string : '';
 };
 
 const setVocabularyUrl = (url: string) => localStorage.setItem('_vocabulary_url', url);
@@ -48,6 +78,7 @@ const getVocabularyUrl = () => localStorage.getItem('_vocabulary_url');
 
 export const setSetting = async (setting: ISetting) => {
     if (!setting) return;
+    signals.setting.value = setting;
     localStorage.setItem('_setting', JSON.stringify(setting));
     return await fetch('/setting', fetchInit(setting, 'PUT'));
 };
@@ -61,14 +92,6 @@ export const getSetting = () => {
     return { format: settingFormat, sprintNumber: 10, wordBooks: ['LOG', 'ROG'], showStartPage: true } as ISetting;
 };
 
-export const updateSetting = async () => {
-    const resp = await fetch('/setting');
-    if (!resp.ok) return undefined;
-    const setting = await resp.json() as ISetting;
-    localStorage.setItem('_setting', JSON.stringify(setting));
-    return setting;
-};
-
 const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open('dict', 1);
     request.onerror = reject;
@@ -80,7 +103,7 @@ export const getDiction = async (word: string, refresh?: boolean): Promise<IDict
     let dict: IDiction|undefined = undefined;
     if (!refresh) {
         dict = await new Promise<IDiction>((resolve, reject) => {
-            const request = dictDB.transaction('dict', 'readonly').objectStore('dict').get(word);
+            const request = db.dict.transaction('dict', 'readonly').objectStore('dict').get(word);
             request.onerror = reject;
             request.onsuccess = () => resolve(request.result);
         });
@@ -92,7 +115,7 @@ export const getDiction = async (word: string, refresh?: boolean): Promise<IDict
         dict = await resp.json() as IDiction;
         dict.word = word;
         dict.version = now();
-        dictDB.transaction('dict', 'readwrite').objectStore('dict').put(dict);
+        db.dict.transaction('dict', 'readwrite').objectStore('dict').put(dict);
     }
     return dict;
 };
@@ -111,62 +134,63 @@ const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) 
     };
 });
 
-export const close = () => { userDB?.close(); dictDB?.close() };
+export const close = () => { db.user?.close(); db.dict?.close() };
 
-export const removeAuth = async (user?: string, cleanDict = false) => {
+export const removeAuth = async (cleanUser: boolean, cleanDict: boolean) => {
     close();
     if (cleanDict) await new Promise((resolve, reject) => {
         const request = indexedDB.deleteDatabase('dict');
         request.onerror = reject;
         request.onsuccess = resolve;
     });
-    if (user) await new Promise((resolve, reject) => {
-        const request = indexedDB.deleteDatabase(user);
+    if (cleanUser) await new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase(signals.user.peek());
         request.onerror = reject;
         request.onsuccess = resolve;
     });
+    signals.user.value = '';
     Cookies.remove('auth');
     localStorage.clear();
 };
 
 const getSyncTime = async () => await new Promise<number>((resolve, reject) => {
-    const request = userDB!.transaction('kv', 'readonly').objectStore('kv').get('_sync-time');
+    const request = db.user!.transaction('kv', 'readonly').objectStore('kv').get('_sync-time');
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result.value);
 });
 
 const setSyncTime = async (time: number) => await new Promise<void>((resolve, reject) => {
-    const request = userDB!.transaction('kv', 'readwrite').objectStore('kv').put({ key: '_sync-time', value: time });
+    const request = db.user!.transaction('kv', 'readwrite').objectStore('kv').put({ key: '_sync-time', value: time });
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 export const getTask = (type: TaskType, word: string) => new Promise<ITask>((resolve, reject) => {
-    const request = userDB!.transaction('task', 'readonly').objectStore('task').get([type, word]);
+    const request = db.user!.transaction('task', 'readonly').objectStore('task').get([type, word]);
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
 export const putTask = (task: ITask) => new Promise<void>((resolve, reject) => {
-    const request = userDB!.transaction('task', 'readwrite').objectStore('task').put(task);
+    const request = db.user!.transaction('task', 'readwrite').objectStore('task').put(task);
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 const deleteTask = (type: TaskType, word: string) => new Promise<void>((resolve, reject) => {
-    const request = userDB!.transaction('task', 'readwrite').objectStore('task').delete([type, word]);
+    const request = db.user!.transaction('task', 'readwrite').objectStore('task').delete([type, word]);
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
-    const request = userDB!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
+    const request = db.user!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
 export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, reject) => {
-    const transaction = userDB!.transaction('task', 'readwrite');
+    const transaction = db.user!.transaction('task', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
@@ -180,7 +204,7 @@ export const putTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, rej
 
 export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((resolve, reject) => {
     const time = now();
-    const transaction = userDB!.transaction('task', 'readwrite');
+    const transaction = db.user!.transaction('task', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
@@ -195,7 +219,7 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
 export const clearTasks = async () => {
     const needRemove = new Set<ITask>();
     await new Promise<void>((resolve, reject) => {
-        const request = userDB!.transaction('task', 'readonly').objectStore('task').openCursor();
+        const request = db.user!.transaction('task', 'readonly').objectStore('task').openCursor();
         request.onerror = reject;
         request.onsuccess = () => {
             const cursor = request.result;
@@ -226,7 +250,7 @@ export const removeTask = async (type: TaskType, word: string) => {
 };
 
 export const study = ({ type, word, level }: ITask, stats: IStats) => new Promise<void>((resolve, reject) => {
-    const transaction = userDB!.transaction('task', 'readwrite');
+    const transaction = db.user!.transaction('task', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
@@ -283,7 +307,7 @@ export const getStats = () => {
 
 export const updateStats = (stats: IStats) => new Promise<IStats>((resolve, reject) => {
     const nstats: IStats = { format: stats.format, time: now(), all: stats.all, task: stats.task };
-    const request = userDB!.transaction('task', 'readonly').objectStore('task')
+    const request = db.user!.transaction('task', 'readonly').objectStore('task')
         .index('next').openCursor(IDBKeyRange.bound(stats.time, nstats.time, false, true));
     request.onerror = reject;
     request.onsuccess = () => {
@@ -302,7 +326,7 @@ export const updateStats = (stats: IStats) => new Promise<IStats>((resolve, reje
 export const totalStats = () => new Promise<IStats>((resolve, reject) => {
     const stats = initStats();
     stats.time = now();
-    const transaction = userDB!.transaction('task', 'readonly');
+    const transaction = db.user!.transaction('task', 'readonly');
     transaction.onerror = reject;
     transaction.oncomplete = () => {
         localStorage.setItem('_stats', JSON.stringify(stats));
@@ -316,17 +340,17 @@ export const totalStats = () => new Promise<IStats>((resolve, reject) => {
         }
 });
 
-export const getEpisode = async (sprintNumber: number, taskType?: TaskType, tag?: Tag, blevel?: BLevel) => {
+export const getEpisode = async (sprintNumber: number, taskTypes?: string, tag?: Tag, blevel?: BLevel) => {
     const tasks: Array<ITask> = [];
     await new Promise<void>((resolve, reject) => {
-        const request = userDB!.transaction('task', 'readonly').objectStore('task')
+        const request = db.user!.transaction('task', 'readonly').objectStore('task')
             .index('next').openCursor(blevel == 'never' ? undefined : IDBKeyRange.upperBound(now()), "prev");
         request.onerror = reject;
         request.onsuccess = () => {
             const cursor = request.result;
             if (!cursor) return resolve();
             const task = cursor.value as ITask;
-            if ((!taskType || task.type == taskType) && (!tag || vocabulary![task.word]?.includes(tag)) && (!blevel || bLevelIncludes(blevel, task.level)))
+            if ((!taskTypes || taskTypes.includes(task.type)) && (!tag || vocabulary![task.word]?.includes(tag)) && (!blevel || bLevelIncludes(blevel, task.level)))
             tasks.push(task);
             if (tasks.length < sprintNumber) cursor.continue();
             else resolve(); 
@@ -351,19 +375,29 @@ export const searchWord = async (word: string) => {
     return { ...task, ...dict } as IStudy;
 };
 
-export const init = async (user: string) => {
-    dictDB = await openDictDB();
-    const res1 = await fetch(vocabularyUrl, { cache: 'force-cache' });
-    if (res1.ok) {
-        vocabulary = {};
-        for (const line of (await res1.text()).split('\n')) {
-            const [word, ...tags] = line.split(/[,:] */).map(w=>w.trim());
+export const init = async () => {
+    db.dict = await openDictDB();
+    db.user = await openUserDB(signals.user.peek());
+    if (signals.setting.peek().format != settingFormat) {
+        const res1 = await fetch('/setting');
+        if (res1.ok) setSetting(await res1.json());
+    }
+    const res2 = await fetch(vocabularyUrl, { cache: 'force-cache' });
+    if (res2.ok) {
+        const delimiter = /[,:] */;
+        for (const line of (await res2.text()).split('\n')) {
+            const [word, ...tags] = line.split(delimiter).map(w=>w.trim());
             vocabulary[word] = tags as Array<Tag>;
         }
     }
-    const res2 = await fetch(revisionUrl, { cache: 'force-cache' });
-    if (res2.ok) revision = yamlParse(await res2.text()) as Record<string, string>;
-    userDB = await openUserDB(user);
+    const res3 = await fetch(revisionUrl, { cache: 'force-cache' });
+    if (res3.ok) {
+        const delimiter = /: */;
+        for (const line of (await res3.text()).split('\n')) {
+            const [word, replace] = line.split(delimiter);
+            revision[word] = replace;
+        }
+    }
     if (vocabularyUrl !== getVocabularyUrl()) {
         clearTasks();
         setVocabularyUrl(vocabularyUrl);

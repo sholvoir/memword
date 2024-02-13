@@ -1,10 +1,8 @@
-import Tab from './tab.tsx';
+import { signals, showDialog } from '../lib/mem.ts';
+import Dialog from './dialog.tsx';
 import RButton from './button-ripple.tsx';
 
-interface IAboutProps {
-    handleMenuClick: (e: Event) => void
-}
-export default ({handleMenuClick}: IAboutProps) => <Tab title="快乐背单词">
+export default () => <Dialog title="快乐背单词" noback={!signals.user.value}>
     <div class="[&>div]:w-full [&>div]:min-h-80 [&>div]:p-5 [&>div]:flex [&>div]:flex-col [&>div]:justify-center [&>div>h1]:mb-4 [&>div>h1]:text-5xl [&>div>p]:text-2xl font-extrabold">
         <div class="bg-slate-200 text-slate-800">
             <h1>语言基础</h1>
@@ -24,7 +22,7 @@ export default ({handleMenuClick}: IAboutProps) => <Tab title="快乐背单词">
         </div>
         <div class="bg-slate-200 text-slate-800">
             <h1>开始学习</h1>
-            <p>使用你的电子邮件，单击<RButton class="w-32 bg-orange-400 hover:bg-orange-500" title="login" onClick={handleMenuClick}>登录</RButton>开始免费学习吧。</p>
+            <p>使用你的电子邮件，单击<RButton class="w-32 bg-orange-400 hover:bg-orange-500" title="login" onClick={() => showDialog('login')}>登录</RButton>开始免费学习吧。</p>
         </div>
         <div class="bg-slate-800 text-slate-300">
             <h1>微信</h1>
@@ -35,4 +33,4 @@ export default ({handleMenuClick}: IAboutProps) => <Tab title="快乐背单词">
             <p>*提示二：请使用「共享」-「添加到主屏幕」（iOS）或「...」-「安装应用」（Android）安装 <b>Web应用</b>，以便下次直接点击进入。</p>
         </div>
     </div>
-</Tab>;
+</Dialog>;

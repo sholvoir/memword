@@ -1,11 +1,11 @@
-import Tab from './tab.tsx';
+import Dialog from './dialog.tsx';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconCircleCaretRight from "tabler_icons/circle-caret-right.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 
-export default () => <Tab title="帮助"><ol class="list-decimal py-2 pr-2 pl-8 [&>li]:mx-2">
+export default () => <Dialog title="帮助"><ol class="list-decimal py-2 pr-2 pl-8 [&>li]:mx-2">
     <li>如何使用本软件？
         <br/>答：点击「学习」，开始学习即可；在学习界面，会显示一个单词，或播放一小段声音，取决于你正在练习听力还是阅读，在心里默想一个概念（意思），点击「答案」，检查是否和自己默想的答案一致，如果一致，点击「知道」，否则点击「不会」。记住，要快速完成，不要在一个词上长时间停留，那样只会降低效率，我们的方法是快速/多次，从记忆效率来讲，次数的作用远远大于时长。这个方法称为大脑按摩，直接在拼写/声音和概念之间建立反射弧，所以不要犹豫，快速完成一个小冲刺。
     </li>
@@ -32,4 +32,4 @@ export default () => <Tab title="帮助"><ol class="list-decimal py-2 pr-2 pl-8 
     <li>以后有AI翻译了，我还用得着学英语吗？
         <br/>答：AI或者任意翻译工具甚至包括人工翻译，都只能解决浅表问题，因为一门语言是无法准确表达另一门语言的含义的，一门语言的背后代表着文化和思维模式，这些深层次的东西是任何翻译都无法解决的。如果你有计划去英语文华圈生活/学习/工作，那你必需亲自用人脑学好它，仅仅翻译工具是不够的。
     </li>
-</ol></Tab>
+</ol></Dialog>

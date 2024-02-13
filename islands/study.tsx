@@ -1,9 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { useEffect, useRef } from "preact/hooks";
-import { Signal, useSignal, useComputed } from "@preact/signals";
-import { IStudy } from "../lib/istudy.ts";
-import { IStats } from '../lib/istat.ts'
-import * as mem from '../lib/mem.ts';
+import { useSignal, useComputed } from "@preact/signals";
+import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask } from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
@@ -14,23 +12,21 @@ import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import Dialog from './dialog.tsx';
 
-interface StudyProps {
-    stats: Signal<IStats>;
-    studies: Signal<Array<IStudy>>;
-    showTips: (content: string) => void;
-    onFinish: () => void;
-};
-
-export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
+export default () => {
     const index = useSignal(0);
     const isPhaseAnswer = useSignal(false);
-    const study = useSignal(studies.value[index.value]);
-    const shouldSound = useComputed(() => isPhaseAnswer.value || study.value.type == 'L');
-    const shouldSpell = useComputed(() => isPhaseAnswer.value || study.value.type == 'R');
-    const finish = () => { stats.value = { ...stats.value }; onFinish() }
-    if (!study.value) return (finish(), <div/>);
-    const player = useRef<HTMLAudioElement>(null);
+    const current = useSignal(signals.studies.value[index.value]);
+    const shouldSound = useComputed(() => isPhaseAnswer.value || current.value.type == 'L');
+    const shouldSpell = useComputed(() => isPhaseAnswer.value || current.value.type == 'R');
 
+    const finish = () => {
+        closeDialog();
+        signals.stats.value = { ...signals.stats.value };
+        updateStats(signals.stats.value);
+        syncTasks();
+    }
+    if (!current.value) return (finish(), <div/>);
+    const player = useRef<HTMLAudioElement>(null);
     const handleKeyPress = (event: any) => {
         event.preventDefault();
         switch (event.keyCode) {
@@ -43,44 +39,44 @@ export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
         }
     };
     const handleSpeakIt = () => {
-        if (study.value.sound && shouldSound.value) player.current?.play();
+        if (current.value.sound && shouldSound.value) player.current?.play();
     };
     const handleShowAnswer = () => isPhaseAnswer.value = true;
     const handleIKnown = async () => {
-        await mem.study(study.value, stats.value);
+        await study(current.value, signals.stats.value);
         handleNext();
     };
     const handleSkilled = async () => {
-        study.value.level = 14;
+        current.value.level = 14;
         await handleIKnown();
     }
     const handleDontKnow = () => {
-        study.value.level = 0;
+        current.value.level = 0;
         handleIKnown();
     };
     const handleNext = () => {
-        if (index.value >= studies.value.length) return finish();
-        study.value = studies.value[++index.value];
+        if (index.value >= signals.studies.value.length) return finish();
+        current.value = signals.studies.value[++index.value];
         isPhaseAnswer.value = false;
     };
     const handlePrevious = () => {
         if (index.value <= 0) return finish();
-        study.value = studies.value[--index.value];
+        current.value = signals.studies.value[--index.value];
         isPhaseAnswer.value = false;
     };
     const handleRefresh = async () => {
-        const dict: any = await mem.getDiction(study.value.word, true);
-        study.value = { ...study.value, ...dict };
+        const dict: any = await getDiction(current.value.word, true);
+        current.value = { ...current.value, ...dict };
     };
     const handleReportIssue = async () => {
-        const resp = await mem.submitIssue(study.value.word);
+        const resp = await submitIssue(current.value.word);
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
     const handleDeleteTask = async () => {
-        await mem.removeTask(study.value.type, study.value.word);
-        studies.value = [...studies.value.slice(0, index.value), ...studies.value.slice(index.value+1)];
-        study.value = studies.value[index.value];
+        await removeTask(current.value.type, current.value.word);
+        signals.studies.value = [...signals.studies.value.slice(0, index.value), ...signals.studies.value.slice(index.value+1)];
+        current.value = signals.studies.value[index.value];
         isPhaseAnswer.value = false;
     }
     useEffect(() => {
@@ -88,13 +84,13 @@ export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="pt-2 h-full flex flex-col bg-cover bg-center [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]" style={(isPhaseAnswer.value && study.value.pic) ? `background-image: url(${study.value.pic});` : ''}>
+        <div class="pt-2 h-full flex flex-col bg-cover bg-center [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]" style={(isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="px-2 flex gap-2 text-lg">
                 <SButton disabled={index.value <= 0} onClick={handlePrevious}>
                     <IconChevronsLeft class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6" />
                 </SButton>
-                <div>{index.value+1}/{studies.value.length}</div>
-                <SButton disabled={index.value >= studies.value.length} onClick={handleNext}>
+                <div>{index.value+1}/{signals.studies.value.length}</div>
+                <SButton disabled={index.value >= signals.studies.value.length} onClick={handleNext}>
                     <IconChevronsRight class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6" />
                 </SButton>
                 <div class="grow"/>
@@ -110,16 +106,16 @@ export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
                 <SButton disabled={!isPhaseAnswer.value} onClick={handleRefresh}>
                     <IconRefresh class="bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6"/>
                 </SButton>
-                <div>{study.value.level}</div>
+                <div>{current.value.level}</div>
             </div>
             <div class="px-2 h-10">
-                {shouldSpell.value && <span class="text-4xl font-bold">{study.value.word}</span>}
+                {shouldSpell.value && <span class="text-4xl font-bold">{current.value.word}</span>}
             </div>
             <div class="grow flex">
                 <div class="grow text-2xl">
                     {isPhaseAnswer.value && <>
-                        <div class="pl-2 pt-2">{study.value.phonetic}</div>
-                        <div class="pl-2 pb-2">{study.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
+                        <div class="pl-2 pt-2">{current.value.phonetic}</div>
+                        <div class="pl-2 pb-2">{current.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>
                     </>}
                 </div>
                 <div class="shrink-0 p-2 flex flex-col gap-4 text-lg justify-center">
@@ -129,7 +125,7 @@ export default ({ stats, studies, showTips, onFinish }: StudyProps) => {
                     <NButton onClick={handleDontKnow} title="Z/M" disabled={!isPhaseAnswer.value}>不会</NButton>
                 </div>
             </div>
-            <audio ref={player} src={shouldSound.value ? study.value.sound : undefined} autoplay/>
+            <audio ref={player} src={shouldSound.value ? current.value.sound : undefined} autoplay/>
         </div>
     </Dialog>;
 }
