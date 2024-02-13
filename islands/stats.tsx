@@ -1,18 +1,19 @@
-import { Tags } from "vocabulary/tag.ts";
+import { Tag, Tags } from "vocabulary/tag.ts";
 import { TagName } from '../lib/tag.ts';
 import { BLevelName, BLevels } from "../lib/istat.ts";
-import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
+import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { iStatToIBStat } from "../lib/istat.ts";
 import { signals, startStudy } from '../lib/mem.ts';
 
 export default () => {
     const getResult = () => {
         const result = [];
-        for (const taskType of TaskTypes) for (const tag of Tags) {
+        for (const tt of signals.setting.value.wordBooks) {
+            const taskType = tt[0] as TaskType;
+            const tag = tt.slice(1) as Tag;
             const statAll = iStatToIBStat(signals.stats.value.all[taskType][tag]);
-            const statTask = iStatToIBStat(signals.stats.value.task[taskType][tag])
-            const all = signals.stats.value.all[taskType][tag].reduce((s,b) => s + b, 0);
-            if (signals.setting.value.wordBooks.includes(`${taskType}${tag}`)) {
+                const statTask = iStatToIBStat(signals.stats.value.task[taskType][tag])
+                const all = signals.stats.value.all[taskType][tag].reduce((s,b) => s + b, 0);
                 result.push(<div class="grow min-w-80 grid gap-x-1 grid-cols-[max-content_1fr] items-center">
                     <div class="col-span-2 text-center font-bold">
                         <a class="hover:cursor-pointer hover:underline" onClick={() => startStudy(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {all}</a>
@@ -31,7 +32,6 @@ export default () => {
                         </>
                     })}
                 </div>);
-            }
         }
         return result;
     }
