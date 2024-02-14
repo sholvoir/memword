@@ -15,7 +15,7 @@ export default (props: ISlectProps & JSX.HTMLAttributes<HTMLFieldSetElement>) =>
         if (index > -1) binding.value = [...binding.value.slice(0,index), ...binding.value.slice(index + 1)];
         else binding.value = [...binding.value, value];
     }
-    return <fieldset class={`overflow-y-auto border border-solid border-gray-500 p-2 flex flex-col gap-1 aria-disabled:opacity-50 fill-slate-800 dark:fill-slate-300 dark:[scrollbar-color:#888_#0000] ${className ?? ''}`} aria-disabled={disabled} {...rest}>
+    return <fieldset class={`overflow-y-auto border border-solid border-gray-500 p-2 flex flex-col gap-1 aria-disabled:opacity-50 fill-slate-800 dark:fill-slate-300 [scrollbar-color:#64748B_transparent] ${className ?? ''}`} aria-disabled={disabled} {...rest}>
         <legend>{title}</legend>
         {options.map(option =>
             <div class="flex gap-1 cursor-pointer items-center hover:bg-slate-300 dark:hover:bg-slate-700" title={option.value as any} onClick={handleOptionClick}>

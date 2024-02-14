@@ -68,10 +68,7 @@ const revision: Record<string, string> = {};
 const db = {} as { dict: IDBDatabase, user: IDBDatabase };
 
 export const getAuth = () => Cookies.get('auth');
-export const getUser = () => {
-    const token = getAuth();
-    return token ? (jwtDecode(token)[1] as Payload).aud as string : '';
-};
+export const getUser = () => { const token = getAuth(); return token ? (jwtDecode(token)[1] as Payload).aud as string : '' };
 
 const setVocabularyUrl = (url: string) => localStorage.setItem('_vocabulary_url', url);
 const getVocabularyUrl = () => localStorage.getItem('_vocabulary_url');
@@ -105,6 +102,26 @@ const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
     request.onupgradeneeded = () => request.result.createObjectStore('dict', { keyPath: 'word' });
 });
 
+const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(user, 1);
+    request.onerror = reject;
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = () => {
+        const db = request.result;
+        const kvStore = db.createObjectStore('kv', { keyPath: 'key' });
+        kvStore.put({ key: '_sync-time', value: 0 });
+        const taskStore = db.createObjectStore('task', { keyPath: ['type', 'word'] });
+        taskStore.createIndex('last', 'last');
+        taskStore.createIndex('next', 'next');
+    };
+});
+
+export const close = () => {
+    if (updateStatsTimer) clearTimeout(updateStatsTimer);
+    db.user?.close();
+    db.dict?.close();
+};
+
 export const getDiction = async (word: string, refresh?: boolean): Promise<IDiction|undefined> => {
     let dict: IDiction|undefined = undefined;
     if (!refresh) {
@@ -125,23 +142,6 @@ export const getDiction = async (word: string, refresh?: boolean): Promise<IDict
     }
     return dict;
 };
-
-const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(user, 1);
-    request.onerror = reject;
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = () => {
-        const db = request.result;
-        const kvStore = db.createObjectStore('kv', { keyPath: 'key' });
-        kvStore.put({ key: '_sync-time', value: 0 });
-        const taskStore = db.createObjectStore('task', { keyPath: ['type', 'word'] });
-        taskStore.createIndex('last', 'last');
-        taskStore.createIndex('next', 'next');
-    };
-});
-
-export const close = () => { db.user?.close(); db.dict?.close() };
-
 export const removeAuth = async (cleanUser: boolean, cleanDict: boolean) => {
     close();
     if (cleanDict) await new Promise((resolve, reject) => {
@@ -320,7 +320,9 @@ export const getStats = () => {
     return initStats();
 };
 
+let updateStatsTimer: number|undefined = undefined;
 export const updateStats = () => new Promise<void>((resolve, reject) => {
+    if (updateStatsTimer) (clearTimeout(updateStatsTimer), updateStatsTimer = undefined);
     const stats = signals.stats.value;
     const nstats: IStats = { format: stats.format, time: now(), all: stats.all, task: stats.task };
     const request = db.user!.transaction('task', 'readonly').objectStore('task')
@@ -331,6 +333,7 @@ export const updateStats = () => new Promise<void>((resolve, reject) => {
         if (!cursor) {
             localStorage.setItem('_stats', JSON.stringify(nstats));
             signals.stats.value = nstats;
+            updateStatsTimer = setTimeout(updateStats, 5*60*1000);
             return resolve();
         }
         const task = cursor.value as ITask;
