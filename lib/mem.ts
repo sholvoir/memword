@@ -219,9 +219,9 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
         if (vocabulary![word]?.includes(tag)) objectStore.get([type, word]).onsuccess = (e) => {
             const task = (e.target as IDBRequest).result as ITask;
             if (!task) {
-                const task: ITask = {type, word, last: time, next: 0, level: 0};
-                addTaskToStats(stats, task);
-                objectStore.add(stats);
+                const ntask: ITask = {type, word, last: time, next: 0, level: 0};
+                addTaskToStats(stats, ntask);
+                objectStore.add(ntask);
             }
         }
     }
