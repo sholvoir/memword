@@ -12,8 +12,8 @@ import { IStudy } from "./istudy.ts";
 
 const settingFormat = '0.0.3';
 const statsFormat = '0.0.2';
-const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.5/vocabulary.txt';
-const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.5/revision.txt';
+const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.6/vocabulary.txt';
+const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.6/revision.txt';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
