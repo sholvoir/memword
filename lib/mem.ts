@@ -383,7 +383,7 @@ export const searchWord = async (word: string) => {
 
 export const init = async () => {
     const user = signals.user.peek();
-    if (!user) return;
+    if (!user) return showDialog({dial: 'about'});
     db.dict = await openDictDB();
     db.user = await openUserDB(user);
     const res1 = await fetch('/setting');
