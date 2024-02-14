@@ -8,7 +8,7 @@ export const handler: Handlers<any, MemState> = {
     async GET(req, ctx) {
         const resp = await ctx.render();
         if (!ctx.state.user) return resp;
-        return await setAuth(req, resp, ctx.state.user);
+        return await setAuth(resp, ctx.state.user);
     }
 }
 

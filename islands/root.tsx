@@ -4,7 +4,7 @@ import { useComputed, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { IStudy } from "../lib/istudy.ts";
 import { ISetting } from "../lib/isetting.ts";
-import { signals, Dial, startStudy, getUser, getSetting, getStats, showDialog, hideTips, init, close, IDialog } from "../lib/mem.ts";
+import { signals, startStudy, getUser, getSetting, getStats, showDialog, hideTips, init, close, IDialog } from "../lib/mem.ts";
 import Start from './start.tsx';
 import Stats from './stats.tsx';
 import About from './about.tsx';

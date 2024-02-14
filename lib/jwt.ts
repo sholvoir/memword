@@ -5,15 +5,8 @@ export const jwt = new JWT({ iss: 'sholvoir.com', sub: 'memword' });
 await jwt.importKey(Deno.env.get('MEM_KEY'));
 
 const maxAge = 180 * 24 * 60 * 60;
-export const setAuth = async (req: Request, resp: Response, aud: string) => {
-    const domain = new URL(req.url).hostname.split('.');
-    while (domain.length > 2) domain.shift();
-    const cookie: Cookie = {
-        name: 'auth',
-        value: await jwt.createToken(maxAge, { aud }),
-        maxAge,
-        domain: domain.join('.')
-    };
+export const setAuth = async (resp: Response, aud: string) => {
+    const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge };
     setCookie(resp.headers, cookie);
     return resp;
 }
