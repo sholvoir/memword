@@ -12,8 +12,8 @@ import { IStudy } from "./istudy.ts";
 
 const settingFormat = '0.0.3';
 const statsFormat = '0.0.2';
-const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/vocabulary.txt';
-const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.3/revision.txt';
+const vocabularyUrl = 'https://www.sholvoir.com/vocabulary/0.0.4/vocabulary.txt';
+const revisionUrl = 'https://www.sholvoir.com/vocabulary/0.0.4/revision.txt';
 const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
@@ -356,8 +356,10 @@ export const getEpisode = async (sprintNumber: number, taskTypes?: string, tag?:
             const cursor = request.result;
             if (!cursor) return resolve();
             const task = cursor.value as ITask;
-            if ((!taskTypes || taskTypes.includes(task.type)) && (!tag || vocabulary![task.word]?.includes(tag)) && (!blevel || bLevelIncludes(blevel, task.level)))
-            tasks.push(task);
+            if ((!taskTypes || taskTypes.includes(task.type))
+                && (!tag || vocabulary![task.word]?.includes(tag))
+                && (!blevel || bLevelIncludes(blevel, task.level)))
+                tasks.push(task);
             if (tasks.length < sprintNumber) cursor.continue();
             else resolve(); 
         }
