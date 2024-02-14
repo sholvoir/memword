@@ -23,7 +23,7 @@ export default () => {
     const finish = () => {
         closeDialog();
         signals.stats.value = { ...signals.stats.value };
-        updateStats(signals.stats.value);
+        updateStats();
         syncTasks();
     }
     if (!current.value) return (finish(), <div/>);

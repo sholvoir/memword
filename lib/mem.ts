@@ -214,10 +214,15 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
+    const stats = signals.stats.value;
     for (const type of types) for (const word in vocabulary!) {
         if (vocabulary![word]?.includes(tag)) objectStore.get([type, word]).onsuccess = (e) => {
             const task = (e.target as IDBRequest).result as ITask;
-            if (!task) objectStore.add({type, word, last: time, next: 0, level: 0})
+            if (!task) {
+                const task: ITask = {type, word, last: time, next: 0, level: 0};
+                addTaskToStats(stats, task);
+                objectStore.add(stats);
+            }
         }
     }
 });
@@ -311,16 +316,18 @@ export const getStats = () => {
     return initStats();
 };
 
-export const updateStats = (stats: IStats) => new Promise<IStats>((resolve, reject) => {
+export const updateStats = () => new Promise<void>((resolve, reject) => {
+    const stats = signals.stats.value;
     const nstats: IStats = { format: stats.format, time: now(), all: stats.all, task: stats.task };
     const request = db.user!.transaction('task', 'readonly').objectStore('task')
-        .index('next').openCursor(IDBKeyRange.bound(stats.time, nstats.time, false, true));
+        .index('next').openCursor(IDBKeyRange.bound(stats.time, nstats.time));
     request.onerror = reject;
     request.onsuccess = () => {
         const cursor = request.result;
         if (!cursor) {
             localStorage.setItem('_stats', JSON.stringify(nstats));
-            return resolve(nstats);
+            signals.stats.value = nstats;
+            return resolve();
         }
         const task = cursor.value as ITask;
         removeTaskFromStats(stats, task);
