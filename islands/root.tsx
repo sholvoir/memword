@@ -56,6 +56,6 @@ export default () => {
             <RButton class="stroke-slate-800 dark:stroke-slate-300 grow" onClick={()=>showDialog({dial:'menu'})}><svg class="w-9 h-9 inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" stroke-width="4" fill="none"><circle cx="32" cy="20" r="15"/><path d="M3 57a28 28 0 0158 0z"/></svg>我</RButton>
         </div>}
         {signals.dialogs.value.map(dialog)}
-        <div class="fixed top-0 inset-x-0 text-center" style="background-color:#ff08" onClick={hideTips}>{signals.tips.value}</div>
+        <div class="fixed top-0 inset-x-0 h-[38px] bg-yellow-300 text-black text-center" onClick={hideTips}>{signals.tips.value}</div>
     </>;
 }
