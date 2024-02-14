@@ -219,12 +219,16 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
         if (vocabulary![word]?.includes(tag)) objectStore.get([type, word]).onsuccess = (e) => {
             const task = (e.target as IDBRequest).result as ITask;
             if (!task) {
-                const ntask: ITask = {type, word, last: time, next: 0, level: 0};
-                addTaskToStats(stats, ntask);
+                const ntask: ITask = { type, word, last: 0, next: MAX_NEXT, level: 0 };
+                removeTaskFromStats(ntask, stats);
+                ntask.last = time;
+                ntask.next = 0;
+                addTaskToStats(ntask, stats);
                 objectStore.add(ntask);
             }
         }
     }
+    signals.stats.value = {...stats};
 });
 
 export const clearTasks = async () => {
@@ -268,13 +272,13 @@ export const study = ({ type, word, level }: ITask, stats: IStats) => new Promis
     objectStore.get([type, word]).onsuccess = (e) => {
         const task = (e.target as IDBRequest).result as ITask;
         if (task) {
-            removeTaskFromStats(stats, task);
+            removeTaskFromStats(task, stats);
             task.level = level;
             task.last = now();
             const next = times[task.level++];
             task.next = next ? task.last + next : MAX_NEXT;
             objectStore.put(task);
-            addTaskToStats(stats, task);
+            addTaskToStats(task, stats);
         }
     }
 });
@@ -292,14 +296,14 @@ const initStats = () => {
     return stats;
 };
 
-const addTaskToStats = (stats: IStats, task: ITask) => {
+const addTaskToStats = (task: ITask, stats: IStats) => {
     const tags = vocabulary![task.word];
     if (tags) for (const tag of tags) {
         stats.all[task.type][tag][task.level]++;
         if (task.next < stats.time) stats.task[task.type][tag][task.level]++;
     }
 };
-const removeTaskFromStats = (stats: IStats, task: ITask) => {
+const removeTaskFromStats = (task: ITask, stats: IStats) => {
     const tags = vocabulary![task.word];
     if (tags) for (const tag of tags) {
         stats.all[task.type][tag][task.level]--;
@@ -330,8 +334,8 @@ export const updateStats = () => new Promise<void>((resolve, reject) => {
             return resolve();
         }
         const task = cursor.value as ITask;
-        removeTaskFromStats(stats, task);
-        addTaskToStats(nstats, task);
+        removeTaskFromStats(task, stats);
+        addTaskToStats(task, nstats);
         cursor.continue();
     }
 });
@@ -349,7 +353,7 @@ export const totalStats = () => new Promise<IStats>((resolve, reject) => {
     for (const type of TaskTypes) for (const word in vocabulary!)
         objectStore.get([type, word]).onsuccess = (e) => {
             const task = (e.target as IDBRequest).result as ITask;
-            addTaskToStats(stats, task ?? { type, word, last: 0, next: MAX_NEXT, level: 0 });
+            addTaskToStats(task ?? { type, word, last: 0, next: MAX_NEXT, level: 0 }, stats);
         }
 });
 
