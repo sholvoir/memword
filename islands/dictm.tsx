@@ -1,8 +1,8 @@
-import { Signal, useComputed, useSignal } from "@preact/signals";
+import { Signal, useSignal } from "@preact/signals";
 import { useRef } from "preact/hooks";
 import { IStudy } from '../lib/istudy.ts';
 import { IDict } from "dict/lib/idict.ts";
-import { signals, showTips } from "../lib/mem.ts";
+import { signals, showTips, getAuth } from "../lib/mem.ts";
 import SButton from './button-anti-shake.tsx';
 import NButton from './button-normal.tsx';
 import TInput from './input-text.tsx';
@@ -23,7 +23,7 @@ export default (props: {study?: Signal<IStudy>}) => {
         const dict: IDict = { pic: pic.value, trans: trans.value, sound: sound.value, phonetic: phonetic.value };
         current.value = { ...current.value, ...dict };
         const res = await fetch(`${baseApi}/${encodeURIComponent(current.value.word)}`,
-            { mode: 'cors', credentials: "include", method: 'PATCH', body: JSON.stringify(dict), headers: { Origin: 'sholvoir.com'} });
+            { method: 'PATCH', body: JSON.stringify(dict), headers: { Authorization: `Bearer ${getAuth()}`} });
         if (res.ok) showTips(`success update word "${current.value.word}"!`);
         else showTips(`Error: ${res.status}`);
     };

@@ -67,8 +67,9 @@ const vocabulary: Record<string, Array<Tag>> = {};
 const revision: Record<string, string> = {};
 const db = {} as { dict: IDBDatabase, user: IDBDatabase };
 
+export const getAuth = () => Cookies.get('auth');
 export const getUser = () => {
-    const token = Cookies.get('auth');
+    const token = getAuth();
     return token ? (jwtDecode(token)[1] as Payload).aud as string : '';
 };
 
