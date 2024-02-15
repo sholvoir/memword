@@ -29,7 +29,6 @@ export default () => {
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
     const handleKeyPress = (event: any) => {
-        event.preventDefault();
         switch (event.keyCode) {
             case 44: case 60: handlePrevious(); break;
             case 66: case 98: case 67: case 99: handleSpeakIt(); break;
