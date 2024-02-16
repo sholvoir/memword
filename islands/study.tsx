@@ -87,7 +87,7 @@ export default () => {
         return () => removeEventListener('keypress', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="p-2 h-full flex flex-col bg-cover bg-center text_thick-shadow" style={(isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+        <div class="p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow" style={(isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <SButton disabled={index.value <= 0} onClick={handlePrevious}><IconChevronsLeft class="bg-round-6"/></SButton>
                 <div>{index.value+1}/{signals.studies.value.length}</div>

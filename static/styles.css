@@ -4,7 +4,7 @@
 
 @layer base {
     input, textarea {
-        border-color: #888;
+        border-color: #78716C;
         background-color: transparent;
         outline: none;
     }
@@ -23,7 +23,7 @@
     .bg-round-6 {
         @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
     }
-    .text_thick-shadow {
+    .text-thick-shadow {
         @apply [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]
     }
 }

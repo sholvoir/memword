@@ -28,12 +28,12 @@ export default (props: {study?: Signal<IStudy>}) => {
         else showTips(`Error: ${res.status}`);
     };
     return <Dialog title="词典维护">
-        <div class="p-2 h-full flex flex-col gap-2 bg-cover bg-center text_thick-shadow" style={pic.value ? `background-image: url(${pic.value});` : ''}>
+        <div class="p-2 h-full flex flex-col gap-2 bg-cover bg-center text-thick-shadow" style={pic.value ? `background-image: url(${pic.value});` : ''}>
             <div class="text-4xl font-bold">{current.value.word}</div>
-            <TInput class="text_thick-shadow" name="phonetic" binding={phonetic}/>
-            <AInput class="grow text_thick-shadow" name="trans" binding={trans}/>
-            <AInput class="h-32 text_thick-shadow" name="pic" binding={pic}/>
-            <AInput class="grow text_thick-shadow" name="sound" binding={sound}/>
+            <TInput class="text-thick-shadow" name="phonetic" binding={phonetic}/>
+            <AInput class="grow text-thick-shadow" name="trans" binding={trans}/>
+            <AInput class="h-32 text-thick-shadow" name="pic" binding={pic}/>
+            <AInput class="grow text-thick-shadow" name="sound" binding={sound}/>
             <div class="w-full flex gap-2 justify-between">
                 <NButton class="w-20" disabled={!signals.admin.value} onClick={handleUpdateClick}>Update</NButton>
                 <SButton disabled={!sound.value} onClick={handlePlayClick}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
