@@ -33,6 +33,7 @@ interface GlobeSignals {
     stats: Signal<IStats>;
     studies: Signal<Array<IStudy>>;
     tips: Signal<string>;
+    isPhaseAnswer: Signal<boolean>;
 }
 
 export const signals = {} as GlobeSignals;
@@ -49,6 +50,7 @@ export const startStudy = async (taskTypes?: string, tag?: Tag, blevel?: BLevel)
         if (!taskTypes && !tag && !blevel) showDialog({ dial: 'start' });
     } else {
         signals.studies.value = ts;
+        signals.isPhaseAnswer.value = false;
         showDialog({ dial: 'study' });
     }
 };

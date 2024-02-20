@@ -30,6 +30,7 @@ export default () => {
     signals.stats  = useSignal(getStats());
     signals.studies = useSignal<Array<IStudy>>([]);
     signals.tips = useSignal('');
+    signals.isPhaseAnswer = useSignal(false);
 
     const dialog = ({dial, ...rest}: IDialog) => { switch (dial) {
         case "wait": return <Waiting {...rest}/>;

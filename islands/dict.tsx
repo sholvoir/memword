@@ -12,6 +12,7 @@ export default () => {
         closeDialog();
         if (!ts) showTips('Not Found!'); else {
             signals.studies.value = [ts];
+            signals.isPhaseAnswer.value = true;
             showDialog({ dial: 'study' });
         }
     }
