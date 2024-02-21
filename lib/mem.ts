@@ -33,6 +33,7 @@ interface GlobeSignals {
     stats: Signal<IStats>;
     studies: Signal<Array<IStudy>>;
     tips: Signal<string>;
+    initDone: Signal<boolean>;
     isPhaseAnswer: Signal<boolean>;
 }
 
@@ -429,4 +430,5 @@ export const init = async () => {
     signals.stats.value = await totalStats();
     if (vocabularyUrl !== oldVocabularyUrl) { setVocabularyUrl(vocabularyUrl); closeDialog(); }
     if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) showDialog({ dial: 'start' });
+    signals.initDone.value = true;
 };
