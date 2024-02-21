@@ -82,12 +82,8 @@ export default () => {
         current.value = signals.studies.value[index.value];
         signals.isPhaseAnswer.value = false;
     }
-    useEffect(() => {
-        addEventListener('keypress', handleKeyPress);
-        return () => removeEventListener('keypress', handleKeyPress);
-    }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow" style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+        <div class="p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={0} onKeyPress={handleKeyPress} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <SButton disabled={index.value <= 0} onClick={handlePrevious}><IconChevronsLeft class="bg-round-6"/></SButton>
                 <div>{index.value+1}/{signals.studies.value.length}</div>
