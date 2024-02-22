@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { useEffect, useRef } from "preact/hooks";
+import { useRef } from "preact/hooks";
 import { useSignal, useComputed } from "@preact/signals";
 import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
@@ -28,14 +28,15 @@ export default () => {
     }
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
-    const handleKeyPress = (event: any) => {
-        switch (event.keyCode) {
-            case 44: case 60: handlePrevious(); break;
-            case 66: case 98: case 67: case 99: handleSpeakIt(); break;
-            case 32: if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
-            case 78: case 88: case 110: case 120: if (signals.isPhaseAnswer.value) handleIKnown(); break;
-            case 77: case 90: case 109: case 122: if (signals.isPhaseAnswer.value) handleDontKnow(); break;
-            case 46: case 62: handleNext();
+    const handleKeyPress = (event: KeyboardEvent ) => {
+        if (event.isComposing) return;
+        switch (event.code) {
+            case 'Comma': handlePrevious(); break;
+            case 'Period': handleNext(); break;
+            case 'KeyB': case 'KeyC': handleSpeakIt(); break;
+            case 'Space': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
+            case 'KeyN': case 'KeyX': if (signals.isPhaseAnswer.value) handleIKnown(); break;
+            case 'KeyM': case 'KeyZ': if (signals.isPhaseAnswer.value) handleDontKnow(); break;
         }
     };
     const handleSpeakIt = () => {
@@ -83,7 +84,7 @@ export default () => {
         signals.isPhaseAnswer.value = false;
     }
     return <Dialog title="学习" onCancel={finish}>
-        <div class="p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={0} onKeyPress={handleKeyPress} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+        <div class="p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onKeyUp={handleKeyPress} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <SButton disabled={index.value <= 0} onClick={handlePrevious}><IconChevronsLeft class="bg-round-6"/></SButton>
                 <div>{index.value+1}/{signals.studies.value.length}</div>
