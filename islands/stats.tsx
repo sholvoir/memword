@@ -12,10 +12,11 @@ export default () => {
         const push = (taskType: TaskType, tag: Tag) => {
             const statAll = iStatToIBStat(signals.stats.value.all[taskType][tag]);
             const statTask = iStatToIBStat(signals.stats.value.task[taskType][tag])
+            const task = signals.stats.value.task[taskType][tag].reduce((s,b) => s + b, 0);
             const all = signals.stats.value.all[taskType][tag].reduce((s,b) => s + b, 0);
             result.push(<div class="grow min-w-80 grid gap-x-1 grid-cols-[max-content_1fr] items-center">
                 <div class="col-span-2 text-center font-bold">
-                    <a class="hover:cursor-pointer hover:underline" onClick={() => startStudy(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {all}</a>
+                    <a class="hover:cursor-pointer hover:underline" onClick={() => startStudy(taskType, tag)}>{TaskTypeName[taskType]}-{TagName[tag]} - {task}|{all}</a>
                 </div>
                 {BLevels.map(blevel => {
                     const value = statAll[blevel];
