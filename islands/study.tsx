@@ -98,25 +98,38 @@ export default () => {
         if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
             div.style.left = `${endX - startX}px`;
             div.style.top = '0';
-        } else if (signals.isPhaseAnswer) {
+        } else if (signals.isPhaseAnswer.value) {
             div.style.left = '0';
             div.style.top = `${endY - startY}px`;
         }
     };
+    const moveDivHThenRun = (div: HTMLDivElement, x: number, handle: () => void) => {
+        endX += x;
+        if (endX - startX > div.clientWidth || endX - startX < -div.clientWidth) (handle(), setTimeout(() => {div.style.left = '0'}, 10));
+        else (div.style.left = `${endX - startX}px`, setTimeout(moveDivHThenRun, 20, div, x, handle));
+    };
+    const moveDivVThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
+        endY += y;
+        if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) (handle(), setTimeout(() => {div.style.top = '0'}, 10));
+        else (div.style.top = `${endY - startY}px`, setTimeout(moveDivVThenRun, 20, div, y, handle));
+    }
     const handleTouchEnd = (e: Event) => {
         const div = e.currentTarget as HTMLDivElement;
-        div.style.top = '0';
-        div.style.left = '0';
         if (Math.abs(endX - startX) < 1 && Math.abs(endY - startY) < 1) {
+            console.log('TouchEnd', startX, startY, endX, endY);
+            div.style.top = '0';
+            div.style.left = '0';
             const rect = div.getBoundingClientRect();
             if (startY > rect.top + rect.height / 2) handleShowAnswer();
-            else handleSpeakIt();
+            else if (startY > rect.top + 36) handleSpeakIt();
         } else if (Math.abs(endX - startX) > Math.abs(endY - startY)) {
-            if (endX - startX >= div.clientWidth / 2) handlePrevious();
-            if (endX - startX <= -div.clientWidth / 2) handleNext();
-        } else if (signals.isPhaseAnswer) {
-            if (endY - startY >= div.clientHeight / 2) handleDontKnow();
-            if (endY - startY <= -div.clientHeight / 2) handleIKnown();
+            if (endX - startX >= div.clientWidth / 2) moveDivHThenRun(div, 20, handlePrevious);
+            else if (endX - startX <= -div.clientWidth / 2) moveDivHThenRun(div, -20, handleNext);
+            else div.style.left = '0';
+        } else if (signals.isPhaseAnswer.value) {
+            if (endY - startY >= div.clientHeight / 4) moveDivVThenRun(div, 40, handleDontKnow);
+            else if (endY - startY <= -div.clientHeight / 4) moveDivVThenRun(div, -40, handleIKnown);
+            else div.style.top = '0';
         }
     };
     const handleTouchCancel = (e: TouchEvent) => {
