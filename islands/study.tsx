@@ -16,11 +16,13 @@ let endY = 0;
 export default () => {
     const index = useSignal(0);
     const current = useSignal(signals.studies.value[index.value]);
-    const finish = () => {
+    const finish = async () => {
         closeDialog();
         signals.stats.value = { ...signals.stats.value };
-        updateStats();
-        syncTasks();
+        signals.syncDone.value = false;
+        await updateStats();
+        await syncTasks();
+        signals.syncDone.value = true;
     }
     if (!current.value) return (finish(), <div/>);
     const shouldSound = useComputed(() => signals.isPhaseAnswer.value || current.value.type == 'L');
