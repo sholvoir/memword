@@ -1,4 +1,4 @@
-import { useRef } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
 import { useSignal, useComputed } from "@preact/signals";
 import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
 import IconCut from "tabler_icons/cut.tsx";
@@ -33,12 +33,11 @@ export default () => {
         current.value = signals.studies.value[++index.value];
     };
     const handleKeyPress = (event: KeyboardEvent ) => {
-        if (event.isComposing) return;
-        switch (event.code) {
-            case 'KeyB': case 'KeyC': handleSpeakIt(); break;
-            case 'Space': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
-            case 'KeyN': case 'KeyX': if (signals.isPhaseAnswer.value) handleIKnown(); break;
-            case 'KeyM': case 'KeyZ': if (signals.isPhaseAnswer.value) handleDontKnow(); break;
+        if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
+            case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
+            case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
+            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(); break;
+            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleDontKnow(); break;
         }
     };
     const handleSpeakIt = () => current.value.sound && shouldSound.value && player.current?.play();
@@ -73,14 +72,20 @@ export default () => {
             if (startY > rect.top + rect.height / 2) handleShowAnswer();
             else if (startY > rect.top + 36) handleSpeakIt();
         } else if (signals.isPhaseAnswer.value) {
-            if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 50, handleDontKnow);
-            else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -50, handleIKnown);
+            if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, handleDontKnow);
+            else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -60, handleIKnown);
             else div.style.top = '0';
         }
     };
     const handleTouchCancel = (e: TouchEvent) => (e.currentTarget as HTMLDivElement).style.top = '0';
+    const handleClick = (e: MouseEvent) => {
+        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+        if (e.clientY > rect.top + rect.height / 2) handleShowAnswer();
+        else if (e.clientY > rect.top + 36) handleSpeakIt();
+    }
+    useEffect(()=>(document.addEventListener('keyup', handleKeyPress), ()=>document.removeEventListener('keyup', handleKeyPress)), []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onKeyUp={handleKeyPress} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+        <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <div>{index.value+1}/{signals.studies.value.length}</div>
                 <SButton onClick={handleShowAnswer} title="_" disabled={signals.isPhaseAnswer.value}><span class="bg-round-6">答</span></SButton>
