@@ -4,6 +4,9 @@ import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
+import IconCircleLetterA from "tabler_icons/circle-letter-a.tsx";
+import IconCheck from "tabler_icons/check.tsx";
+import IconX from "tabler_icons/x.tsx";
 
 export default () => <Dialog title="帮助"><ol class="list-decimal py-2 pr-2 pl-8 [&>li]:mx-2">
     <li>如何使用本软件？
@@ -16,6 +19,9 @@ export default () => <Dialog title="帮助"><ol class="list-decimal py-2 pr-2 pl
         <br/>答：完全不必操心这个事情，让系统决定，系统自动根据「艾宾浩斯」遗忘曲线来决定此时的最佳复习内容，你要做的事是每天利用碎片时间，拿出手机，开始「学习」。
     </li>
     <li>界面上的按钮是什么意思？
+        <br/><IconCircleLetterA class="w-6 h-6 inline-block"/>显示答案；
+        <br/><IconCheck class="w-6 h-6 inline-block"/>我认识这个词；
+        <br/><IconX class="w-6 h-6 inline-block"/>我不认识这个词；
         <br/><IconPlayerPlayFilled class="w-6 h-6 inline-block"/>: 再播一遍声音；
         <br/><IconCircleLetterF class="w-6 h-6 inline-block"/>: 这个词我已经掌握，直接标记为「已完成」；
         <br/><IconCut class="w-6 h-6 inline-block"/>: 这个词是生僻词，从我的任务列表中删除；

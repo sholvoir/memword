@@ -6,7 +6,10 @@ import IconRefresh from "tabler_icons/refresh.tsx";
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
+import IconCircleLetterA from "tabler_icons/circle-letter-a.tsx";
 import IconBook2 from "tabler_icons/book-2.tsx";
+import IconCheck from "tabler_icons/check.tsx";
+import IconX from "tabler_icons/x.tsx";
 import SButton from './button-anti-shake.tsx';
 import Dialog from './dialog.tsx';
 
@@ -90,9 +93,9 @@ export default () => {
         <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <div>{index.value+1}/{signals.studies.value.length}</div>
-                <SButton onClick={handleShowAnswer} title="_" disabled={signals.isPhaseAnswer.value}><span class="bg-round-6">答</span></SButton>
-                <SButton onClick={handleIKnown} title="X/N" disabled={!signals.isPhaseAnswer.value}><span class="bg-round-6">知</span></SButton>
-                <SButton onClick={handleDontKnow} title="Z/M" disabled={!signals.isPhaseAnswer.value}><span class="bg-round-6">不</span></SButton>
+                <SButton onClick={handleShowAnswer} title="_" disabled={signals.isPhaseAnswer.value}><IconCircleLetterA class="bg-round-6"/></SButton>
+                <SButton onClick={handleIKnown} title="X/N" disabled={!signals.isPhaseAnswer.value}><IconCheck class="bg-round-6"/></SButton>
+                <SButton onClick={handleDontKnow} title="Z/M" disabled={!signals.isPhaseAnswer.value}><IconX class="bg-round-6"/></SButton>
                 <div class="grow"/>
                 {signals.admin.value && <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
                 <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
