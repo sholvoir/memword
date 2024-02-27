@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal, useComputed } from "@preact/signals";
 import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
-import IconCut from "tabler_icons/cut.tsx";
-import IconRefresh from "tabler_icons/refresh.tsx";
+import Dialog from './dialog.tsx';
+import SButton from './button-anti-shake.tsx';
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 import IconCircleLetterA from "tabler_icons/circle-letter-a.tsx";
+import IconRefresh from "tabler_icons/refresh.tsx";
 import IconBook2 from "tabler_icons/book-2.tsx";
 import IconCheck from "tabler_icons/check.tsx";
+import IconCut from "tabler_icons/cut.tsx";
 import IconX from "tabler_icons/x.tsx";
-import SButton from './button-anti-shake.tsx';
-import Dialog from './dialog.tsx';
 
 let startY = 0;
 let endY = 0;
@@ -37,6 +37,12 @@ export default () => {
         if (index.value >= signals.studies.value.length) return finish();
         current.value = signals.studies.value[++index.value];
     };
+    const handleSpeakIt = () => current.value.sound && shouldSound.value && player.current?.play();
+    const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
+    const handleFinished = () => (current.value.level = 14, handleIKnown());
+    const handleDontKnow = () => (current.value.level = 0, handleIKnown());
+    const handleDictMaintain = () => showDialog({dial: 'dictm', study: current});
+    const handleRefresh = async () => current.value = { ...current.value, ...await getDiction(current.value.word, true) };
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
             case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
@@ -45,12 +51,6 @@ export default () => {
             case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleDontKnow(); break;
         }
     };
-    const handleSpeakIt = () => current.value.sound && shouldSound.value && player.current?.play();
-    const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
-    const handleFinished = () => (current.value.level = 14, handleIKnown());
-    const handleDontKnow = () => (current.value.level = 0, handleIKnown());
-    const handleDictMaintain = () => showDialog({dial: 'dictm', study: current});
-    const handleRefresh = async () => current.value = { ...current.value, ...await getDiction(current.value.word, true) };
     const handleReportIssue = async () => {
         const resp = await submitIssue(current.value.word);
         if (!resp.ok) showTips(await resp.text());
@@ -92,13 +92,12 @@ export default () => {
     return <Dialog title="学习" onCancel={finish}>
         <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
-                <div>{index.value+1}/{signals.studies.value.length}</div>
-                <SButton onClick={handleShowAnswer} title="_" disabled={signals.isPhaseAnswer.value}><IconCircleLetterA class="bg-round-6"/></SButton>
-                <SButton onClick={handleIKnown} title="X/N" disabled={!signals.isPhaseAnswer.value}><IconCheck class="bg-round-6"/></SButton>
-                <SButton onClick={handleDontKnow} title="Z/M" disabled={!signals.isPhaseAnswer.value}><IconX class="bg-round-6"/></SButton>
-                <div class="grow"/>
-                {signals.admin.value && <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
+                <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_"><IconCircleLetterA class="bg-round-6"/></SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleIKnown} title="X/N"><IconCheck class="bg-round-6"/></SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDontKnow} title="Z/M"><IconX class="bg-round-6"/></SButton>
                 <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
+                <div class="grow text-center">{index.value+1}/{signals.studies.value.length}</div>
+                {signals.admin.value && <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleFinished}><IconCircleLetterF class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="bg-round-6"/></SButton>
