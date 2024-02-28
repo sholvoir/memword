@@ -234,7 +234,7 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
     signals.stats.value = {...stats};
 });
 
-export const clearTasks = async () => {
+export const clarifyTasks = async () => {
     const needRemove = new Set<ITask>();
     await new Promise<void>((resolve, reject) => {
         const request = db.user!.transaction('task', 'readonly').objectStore('task').openCursor();
@@ -425,7 +425,7 @@ export const init = async () => {
             revision[word] = replace;
         }
     }
-    if (vocabularyUrl !== oldVocabularyUrl) clearTasks();
+    if (vocabularyUrl !== oldVocabularyUrl) clarifyTasks();
     await syncTasks();
     signals.stats.value = await totalStats();
     if (vocabularyUrl !== oldVocabularyUrl) { setVocabularyUrl(vocabularyUrl); closeDialog(); }

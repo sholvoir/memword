@@ -63,7 +63,7 @@ export default () => {
         signals.isPhaseAnswer.value = false;
     };
     const handleTouchStart = (e: TouchEvent) => endY = startY = e.touches[0].clientY;
-    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && ((e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`);
+    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && ((e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`) && e.preventDefault();
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
         endY += y;
         if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) (handle(), setTimeout(() => {div.style.top = '0'}, 10));
