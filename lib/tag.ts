@@ -2,6 +2,7 @@ import { Tag } from "vocabulary/tag.ts";
 
 export const TagName: Record<Tag, string> = {
     OG: '奥格登基础英语850词',
+    FS: 'Fry1000视觉单词',
     MC: '麦克米伦词典2500释义词汇',
     LD: '朗文词典2500释义词汇',
     S1: '朗文通讯3000词口语1级',
