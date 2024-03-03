@@ -18,10 +18,6 @@ const dictApi = 'https://dict.sholvoir.com/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
 const now = () => Math.floor(Date.now() / 1000);
-// times: 1m, 5m, 30m, 3h, 18h, 36h, 3d, 7d, 13d, 25d, 49d, 97d, 191d, 367d
-const times = [60, 5 * 60, 30 * 60, 3 * 60 * 60, 18 * 60 * 60, 36 * 60 * 60, 3 * 24 * 60 * 60, 7 * 24 * 60 * 60,
-    13 * 24 * 60 * 60, 25 * 24 * 60 * 60, 49 * 24 * 60 * 60, 97 * 24 * 60 * 60, 191 * 24 * 60 * 60, 367 * 24 * 60 * 60
-];
 
 export type Dial = 'about'|'start'|'stats'|'dict'|'dictm'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
 export interface IDialog { dial: Dial, [key: string]: any }
@@ -276,10 +272,9 @@ export const study = ({ type, word, level }: ITask, stats: IStats) => new Promis
         const task = (e.target as IDBRequest).result as ITask;
         if (task) {
             removeTaskFromStats(task, stats);
-            task.level = level;
+            task.level = ++level;
             task.last = now();
-            const next = times[task.level++];
-            task.next = next ? task.last + next : MAX_NEXT;
+            task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(33 * level ** 2 * 1.82 ** level);
             objectStore.put(task);
             addTaskToStats(task, stats);
         }
