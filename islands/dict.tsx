@@ -6,9 +6,11 @@ import Dialog from './dialog.tsx';
 
 export default () => {
     const word = useSignal('');
-    const handleSearchWord = async (word: string) => {
+    const handleSearchClick = async () => {
+        const text = word.value.trim();
+        if (!text) return;
         showDialog({ dial: 'wait', prompt: '请稍候...' });
-        const ts = await searchWord(word);
+        const ts = await searchWord(text);
         closeDialog();
         if (!ts) showTips('Not Found!'); else {
             signals.studies.value = [ts];
@@ -16,7 +18,6 @@ export default () => {
             showDialog({ dial: 'study' });
         }
     }
-    const handleSearchClick = () => handleSearchWord(word.value);
     return <Dialog title="词典">
         <div class="p-2 flex gap-2">
             <TInput type="search" name="word" placeholder="word" class="grow" binding={word} onSearch={handleSearchClick}/>

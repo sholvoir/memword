@@ -385,7 +385,14 @@ export const getEpisode = async (sprintNumber: number, taskTypes?: string, tag?:
 };
 
 export const searchWord = async (word: string) => {
-    if (!vocabulary?.[word] && !(word = revision[word])) return undefined;
+    if (!vocabulary?.[word]) {
+        if (!revision[word]) {
+            if (!vocabulary?.[word.toLowerCase()]) {
+                if (!revision[word.toLowerCase()]) return undefined;
+                else word = revision[word.toLowerCase()];
+            } else word = word.toLowerCase();
+        } else word = revision[word];
+    }
     let task = await getTask('R', word);
     if (!task) {
         task = { type: 'R', word, last: 0, next: MAX_NEXT, level: 0 };
