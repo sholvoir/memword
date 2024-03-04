@@ -15,8 +15,7 @@ export const handler: Handlers = {
             const kv = await Deno.openKv(kvPath);
             const res = await kv.get([catalog, id]);
             const pass = res.value as IPass;
-            if (!pass) return badRequest;
-            if (pass.password != password || pass.expire < Math.round(Date.now() / 1000)) return badRequest;
+            if (!pass || pass.password != password || pass.expire < Math.round(Date.now() / 1000)) return badRequest;
             await mongorun(async client => {
                 const db = client.db('task');
                 const collectionNames = (await db.collections()).map(conn => conn.collectionName);
