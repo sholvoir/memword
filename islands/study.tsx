@@ -28,8 +28,6 @@ export default () => {
         signals.syncDone.value = true;
     }
     if (!current.value) return (finish(), <div/>);
-    const shouldSound = useComputed(() => signals.isPhaseAnswer.value || current.value.type == 'L');
-    const shouldSpell = useComputed(() => signals.isPhaseAnswer.value || current.value.type == 'R');
     const player = useRef<HTMLAudioElement>(null);
     const handleIKnown = async () => {
         await study(current.value, signals.stats.value);
@@ -37,7 +35,7 @@ export default () => {
         if (index.value >= signals.studies.value.length) return finish();
         current.value = signals.studies.value[++index.value];
     };
-    const handleSpeakIt = () => current.value.sound && shouldSound.value && player.current?.play();
+    const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L') && current.value.sound && player.current?.play();
     const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
     const handleFinished = () => (current.value.level = 14, handleIKnown());
     const handleDontKnow = () => (current.value.level = 0, handleIKnown());
@@ -62,20 +60,21 @@ export default () => {
         current.value = signals.studies.value[index.value];
         signals.isPhaseAnswer.value = false;
     };
-    const handleTouchStart = (e: TouchEvent) => endY = startY = e.touches[0].clientY;
-    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && ((e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`) && e.preventDefault();
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
         endY += y;
         if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) (handle(), setTimeout(() => {div.style.top = '0'}, 10));
         else (div.style.top = `${endY - startY}px`, setTimeout(moveDivThenRun, 20, div, y, handle));
-    }
+    };
+    const handleTouchStart = (e: TouchEvent) => endY = startY = e.touches[0].clientY;
+    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && ((e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`) && e.preventDefault();
     const handleTouchEnd = (e: Event) => {
         const div = e.currentTarget as HTMLDivElement;
         if (Math.abs(endY - startY) < 1) {
             div.style.top = '0';
             const rect = div.getBoundingClientRect();
-            if (startY > rect.top + rect.height / 2) handleShowAnswer();
-            else if (startY > rect.top + 36) handleSpeakIt();
+            if (startY < rect.top + 36) return;
+            if (!signals.isPhaseAnswer.value && (current.value.type == 'R' || startY > rect.top + rect.height / 2)) handleShowAnswer();
+            else handleSpeakIt();
         } else if (signals.isPhaseAnswer.value) {
             if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, handleDontKnow);
             else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -60, handleIKnown);
@@ -95,7 +94,7 @@ export default () => {
                 <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_"><IconCircleLetterA class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleIKnown} title="X/N"><IconCheck class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDontKnow} title="Z/M"><IconX class="bg-round-6"/></SButton>
-                <SButton disabled={!shouldSound.value} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value && current.value.type == 'R'} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
                 <div class="grow text-center">{index.value+1}/{signals.studies.value.length}</div>
                 {signals.admin.value && <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleFinished}><IconCircleLetterF class="bg-round-6"/></SButton>
@@ -104,10 +103,10 @@ export default () => {
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="bg-round-6"/></SButton>
                 <div>{current.value.level}</div>
             </div>
-            {shouldSpell.value && <div class="text-4xl font-bold">{current.value.word}</div>}
+            {(signals.isPhaseAnswer.value || current.value.type == 'R') && <div class="text-4xl font-bold">{current.value.word}</div>}
             {signals.isPhaseAnswer.value && <div class="text-2xl">{current.value.phonetic}</div>}
             {signals.isPhaseAnswer.value && <div class="grow text-2xl">{current.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
         </div>
-        <audio ref={player} src={shouldSound.value ? current.value.sound : undefined} autoplay/>
+        <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? current.value.sound : undefined} autoplay/>
     </Dialog>;
 }
