@@ -1,7 +1,7 @@
 import { type Cookie, setCookie, getCookies } from "$std/http/cookie.ts";
 import { JWT } from "generic-ts/jwt.ts";
 
-export const jwt = new JWT({ iss: 'sholvoir.com', sub: 'memword' });
+export const jwt = new JWT({ iss: 'micit.co', sub: 'memword' });
 await jwt.importKey(Deno.env.get('MEM_KEY'));
 
 const maxAge = 180 * 24 * 60 * 60;

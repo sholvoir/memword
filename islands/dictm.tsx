@@ -10,7 +10,7 @@ import AInput from './input-textarea.tsx';
 import Dialog from './dialog.tsx';
 import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 
-const baseApi = 'https://dict.sholvoir.com/api'
+const baseApi = 'https://dict.micit.co/api';
 export default (props: {study?: Signal<IStudy>}) => {
     const current = props.study!
     const phonetic = useSignal(current.value.phonetic);
