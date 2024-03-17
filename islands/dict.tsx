@@ -20,7 +20,7 @@ export default () => {
     }
     return <Dialog title="词典">
         <div class="p-2 flex gap-2">
-            <TInput type="search" name="word" placeholder="word" class="grow" binding={word} onSearch={handleSearchClick}/>
+            <TInput name="word" placeholder="word" class="grow" binding={word} onChange={handleSearchClick}/>
             <PButton class="w-20" onClick={handleSearchClick}>查找</PButton>
         </div>
     </Dialog>;
