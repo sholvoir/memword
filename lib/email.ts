@@ -1,6 +1,7 @@
 import { IMail } from 'deno-esmtp/imail.ts';
 
-const MAIL_URL = 'https://mail-hw3lihpmoq-uc.a.run.app';
+const MAIL_URL = 'https://mail-mqjw43lfna-uc.a.run.app';
+
 const headers = new Headers([
     ['Content-Type', 'application/json'],
     ['Authorization', `Bearer ${Deno.env.get('MAIL_TOKEN')}`]
