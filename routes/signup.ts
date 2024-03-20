@@ -20,7 +20,7 @@ export const handler: Handlers = {
             await kv.set([catalog, btoa(email).replaceAll('=', '')], pass);
             kv.close();
             const mail = {
-                from: 'MEMWORD <memword.sholvoir@gmail.com>',
+                from: 'MEMWORD <memword.micit@gmail.com>',
                 to: `${email}`,
                 subject: 'Your MemWord Account',
                 content: `<p>Dear user ${email}:</p>
@@ -28,7 +28,7 @@ export const handler: Handlers = {
                     <p style="padding: 8px; font-size: 40px; font-weight: 700">${password}</p>
                     <p>Note: You must use this temporary password in 5 minutes, or the it will expire.</p>
                     <p>Best Wish</p>
-                    <p>MEMWORD <memword.sholvoir@gmail.com></p>
+                    <p>MEMWORD <memword.micit@gmail.com></p>
                 `
             };
             return await sendEmail(mail);

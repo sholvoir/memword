@@ -1,4 +1,4 @@
-import { IMail } from 'deno-esmtp/imail.ts';
+import { IMail } from 'deno-smtp/imail.ts';
 
 const MAIL_URL = 'https://mail-mqjw43lfna-uc.a.run.app';
 

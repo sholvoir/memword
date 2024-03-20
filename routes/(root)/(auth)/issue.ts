@@ -5,10 +5,11 @@ import { Handlers } from "$fresh/server.ts";
 
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
+        const email = atob(ctx.state.user);
         return await sendEmail({
-            from: ctx.state.user,
+            from: email,
             to: 'sovar.he@gmail.com',
-            subject: `Issue Report from ${atob(ctx.state.user)}`,
+            subject: `Issue Report from ${email}`,
             content: await req.text()
         })
     }
