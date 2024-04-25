@@ -12,8 +12,8 @@ import { IStudy } from "./istudy.ts";
 
 const settingFormat = '0.0.3';
 const statsFormat = '0.0.2';
-const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.7/vocabulary.txt';
-const revisionUrl = 'https://www.micit.co/vocabulary/0.0.7/revision.txt';
+const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.8/vocabulary.txt';
+const revisionUrl = 'https://www.micit.co/vocabulary/0.0.8/revision.txt';
 const dictApi = 'https://dict.micit.co/api';
 const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
