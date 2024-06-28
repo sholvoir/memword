@@ -1,6 +1,6 @@
 import { IMail } from 'deno-smtp/imail.ts';
 
-const MAIL_URL = 'https://mail-mqjw43lfna-uc.a.run.app';
+const MAIL_URL = 'https://mail-bkz6cj2wxq-uc.a.run.app';
 
 const headers = new Headers([
     ['Content-Type', 'application/json'],
