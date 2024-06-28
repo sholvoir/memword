@@ -1,4 +1,3 @@
-import { TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { Tag, Tags } from "vocabulary/tag.ts";
 import { TagName } from '../lib/tag.ts';
 import { useSignal } from "@preact/signals";
@@ -24,7 +23,7 @@ export default () => {
             <MSelect class="h-72" binding={readBooks} options={options} title="选择您关注的词书 - 阅读"/>
             <MSelect class="h-72" binding={listenBooks} options={options} title="选择您关注的词书 - 听力"/>
             <div class="my-2 flex gap-1">
-                <label for="sprintNumber">每次学习单词数:</label>
+                <label for="sprintNumber" class="shrink-0">每次学习单词数:</label>
                 <TInput num name="sprintNumber" binding={sprintNumber} class="grow"/>
             </div>
             <div class="flex justify-end gap-2">

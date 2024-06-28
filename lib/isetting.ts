@@ -9,3 +9,11 @@ export interface ISetting {
     readBooks: Array<Tag>;
     listenBooks: Array<Tag>;
 };
+
+export const defaultSetting = () => ({
+    format: settingFormat,
+    sprintNumber: 10,
+    listenBooks: [],
+    readBooks: [],
+    showStartPage: true
+}) as ISetting;

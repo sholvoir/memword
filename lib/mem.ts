@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import { BLevel, IStats, bLevelIncludes, totalTask, statsFormat, initStats, addTaskToStats, removeTaskFromStats } from "./istat.ts";
 import { Tag } from "vocabulary/tag.ts";
 import { type ITask, TaskType, TaskTypes } from "./itask.ts";
-import { ISetting, settingFormat } from "./isetting.ts";
+import { ISetting, defaultSetting, settingFormat } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
 
@@ -80,16 +80,10 @@ export const setSetting = async (setting: ISetting) => {
 export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) {
-        const p = JSON.parse(result) as ISetting;
-        if (p.format == settingFormat) return p;
+        const s = JSON.parse(result) as ISetting;
+        if (s.format == settingFormat) return s;
     }
-    return {
-        format: settingFormat,
-        sprintNumber: 10,
-        listenBooks: ['OG'],
-        readBooks: ['OG'],
-        showStartPage: true
-    } as ISetting;
+    return defaultSetting();
 };
 
 const openDictDB = () => new Promise<IDBDatabase>((resolve, reject) => {
