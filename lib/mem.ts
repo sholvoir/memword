@@ -3,15 +3,13 @@ import { Signal } from "@preact/signals";
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
 import Cookies from "js-cookie";
-import { BLevel, IStats, bLevelIncludes, totalTask } from "./istat.ts";
-import { Tag, Tags } from "vocabulary/tag.ts";
-import { ITask, TaskType, TaskTypes } from "./itask.ts";
-import { ISetting } from "./isetting.ts";
+import { BLevel, IStats, bLevelIncludes, totalTask, statsFormat, initStats, addTaskToStats, removeTaskFromStats } from "./istat.ts";
+import { Tag } from "vocabulary/tag.ts";
+import { type ITask, TaskType, TaskTypes } from "./itask.ts";
+import { ISetting, settingFormat } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
 import { IStudy } from "./istudy.ts";
 
-const settingFormat = '0.0.3';
-const statsFormat = '0.0.2';
 const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.9/vocabulary.txt';
 const revisionUrl = 'https://www.micit.co/vocabulary/0.0.9/revision.txt';
 const dictApi = 'https://dict.micit.co/api';
@@ -219,10 +217,11 @@ export const addTasks = (types: TaskType[], tag: Tag) => new Promise<void>((reso
             const task = (e.target as IDBRequest).result as ITask;
             if (!task) {
                 const ntask: ITask = { type, word, last: 0, next: MAX_NEXT, level: 0 };
-                removeTaskFromStats(ntask, stats);
+                const tags = vocabulary![ntask.word];
+                removeTaskFromStats(ntask, stats, tags);
                 ntask.last = time;
                 ntask.next = 0;
-                addTaskToStats(ntask, stats);
+                addTaskToStats(ntask, stats, tags);
                 objectStore.add(ntask);
             }
         }
@@ -271,43 +270,16 @@ export const study = ({ type, word, level }: ITask, stats: IStats) => new Promis
     objectStore.get([type, word]).onsuccess = (e) => {
         const task = (e.target as IDBRequest).result as ITask;
         if (task) {
-            removeTaskFromStats(task, stats);
+            const tags = vocabulary![task.word];
+            removeTaskFromStats(task, stats, tags);
             task.level = ++level;
             task.last = now();
             task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(33 * level ** 2 * 1.82 ** level);
             objectStore.put(task);
-            addTaskToStats(task, stats);
+            addTaskToStats(task, stats, tags);
         }
     }
 });
-
-const initStats = () => {
-    const stats = { format: statsFormat, time: 0, all: {}, task: {} } as IStats;
-    for (const taskType of TaskTypes) {
-        stats.all[taskType] = {} as any;
-        stats.task[taskType] = {} as any;
-        for (const tag of Tags) {
-            stats.all[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-            stats.task[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        }
-    }
-    return stats;
-};
-
-const addTaskToStats = (task: ITask, stats: IStats) => {
-    const tags = vocabulary![task.word];
-    if (tags) for (const tag of tags) {
-        stats.all[task.type][tag][task.level]++;
-        if (task.next < stats.time) stats.task[task.type][tag][task.level]++;
-    }
-};
-const removeTaskFromStats = (task: ITask, stats: IStats) => {
-    const tags = vocabulary![task.word];
-    if (tags) for (const tag of tags) {
-        stats.all[task.type][tag][task.level]--;
-        if (task.next < stats.time) stats.task[task.type][tag][task.level]--;
-    }
-};
 
 export const getStats = () => {
     const result = localStorage.getItem('_stats');
@@ -322,7 +294,11 @@ let updateStatsTimer: number|undefined = undefined;
 export const updateStats = () => new Promise<void>((resolve, reject) => {
     if (updateStatsTimer) (clearTimeout(updateStatsTimer), updateStatsTimer = undefined);
     const stats = signals.stats.value;
-    const nstats: IStats = { format: stats.format, time: now(), all: stats.all, task: stats.task };
+    const nstats: IStats = {
+        format: stats.format, time: now(),
+        allT: stats.allT, taskT: stats.taskT,
+        all: stats.all, task: stats.task
+    };
     const request = db.user!.transaction('task', 'readonly').objectStore('task')
         .index('next').openCursor(IDBKeyRange.bound(stats.time, nstats.time));
     request.onerror = reject;
@@ -335,15 +311,15 @@ export const updateStats = () => new Promise<void>((resolve, reject) => {
             return resolve();
         }
         const task = cursor.value as ITask;
-        removeTaskFromStats(task, stats);
-        addTaskToStats(task, nstats);
+        const tags = vocabulary![task.word];
+        removeTaskFromStats(task, stats, tags);
+        addTaskToStats(task, nstats, tags);
         cursor.continue();
     }
 });
 
 export const totalStats = () => new Promise<IStats>((resolve, reject) => {
-    const stats = initStats();
-    stats.time = now();
+    const stats = initStats(now());
     const transaction = db.user!.transaction('task', 'readonly');
     transaction.onerror = reject;
     transaction.oncomplete = () => {
@@ -353,8 +329,8 @@ export const totalStats = () => new Promise<IStats>((resolve, reject) => {
     const objectStore = transaction.objectStore('task');
     for (const type of TaskTypes) for (const word in vocabulary!)
         objectStore.get([type, word]).onsuccess = (e) => {
-            const task = (e.target as IDBRequest).result as ITask;
-            addTaskToStats(task ?? { type, word, last: 0, next: MAX_NEXT, level: 0 }, stats);
+            const task = (e.target as IDBRequest).result as ITask ?? { type, word, last: 0, next: MAX_NEXT, level: 0 };
+            addTaskToStats(task, stats, vocabulary![task.word]);
         }
 });
 

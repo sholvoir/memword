@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { Tag, Tags } from "vocabulary/tag.ts";
+import { Tag } from "vocabulary/tag.ts";
 import { TagName } from '../lib/tag.ts';
-import { BLevel, IStat, IStats } from "../lib/istat.ts";
+import { BLevel, IStats } from "../lib/istat.ts";
 import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";
 import { iStatToIBStat } from "../lib/istat.ts";
 import { signals, startStudy } from '../lib/mem.ts';
@@ -12,17 +12,13 @@ export default () => {
         const result = [] as Array<any>;
         const stats: IStats = signals.stats.value;
         const push1 = (taskType: TaskType) => {
-            const statAllSum: IStat = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-            for (let i = 0; i < 16; i++) for (const tag of Tags) statAllSum[i] += stats.all[taskType][tag][i];
-            const statTaskSum: IStat = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-            for (let i = 0; i < 16; i++) for (const tag of Tags) statTaskSum[i] += stats.task[taskType][tag][i];
-            const width = statAllSum.reduce((s,b) => s + b, 0);
-            const task = statTaskSum.reduce((s,b) => s + b, 0);
+            const width = stats.allT[taskType].reduce((s,b) => s + b, 0);
+            const task = stats.taskT[taskType].reduce((s,b) => s + b, 0);
             result.push(<Stat onTitleClick={() => startStudy(taskType)}
                 onItemClick={(blevel: BLevel) => startStudy(taskType, undefined, blevel)} 
                 title={`${TaskTypeName[taskType]} - ${task}|${width}`} width={width}
-                statAll={iStatToIBStat(statAllSum)}
-                statTask={iStatToIBStat(statTaskSum)}/>);
+                statAll={iStatToIBStat(stats.allT[taskType])}
+                statTask={iStatToIBStat(stats.taskT[taskType])}/>);
         };
         const push = (taskType: TaskType, tag: Tag) => {
             const width = stats.all[taskType][tag].reduce((s,b) => s + b, 0);
