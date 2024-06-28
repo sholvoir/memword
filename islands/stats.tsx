@@ -12,8 +12,8 @@ export default () => {
         const result = [] as Array<any>;
         const stats: IStats = signals.stats.value;
         const push1 = (taskType: TaskType) => {
-            const width = stats.allT[taskType].reduce((s,b) => s + b, 0);
-            const task = stats.taskT[taskType].reduce((s,b) => s + b, 0);
+            const width = stats.allT[taskType].reduce((s,b) => s + b) - stats.allT[taskType][0] + stats.taskT[taskType][0];
+            const task = stats.taskT[taskType].reduce((s,b) => s + b);
             result.push(<Stat onTitleClick={() => startStudy(taskType)}
                 onItemClick={(blevel: BLevel) => startStudy(taskType, undefined, blevel)} 
                 title={`${TaskTypeName[taskType]} - ${task}|${width}`} width={width}
@@ -21,8 +21,8 @@ export default () => {
                 statTask={iStatToIBStat(stats.taskT[taskType])}/>);
         };
         const push = (taskType: TaskType, tag: Tag) => {
-            const width = stats.all[taskType][tag].reduce((s,b) => s + b, 0);
-            const task = stats.task[taskType][tag].reduce((s,b) => s + b, 0);
+            const width = stats.all[taskType][tag].reduce((s,b) => s + b);
+            const task = stats.task[taskType][tag].reduce((s,b) => s + b);
             result.push(<Stat onTitleClick={() => startStudy(taskType, tag)}
                 onItemClick={(blevel) => startStudy(taskType, tag, blevel)}
                 title={`${TaskTypeName[taskType]}-${TagName[tag]} - ${task}|${width}`} width={width}

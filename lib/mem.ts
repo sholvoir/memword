@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-cond-assign
 import { Signal } from "@preact/signals";
 import { type HTTPMethod } from 'generic-ts/http-method.ts';
 import { Payload, decode as jwtDecode } from 'djwt';
@@ -386,11 +386,11 @@ export const init = async () => {
     const res1 = await fetch('/setting');
     if (res1.ok) setSetting(await res1.json());
     const oldVocabularyUrl = getVocabularyUrl();
-    if (vocabularyUrl !== oldVocabularyUrl) showDialog({ dial: 'wait', prompt: '正在升级, 请稍候...' });
+    if (vocabularyUrl !== oldVocabularyUrl) showDialog({ dial: 'wait', prompt: '更新本地数据...' });
     const res2 = await fetch(vocabularyUrl, { cache: 'force-cache' });
     if (res2.ok) {
         const delimiter = /[,:] */;
-        for (const line of (await res2.text()).split('\n')) {
+        for (let line of (await res2.text()).split('\n')) if (line = line.trim()) {
             const [word, ...tags] = line.split(delimiter).map(w=>w.trim());
             vocabulary[word] = tags as Array<Tag>;
         }
@@ -398,7 +398,7 @@ export const init = async () => {
     const res3 = await fetch(revisionUrl, { cache: 'force-cache' });
     if (res3.ok) {
         const delimiter = /: */;
-        for (const line of (await res3.text()).split('\n')) {
+        for (let line of (await res3.text()).split('\n')) if (line = line.trim()) {
             const [word, replace] = line.split(delimiter);
             revision[word] = replace;
         }
