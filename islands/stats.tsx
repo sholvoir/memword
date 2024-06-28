@@ -14,11 +14,13 @@ export default () => {
         const push1 = (taskType: TaskType) => {
             const width = stats.allT[taskType].reduce((s,b) => s + b) - stats.allT[taskType][0] + stats.taskT[taskType][0];
             const task = stats.taskT[taskType].reduce((s,b) => s + b);
+            const statTask = iStatToIBStat(stats.taskT[taskType]);
+            const statAll = iStatToIBStat(stats.allT[taskType]);
+            statAll.never = statTask.never;
             result.push(<Stat onTitleClick={() => startStudy(taskType)}
                 onItemClick={(blevel: BLevel) => startStudy(taskType, undefined, blevel)} 
                 title={`${TaskTypeName[taskType]} - ${task}|${width}`} width={width}
-                statAll={iStatToIBStat(stats.allT[taskType])}
-                statTask={iStatToIBStat(stats.taskT[taskType])}/>);
+                statAll={statAll} statTask={statTask}/>);
         };
         const push = (taskType: TaskType, tag: Tag) => {
             const width = stats.all[taskType][tag].reduce((s,b) => s + b);
