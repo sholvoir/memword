@@ -1,6 +1,6 @@
 import { Signal, useSignal } from "@preact/signals";
 import { TaskType, TaskTypes } from "../lib/itask.ts";
-import { Tag, Tags } from "vocabulary/tag.ts";
+import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from "../lib/tag.ts";
 import { signals, setSetting, showDialog, closeDialog, showTips, addTasks, startStudy } from "../lib/mem.ts";
 import Dialog from './dialog.tsx';

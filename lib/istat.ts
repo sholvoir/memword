@@ -1,4 +1,4 @@
-import { Tag, Tags } from "vocabulary/tag.ts";
+import { Tag, Tags } from "@sholvoir/vocabulary";
 import { ITask, TaskType, TaskTypes } from "./itask.ts";
 
 export const statsFormat = '0.0.3';

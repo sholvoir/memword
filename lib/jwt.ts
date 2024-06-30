@@ -1,5 +1,5 @@
-import { type Cookie, setCookie, getCookies } from "$std/http/cookie.ts";
-import { JWT } from "generic-ts/jwt.ts";
+import { type Cookie, setCookie, getCookies } from "@std/http";
+import { JWT } from "@sholvoir/generic/jwt";
 
 export const jwt = new JWT({ iss: 'micit.co', sub: 'memword' });
 await jwt.importKey(Deno.env.get('MEM_KEY'));

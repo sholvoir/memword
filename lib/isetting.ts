@@ -1,4 +1,4 @@
-import { Tag } from "vocabulary/tag.ts";
+import { Tag } from "@sholvoir/vocabulary";
 
 export const settingFormat = '0.0.3';
 

@@ -1,4 +1,4 @@
-import { Tag } from "vocabulary/tag.ts";
+import { Tag } from "@sholvoir/vocabulary";
 
 export const TagName: Record<Tag, string> = {
     OG: '奥格登基础英语850词',

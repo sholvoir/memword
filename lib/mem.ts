@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any no-cond-assign
 import { Signal } from "@preact/signals";
-import { type HTTPMethod } from 'generic-ts/http-method.ts';
-import { Payload, decode as jwtDecode } from 'djwt';
+import { type HTTPMethod } from '@sholvoir/generic/http-method';
+import { JWT } from '@sholvoir/generic/jwt';
 import Cookies from "js-cookie";
 import { BLevel, IStats, bLevelIncludes, totalTask, statsFormat, initStats, addTaskToStats, removeTaskFromStats } from "./istat.ts";
-import { Tag } from "vocabulary/tag.ts";
+import { Tag } from "@sholvoir/vocabulary";
 import { type ITask, TaskType, TaskTypes } from "./itask.ts";
 import { ISetting, defaultSetting, settingFormat } from "./isetting.ts";
 import { IDiction } from "./idict.ts";
@@ -65,7 +65,7 @@ const revision: Record<string, string> = {};
 const db = {} as { dict: IDBDatabase, user: IDBDatabase };
 
 export const getAuth = () => Cookies.get('auth');
-export const getUser = () => { const token = getAuth(); return token ? (jwtDecode(token)[1] as Payload).aud as string : '' };
+export const getUser = () => { const token = getAuth(); return token ? JWT.decode(token)[1].aud as string : '' };
 
 const setVocabularyUrl = (url: string) => localStorage.setItem('_vocabulary_url', url);
 const getVocabularyUrl = () => localStorage.getItem('_vocabulary_url');

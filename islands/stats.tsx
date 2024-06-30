@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Tag } from "vocabulary/tag.ts";
+import { Tag } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { BLevel, IStats } from "../lib/istat.ts";
 import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";

@@ -1,4 +1,4 @@
-import { STATUS_CODE } from "$std/http/status.ts";
+import { STATUS_CODE } from "@std/http";
 
 export const jsonHeader = new Headers([['Content-Type', 'application/json']]);
 export type MemState = { user: string };

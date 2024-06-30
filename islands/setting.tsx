@@ -1,4 +1,4 @@
-import { Tag, Tags } from "vocabulary/tag.ts";
+import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { useSignal } from "@preact/signals";
 import { signals, closeDialog, setSetting } from "../lib/mem.ts";
