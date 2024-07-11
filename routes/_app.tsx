@@ -9,12 +9,10 @@ export default function App({ Component }: PageProps) {
         <title>MemWord</title>
         <link rel="icon" type="image/png" sizes="192x192" href="/icon/icon-192.png"/>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-startup-image" href="/icon/icon-1024.png"/>
+        <meta name="apple-mobile-web-app-title" content="MemWord"/>
         <meta name="apple-mobile-web-app-capable" content="yes"/>
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-        <link rel="apple-touch-icon" sizes="120x120" href="/icon/icon-120.png"></link>
-        <link rel="apple-touch-icon" sizes="180x180" href="/icon/icon-180.png"></link>
-        <link rel="apple-touch-icon" sizes="512x512" href="/icon/icon-512.png"></link>
-        <link rel="apple-touch-icon" sizes="1024x1024" href="/icon/icon-1024.png"></link>
         <meta name="theme-color" content="#CBD5E1" media="(prefers-color-scheme: light)"/>
         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)"/>
         <link rel="stylesheet" href="/styles.css"/>
