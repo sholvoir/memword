@@ -2,7 +2,7 @@ import { type Cookie, setCookie, getCookies } from "@std/http";
 import { JWT } from "@sholvoir/generic/jwt";
 
 export const jwt = new JWT({ iss: 'micit.co', sub: 'memword' });
-await jwt.importKey(Deno.env.get('MEM_KEY'));
+await jwt.importKey(Deno.env.get('APP_KEY'));
 
 const maxAge = 180 * 24 * 60 * 60;
 export const setAuth = async (resp: Response, aud: string) => {
