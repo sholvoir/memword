@@ -26,6 +26,7 @@ export const handler: Handlers<any, MemState> = {
                 }
             }
         })} catch { return internalServerError }
+        console.log(`API '/task' POST ${ctx.state.user} ${lastgt} with tasks ${clientTasks.length}, return ${serverTasks.length}.`);
         return new Response(JSON.stringify(serverTasks), { headers: jsonHeader });
     },
     async DELETE(req, ctx) {
@@ -40,6 +41,7 @@ export const handler: Handlers<any, MemState> = {
             const collection = client.db('task').collection(ctx.state.user);
             result = await collection.deleteOne({ type, word });
         })} catch { return internalServerError }
+        console.log(`API '/task' DELETE ${ctx.state.user} ${type} ${word}.`);
         return new Response(JSON.stringify(result), { headers: jsonHeader });
     }
 };
