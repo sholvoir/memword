@@ -5,34 +5,28 @@ import { MemState, badRequest, internalServerError, jsonHeader } from "../../../
 import mongorun from '../../../lib/mongo.ts';
 import { Int32 } from "mongodb";
 
-const syncMongo = async (collectionName: string, ntasks: Array<ITask>) => {
-    try { await mongorun(async client => {
-        const collection = client.db('task').collection(collectionName);
-        for (const ntask of ntasks) {
-            const filter = { type: ntask.type, word: ntask.word };
-            const otask = (await collection.findOne(filter)) as ITask | null;
-            if (!otask) {
-                await collection.insertOne(ntask);
-            }
-            else if (ntask.last > otask.last) {
-                const $set = { last: new Int32(ntask.last), next: new Int32(ntask.next), level: new Int32(ntask.level) };
-                await collection.updateOne(filter, { $set })
-            }
-        }
-    })} catch (e) { console.error('sync mongo error: ', e)}
-}
-
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
         const lastgt = +new URL(req.url).searchParams.get('lastgt')!;
-        const otasks: ITask[] = [];
+        const clientTasks: Array<ITask> = await req.json();
+        const serverTasks: ITask[] = [];
         try { await mongorun(async client => {
             const collection = client.db('task').collection(ctx.state.user);
             const cursor = collection.find({ last: { $gt: lastgt } });
-            for await (const task of cursor) otasks.push(task as any);
+            for await (const task of cursor) serverTasks.push(task as any);
+            for (const ntask of clientTasks) {
+                const filter = { type: ntask.type, word: ntask.word };
+                const otask = (await collection.findOne(filter)) as ITask | null;
+                if (!otask) {
+                    await collection.insertOne(ntask);
+                }
+                else if (ntask.last > otask.last) {
+                    const $set = { last: new Int32(ntask.last), next: new Int32(ntask.next), level: new Int32(ntask.level) };
+                    await collection.updateOne(filter, { $set })
+                }
+            }
         })} catch { return internalServerError }
-        syncMongo(ctx.state.user, await req.json());
-        return new Response(JSON.stringify(otasks), { headers: jsonHeader });
+        return new Response(JSON.stringify(serverTasks), { headers: jsonHeader });
     },
     async DELETE(req, ctx) {
         const params = new URL(req.url).searchParams;
