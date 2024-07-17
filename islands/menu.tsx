@@ -9,6 +9,7 @@ export default () => {
     const syncT = async () => {
         await syncTasks(1);
         await totalStats();
+        closeDialog();
     };
     return <Dialog title="菜单">
         <div class="p-2 [&>menu]:p-2 [&>menu]:cursor-pointer [&>div]:h-px [&>div]:bg-slate-500">
