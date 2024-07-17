@@ -312,13 +312,14 @@ export const updateStats = () => new Promise<void>((resolve, reject) => {
     }
 });
 
-export const totalStats = () => new Promise<IStats>((resolve, reject) => {
+export const totalStats = () => new Promise<void>((resolve, reject) => {
     const stats = initStats(now());
     const transaction = db.user!.transaction('task', 'readonly');
     transaction.onerror = reject;
     transaction.oncomplete = () => {
         localStorage.setItem('_stats', JSON.stringify(stats));
-        resolve(stats);
+        signals.stats.value = stats;
+        resolve();
     }
     const objectStore = transaction.objectStore('task');
     for (const type of TaskTypes) for (const word in vocabulary!)
@@ -399,7 +400,7 @@ export const init = async () => {
     }
     if (vocabularyUrl !== oldVocabularyUrl) clarifyTasks();
     await syncTasks();
-    signals.stats.value = await totalStats();
+    await totalStats();
     if (vocabularyUrl !== oldVocabularyUrl) { setVocabularyUrl(vocabularyUrl); closeDialog(); }
     if (signals.setting.value.showStartPage && totalTask(signals.stats.value) == 0) showDialog({ dial: 'start' });
     signals.syncDone.value = true;
