@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "preact/hooks";
-import { useSignal, useComputed } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
 import Dialog from './dialog.tsx';
 import SButton from './button-anti-shake.tsx';

@@ -240,9 +240,9 @@ export const clarifyTasks = async () => {
     for (const task of needRemove) await removeTask(task.type, task.word);
 };
 
-export const syncTasks = async () => {
+export const syncTasks = async (lastTime?: number) => {
     const thisTime = now();
-    const lastTime = await getSyncTime();
+    if (!lastTime) lastTime = await getSyncTime();
     const otasks = await getTasks(lastTime);
     const resp = await fetch(`/task?lastgt=${lastTime}`, fetchInit(otasks));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
