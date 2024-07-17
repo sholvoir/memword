@@ -7,8 +7,12 @@ export default () => {
         showDialog({dial: (e.target as HTMLMenuElement).title as Dial});
     };
     const syncT = async () => {
+        showDialog({dial: 'wait', prompt: '正在同步, 请稍候...'});
         await syncTasks(1);
+        closeDialog();
+        showDialog({dial: 'wait', prompt: '正在統計, 请稍候...'});
         await totalStats();
+        closeDialog();
         closeDialog();
     };
     return <Dialog title="菜单">
