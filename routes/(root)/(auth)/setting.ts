@@ -16,7 +16,7 @@ export const handler: Handlers<any, MemState> = {
             kv.close();
             if (!value) return notFound;
             return new Response(JSON.stringify(value), { headers: jsonHeader });
-        } catch { return internalServerError; }
+        } catch (e) { console.log(e); return internalServerError; }
     },
     async PUT(req, ctx) {
         try {

@@ -13,4 +13,4 @@ node_modules/
 .DS_Store
 data/
 /server.ts
-/static/worker.js
+/static/service-worker.js
