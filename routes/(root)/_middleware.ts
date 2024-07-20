@@ -4,6 +4,7 @@ import { jwt, getAuth } from "../../lib/jwt.ts";
 
 export async function handler(req: Request, ctx: FreshContext<MemState>) {
     const token = getAuth(req);
+    console.log(`token: ${token}`);
     const payload = token && await jwt.verifyToken(token);
     if (payload) ctx.state.user = payload.aud as string;
     return await ctx.next();

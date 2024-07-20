@@ -124,7 +124,7 @@ export const getDiction = async (word: string, refresh?: boolean): Promise<IDict
         if ((refresh === false) && dict) return dict;
     };
     if (refresh || !dict || dict.version + dictExpire < now()) {
-        const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'no-cache' });
+        const resp = await fetch(`${dictApi}/${encodeURIComponent(word)}`, { cache: 'reload' });
         if (!resp.ok) return dict;
         dict = await resp.json() as IDiction;
         dict.word = word;

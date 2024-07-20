@@ -1,6 +1,5 @@
 import { useSignal } from "@preact/signals";
 import { signals, searchWord, closeDialog, showDialog, showTips } from "../lib/mem.ts";
-import PButton from './button-prime.tsx';
 import TInput from './input-text.tsx';
 import Dialog from './dialog.tsx';
 
