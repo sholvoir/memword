@@ -7,7 +7,7 @@ await jwt.importKey(Deno.env.get('APP_KEY'));
 const maxAge = 180 * 24 * 60 * 60;
 export const setAuth = async (resp: Response, aud?: string) => {
     if (aud) {
-        const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge, httpOnly: true };
+        const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge };
         setCookie(resp.headers, cookie);
     }
     else deleteCookie(resp.headers, 'auth');

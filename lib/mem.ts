@@ -17,11 +17,10 @@ const MAX_NEXT = 2000000000;
 const dictExpire = 7 * 24 * 60 * 60;
 const now = () => Math.floor(Date.now() / 1000);
 
-export type Dial = 'about'|'start'|'stats'|'dict'|'dictm'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
+export type Dial = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
 export interface IDialog { dial: Dial, [key: string]: any }
 interface GlobeSignals {
     user: Signal<string>;
-    admin: Signal<boolean>;
     setting: Signal<ISetting>;
     dialogs: Signal<Array<IDialog>>;
     stats: Signal<IStats>;

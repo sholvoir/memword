@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask, showDialog } from '../lib/mem.ts';
+import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask } from '../lib/mem.ts';
 import Dialog from './dialog.tsx';
 import SButton from './button-anti-shake.tsx';
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
@@ -8,7 +8,6 @@ import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
 import IconCircleLetterA from "tabler_icons/circle-letter-a.tsx";
 import IconRefresh from "tabler_icons/refresh.tsx";
-import IconBook2 from "tabler_icons/book-2.tsx";
 import IconCheck from "tabler_icons/check.tsx";
 import IconCut from "tabler_icons/cut.tsx";
 import IconX from "tabler_icons/x.tsx";
@@ -39,7 +38,6 @@ export default () => {
     const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
     const handleFinished = () => (current.value.level = 14, handleIKnown());
     const handleDontKnow = () => (current.value.level = 0, handleIKnown());
-    const handleDictMaintain = () => showDialog({dial: 'dictm', study: current});
     const handleRefresh = async () => current.value = { ...current.value, ...await getDiction(current.value.word, true) };
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
@@ -96,7 +94,6 @@ export default () => {
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDontKnow} title="Z/M"><IconX class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value && current.value.type == 'R'} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
                 <div class="grow text-center">{index.value+1}/{signals.studies.value.length}</div>
-                {signals.admin.value && <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDictMaintain}><IconBook2 class="bg-round-6"/></SButton>}
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleFinished}><IconCircleLetterF class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="bg-round-6"/></SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="bg-round-6"/></SButton>

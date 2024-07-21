@@ -1,6 +1,6 @@
 // deno-lint-ignore-file
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import { useComputed, useSignal } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { IStudy } from "../lib/istudy.ts";
 import { ISetting } from "../lib/isetting.ts";
@@ -16,7 +16,6 @@ import Setting from './setting.tsx';
 import Tasks from './tasks.tsx';
 import Issue from './issue.tsx';
 import Dict from './dict.tsx';
-import DictM from './dictm.tsx';
 import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 import RButton from './button-ripple.tsx';
@@ -24,7 +23,6 @@ import RButton from './button-ripple.tsx';
 export default () => {
     if (!IS_BROWSER) return <div/>;
     signals.user = useSignal<string>(getUser());
-    signals.admin = useComputed(()=>signals.user.value == 'c292YXIuaGVAZ21haWwuY29t');
     signals.setting = useSignal<ISetting>(getSetting());
     signals.dialogs = useSignal<Array<IDialog>>([]);
     signals.stats  = useSignal(getStats());
@@ -44,7 +42,6 @@ export default () => {
         case 'about': return <About {...rest}/>;
         case 'help': return <Help {...rest}/>;
         case 'dict': return <Dict {...rest}/>;
-        case 'dictm': return <DictM {...rest}/>;
         case 'tasks': return <Tasks {...rest}/>;
         case 'menu': return <Menu {...rest}/>;
     } };
