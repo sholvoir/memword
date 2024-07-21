@@ -25,6 +25,7 @@ export const handler: Handlers = {
                     await collection.createIndex({ last: 1 });
                 }
             });
+            console.log(`API '/login' POST ${id}`);
             return await setAuth(new Response(), id);
         } catch { return internalServerError; }
     },

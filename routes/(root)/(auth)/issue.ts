@@ -6,6 +6,7 @@ import { Handlers } from "$fresh/server.ts";
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
         const email = atob(ctx.state.user);
+        console.log(`API '/issue' POST ${ctx.state.user}`);
         return await sendEmail({
             from: email,
             to: 'sovar.he@gmail.com',

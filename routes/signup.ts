@@ -31,6 +31,7 @@ export const handler: Handlers = {
                     <p>MEMWORD <memword.micit@gmail.com></p>
                 `
             };
+            console.log(`API '/signup' POST ${email}`);
             return await sendEmail(mail);
         } catch { return internalServerError; }
     }

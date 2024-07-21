@@ -6,9 +6,7 @@ import { Handlers } from "$fresh/server.ts";
 
 export const handler: Handlers<any, MemState> = {
     async GET(_req, ctx) {
-        const resp = await ctx.render();
-        if (!ctx.state.user) return resp;
-        return await setAuth(resp, ctx.state.user);
+        return await setAuth(await ctx.render(), ctx.state.user);
     }
 }
 

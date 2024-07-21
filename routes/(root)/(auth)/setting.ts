@@ -15,8 +15,9 @@ export const handler: Handlers<any, MemState> = {
             const value = res.value as ISetting;
             kv.close();
             if (!value) return notFound;
+            console.log(`API '/setting' GET ${ctx.state.user}`)
             return new Response(JSON.stringify(value), { headers: jsonHeader });
-        } catch (e) { console.log(e); return internalServerError; }
+        } catch { return internalServerError; }
     },
     async PUT(req, ctx) {
         try {
@@ -24,6 +25,7 @@ export const handler: Handlers<any, MemState> = {
             const kv = await Deno.openKv(kvPath);
             await kv.set([catalog, ctx.state.user], setting);
             kv.close();
+            console.log(`API '/setting' PUT ${ctx.state.user}`);
             return ok;
         } catch { return internalServerError; }
     },
@@ -32,6 +34,7 @@ export const handler: Handlers<any, MemState> = {
             const kv = await Deno.openKv(kvPath);
             await kv.delete([catalog, ctx.state.user]);
             kv.close();
+            console.log(`API '/setting' DELETE ${ctx.state.user}`);
             return ok;
         } catch { return internalServerError; }
     }

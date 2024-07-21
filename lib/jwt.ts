@@ -1,13 +1,16 @@
-import { type Cookie, setCookie, getCookies } from "@std/http";
+import { type Cookie, setCookie, getCookies, deleteCookie } from "@std/http";
 import { JWT } from "@sholvoir/generic/jwt";
 
 export const jwt = new JWT({ iss: 'micit.co', sub: 'memword' });
 await jwt.importKey(Deno.env.get('APP_KEY'));
 
 const maxAge = 180 * 24 * 60 * 60;
-export const setAuth = async (resp: Response, aud: string) => {
-    const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge };
-    setCookie(resp.headers, cookie);
+export const setAuth = async (resp: Response, aud?: string) => {
+    if (aud) {
+        const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge, httpOnly: true };
+        setCookie(resp.headers, cookie);
+    }
+    else deleteCookie(resp.headers, 'auth');
     return resp;
 }
 
