@@ -268,7 +268,7 @@ export const study = ({ type, word, level }: ITask, stats: IStats) => new Promis
             removeTaskFromStats(task, stats, tags);
             task.level = ++level;
             task.last = now();
-            task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(33 * level ** 2 * 1.82 ** level);
+            task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(551 * level ** 2 * 1.5 ** level);
             objectStore.put(task);
             addTaskToStats(task, stats, tags);
         }
@@ -374,6 +374,7 @@ export const searchWord = async (word: string) => {
 };
 
 export const init = async () => {
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' });
     const user = signals.user.peek();
     if (!user) return showDialog({dial: 'about'});
     db.dict = await openDictDB();
