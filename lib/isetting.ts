@@ -1,19 +1,14 @@
-import { Tag } from "@sholvoir/vocabulary";
-
-export const settingFormat = '0.0.3';
+export const settingFormat = '0.0.4';
 
 export interface ISetting {
     format: string;
-    showStartPage?: true;
-    sprintNumber: number;
-    readBooks: Array<Tag>;
-    listenBooks: Array<Tag>;
+    sprint: number;
+    books: Array<string>;
+    unsynced?: true
 };
 
 export const defaultSetting = () => ({
     format: settingFormat,
-    sprintNumber: 10,
-    listenBooks: [],
-    readBooks: [],
-    showStartPage: true
+    sprint: 10,
+    books: ['R__', 'L__']
 }) as ISetting;

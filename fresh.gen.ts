@@ -36,7 +36,6 @@ import * as $start from "./islands/start.tsx";
 import * as $stat from "./islands/stat.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
-import * as $tasks from "./islands/tasks.tsx";
 import * as $waiting from "./islands/waiting.tsx";
 import { type Manifest } from "$fresh/server.ts";
 
@@ -78,7 +77,6 @@ const manifest = {
     "./islands/stat.tsx": $stat,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
-    "./islands/tasks.tsx": $tasks,
     "./islands/waiting.tsx": $waiting,
   },
   baseUrl: import.meta.url,

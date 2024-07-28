@@ -1,7 +1,7 @@
 import { Handlers } from "$fresh/server.ts";
+import { badRequest, internalServerError } from '@sholvoir/generic/http';
 import { sendEmail } from "../lib/email.ts";
 import { IPass } from "../lib/ipass.ts";
-import { badRequest, internalServerError } from '../lib/mem-server.ts';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 const catalog = 'password';

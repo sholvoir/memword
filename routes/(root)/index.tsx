@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import { MemState } from '../../lib/mem-server.ts';
+import { MemState } from '../../lib/server.ts';
 import { setAuth } from "../../lib/jwt.ts";
-import Root from '../../islands/root.tsx';
 import { Handlers } from "$fresh/server.ts";
+import Root from '../../islands/root.tsx';
 
 export const handler: Handlers<any, MemState> = {
     async GET(_req, ctx) {

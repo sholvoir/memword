@@ -1,0 +1,1 @@
+export type MemState = { user: string };

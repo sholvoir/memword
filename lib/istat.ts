@@ -1,11 +1,19 @@
 import { Tag, Tags } from "@sholvoir/vocabulary";
-import { ITask, TaskType, TaskTypes } from "./itask.ts";
+import { ITask, TaskTypes } from "./itask.ts";
 
-export const statsFormat = '0.0.3';
+export const statsFormat = '0.0.5';
 export const BLevels = ['never','start','medium','familiar','skilled','finished'] as const;
 export type BLevel = typeof BLevels[number];
 export type IBStat = Record<BLevel, number>;
 export type IStat = [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number];
+const newStat = (): IStat => [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+export interface IStats {
+    format: string;
+    time: number;
+    all: Record<string, IStat>;
+    task: Record<string, IStat>;
+}
 
 export const BLevelName: Record<BLevel, string> = {
     never: '未学',
@@ -27,52 +35,25 @@ export const bLevelIncludes = (blevel: BLevel, level: number) => {
     }
 }
 
-export interface IStats {
-    format: string;
-    time: number;
-    allT: Record<TaskType, IStat>;
-    taskT: Record<TaskType, IStat>;
-    all: Record<TaskType, Record<Tag, IStat>>;
-    task: Record<TaskType, Record<Tag, IStat>>;
-}
-
-export const totalTask = (stats: IStats) => {
-    let s = 0;
-    for (const type of TaskTypes) for (const tag of Tags) for (let i = 0; i < 16; i++)
-        s += stats.task[type][tag][i];
-    return s;
-}
-
 export const initStats = (time = 0) => {
-    const stats = { format: statsFormat, time, allT: {}, taskT: {}, all: {}, task: {} } as IStats;
-    for (const taskType of TaskTypes) {
-        stats.allT[taskType] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        stats.taskT[taskType] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        stats.all[taskType] = {} as Record<Tag, IStat>;
-        stats.task[taskType] = {} as Record<Tag, IStat>;
-        for (const tag of Tags) {
-            stats.all[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-            stats.task[taskType][tag] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-        }
+    const stats = { format: statsFormat, time, all: {}, task: {} } as IStats;
+    for (const type of TaskTypes) for (const tag of Tags) {
+        const k = `${type}${tag}`;
+        stats.all[k] = newStat();
+        stats.task[k] = newStat();
     }
     return stats;
 };
 
-export const addTaskToStats = (task: ITask, stats: IStats, tags?: Array<Tag>) => {
-    stats.allT[task.type][task.level]++;
-    if (task.next < stats.time) stats.taskT[task.type][task.level]++;
-    if (tags) for (const tag of tags) {
-        stats.all[task.type][tag][task.level]++;
-        if (task.next < stats.time) stats.task[task.type][tag][task.level]++;
-    }
-};
-
-export const removeTaskFromStats = (task: ITask, stats: IStats, tags?: Array<Tag>) => {
-    stats.allT[task.type][task.level]--;
-    if (task.next < stats.time) stats.taskT[task.type][task.level]--;
-    if (tags) for (const tag of tags) {
-        stats.all[task.type][tag][task.level]--;
-        if (task.next < stats.time) stats.task[task.type][tag][task.level]--;
+export const adjTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>, direction = 0) => {
+    const ttag = `${task.type}__`;
+    if (task.level != 0 || task.next < stats.time) stats.all[ttag][task.level] += direction;
+    if (Number.isNaN(stats.all[ttag][task.level])) console.log(task, stats, tags);
+    if (task.next < stats.time) stats.task[ttag][task.level] += direction;
+    for (const tag of tags) {
+        const k = `${task.type}${tag}`;
+        stats.all[k][task.level] += direction;
+        if (task.next < stats.time) stats.task[k][task.level] += direction;
     }
 };
 

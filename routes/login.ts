@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 import { setAuth } from "../lib/jwt.ts";
-import { badRequest, internalServerError } from "../lib/mem-server.ts";
+import { badRequest, internalServerError } from "@sholvoir/generic/http";
 import { IPass } from "../lib/ipass.ts";
 import mongorun from '../lib/mongo.ts';
 

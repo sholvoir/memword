@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
-import { MemState, notFound } from '../../../lib/mem-server.ts';
 import { Handlers } from "$fresh/server.ts";
+import { responseInit, ok, notFound, internalServerError } from "@sholvoir/generic/http";
+import { MemState } from '../../../lib/server.ts';
 import { ISetting } from "../../../lib/isetting.ts";
-import { jsonHeader, ok, internalServerError } from "../../../lib/mem-server.ts";
 
 const catalog = 'setting';
 const kvPath = Deno.env.get('DENO_KV_PATH');
@@ -16,7 +16,7 @@ export const handler: Handlers<any, MemState> = {
             kv.close();
             if (!value) return notFound;
             console.log(`API '/setting' GET ${ctx.state.user}`)
-            return new Response(JSON.stringify(value), { headers: jsonHeader });
+            return new Response(JSON.stringify(value), responseInit);
         } catch { return internalServerError; }
     },
     async PUT(req, ctx) {

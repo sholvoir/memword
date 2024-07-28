@@ -6,7 +6,7 @@ interface ITextInputProps extends JSX.HTMLAttributes<HTMLInputElement>{
     num?: boolean;
 }
 export default (props: ITextInputProps) => {
-    const { type, num, binding, value, class: className, ...rest} = props;
+    const { type, num, binding, class: className, ...rest} = props;
     const handleInput = (e: Event) => {
         const text = (e.target as HTMLInputElement).value;
         const number = +text;

@@ -1,39 +1,29 @@
 // deno-lint-ignore-file no-explicit-any
 import { Tag } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
-import { BLevel, IStats } from "../lib/istat.ts";
-import { TaskType, TaskTypeName, TaskTypes } from "../lib/itask.ts";
+import { TaskType, TaskTypeName } from "../lib/itask.ts";
 import { iStatToIBStat } from "../lib/istat.ts";
 import { signals, startStudy } from '../lib/mem.ts';
 import Stat from './stat.tsx';
 
+const sum = (s: number, b: number) => s + b;
+
 export default () => {
     const getResult = () => {
         const result = [] as Array<any>;
-        const stats: IStats = signals.stats.value;
-        const push1 = (taskType: TaskType) => {
-            const width = stats.allT[taskType].reduce((s,b) => s + b) - stats.allT[taskType][0] + stats.taskT[taskType][0];
-            const task = stats.taskT[taskType].reduce((s,b) => s + b);
-            const statTask = iStatToIBStat(stats.taskT[taskType]);
-            const statAll = iStatToIBStat(stats.allT[taskType]);
-            statAll.never = statTask.never;
-            result.push(<Stat onTitleClick={() => startStudy(taskType)}
-                onItemClick={(blevel: BLevel) => startStudy(taskType, undefined, blevel)} 
-                title={`${TaskTypeName[taskType]} - ${task}|${width}`} width={width}
-                statAll={statAll} statTask={statTask}/>);
+        const stats = signals.stats.value;
+        const push = (ttag: string) => {
+            const type = ttag[0] as TaskType;
+            const tag = ttag.slice(1) as Tag;
+            const width = stats.all[ttag].reduce(sum);
+            const task = stats.task[ttag].reduce(sum);
+            result.push(<Stat onTitleClick={() => startStudy(type, tag)}
+                onItemClick={(blevel) => startStudy(type, tag, blevel)}
+                title={`${TaskTypeName[type]}-${TagName[tag]} - ${task}|${width}`} width={width}
+                statAll={iStatToIBStat(stats.all[ttag])}
+                statTask={iStatToIBStat(stats.task[ttag])} />)
         };
-        const push = (taskType: TaskType, tag: Tag) => {
-            const width = stats.all[taskType][tag].reduce((s,b) => s + b);
-            const task = stats.task[taskType][tag].reduce((s,b) => s + b);
-            result.push(<Stat onTitleClick={() => startStudy(taskType, tag)}
-                onItemClick={(blevel) => startStudy(taskType, tag, blevel)}
-                title={`${TaskTypeName[taskType]}-${TagName[tag]} - ${task}|${width}`} width={width}
-                statAll={iStatToIBStat(stats.all[taskType][tag])}
-                statTask={iStatToIBStat(stats.task[taskType][tag])} />)
-        };
-        for (const taskType of TaskTypes) push1(taskType);
-        for (const tag of signals.setting.value.readBooks) push('R', tag);
-        for (const tag of signals.setting.peek().listenBooks) push('L', tag);
+        for (const ttag of signals.setting.value.books) push(ttag);
         return result;
     }
     return <>

@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, updateStats, syncTasks, study, getDiction, submitIssue, showTips, removeTask } from '../lib/mem.ts';
+import { signals, closeDialog, submitIssue, showTips } from '../lib/mem.ts';
+import { IDict } from "dict/lib/idict.ts";
+import { ITask } from "../lib/itask.ts";
+import { requestInit } from "@sholvoir/generic/http";
 import Dialog from './dialog.tsx';
 import SButton from './button-anti-shake.tsx';
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
@@ -17,34 +20,42 @@ let endY = 0;
 
 export default () => {
     const index = useSignal(0);
-    const current = useSignal(signals.studies.value[index.value]);
-    const finish = async () => {
+    const current = useSignal<ITask>(signals.tasks.value[0]);
+    const dict = useSignal<IDict>({});
+    const finish = () => {
         closeDialog();
         signals.stats.value = { ...signals.stats.value };
-        signals.syncDone.value = false;
-        await updateStats();
-        await syncTasks();
-        signals.syncDone.value = true;
+        fetch('/update-stats');
+        fetch('/sync-tasks');
     }
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
-    const handleIKnown = async () => {
-        await study(current.value, signals.stats.value);
-        signals.isPhaseAnswer.value = false;
-        if (index.value >= signals.studies.value.length) return finish();
-        current.value = signals.studies.value[++index.value];
+    const getDict = async () => {
+        const req = await fetch(`/dict?word=${current.value.word}`);
+        if (req.ok) dict.value = await req.json();
+    }
+    const handleRefresh = async () => {
+        const req = await fetch(`/dict?word=${current.value.word}`, { cache: 'reload' });
+        if (req.ok) dict.value = await req.json();
     };
-    const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L') && current.value.sound && player.current?.play();
+    const handleIKnown = (level?: number) => {
+        if (level !== undefined) current.value.level = level;
+        fetch('/study', requestInit(current.value));
+        signals.isPhaseAnswer.value = false;
+        if (++index.value >= signals.tasks.value.length) return finish();
+        current.value = signals.tasks.value[index.value];
+        getDict();
+    };
+    const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L')
+        && dict.value.sound
+        && player.current?.play();
     const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
-    const handleFinished = () => (current.value.level = 14, handleIKnown());
-    const handleDontKnow = () => (current.value.level = 0, handleIKnown());
-    const handleRefresh = async () => current.value = { ...current.value, ...await getDiction(current.value.word, true) };
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
             case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
             case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
             case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(); break;
-            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleDontKnow(); break;
+            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0); break;
         }
     };
     const handleReportIssue = async () => {
@@ -52,19 +63,29 @@ export default () => {
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
-    const handleDeleteTask = async () => {
-        await removeTask(current.value.type, current.value.word);
-        signals.studies.value = [...signals.studies.value.slice(0, index.value), ...signals.studies.value.slice(index.value+1)];
-        current.value = signals.studies.value[index.value];
+    const handleDeleteTask = () => {
+        fetch('/delete-task', requestInit(JSON.stringify(current.value)));
+        signals.tasks.value = [...signals.tasks.value.slice(0, index.value), ...signals.tasks.value.slice(index.value+1)];
+        current.value = signals.tasks.value[index.value];
+        getDict();
         signals.isPhaseAnswer.value = false;
     };
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
         endY += y;
-        if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) (handle(), setTimeout(() => {div.style.top = '0'}, 10));
-        else (div.style.top = `${endY - startY}px`, setTimeout(moveDivThenRun, 20, div, y, handle));
+        if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) {
+            handle();
+            setTimeout(() => {div.style.top = '0'}, 10)
+        } else {
+            div.style.top = `${endY - startY}px`;
+            setTimeout(moveDivThenRun, 20, div, y, handle);
+        }
     };
     const handleTouchStart = (e: TouchEvent) => endY = startY = e.touches[0].clientY;
-    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && ((e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`) && e.preventDefault();
+    const handleTouchMove = (e: TouchEvent) => {
+        e.preventDefault();
+        if (signals.isPhaseAnswer.value)
+            (e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`;
+    };
     const handleTouchEnd = (e: Event) => {
         const div = e.currentTarget as HTMLDivElement;
         if (Math.abs(endY - startY) < 1) {
@@ -74,7 +95,7 @@ export default () => {
             if (!signals.isPhaseAnswer.value && (current.value.type == 'R' || startY > rect.top + rect.height / 2)) handleShowAnswer();
             else handleSpeakIt();
         } else if (signals.isPhaseAnswer.value) {
-            if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, handleDontKnow);
+            if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, () => handleIKnown(0));
             else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -60, handleIKnown);
             else div.style.top = '0';
         }
@@ -85,25 +106,48 @@ export default () => {
         if (e.clientY > rect.top + rect.height / 2) handleShowAnswer();
         else if (e.clientY > rect.top + 36) handleSpeakIt();
     }
-    useEffect(()=>(document.addEventListener('keyup', handleKeyPress), ()=>document.removeEventListener('keyup', handleKeyPress)), []);
+    useEffect(() => {
+        document.addEventListener('keyup', handleKeyPress);
+        getDict();
+        return () => document.removeEventListener('keyup', handleKeyPress);
+    }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]" tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} style={(signals.isPhaseAnswer.value && current.value.pic) ? `background-image: url(${current.value.pic});` : ''}>
+        <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]"
+            tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
+            style={(signals.isPhaseAnswer.value && dict.value.pic) ? `background-image: url(${dict.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
-                <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_"><IconCircleLetterA class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleIKnown} title="X/N"><IconCheck class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDontKnow} title="Z/M"><IconX class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value && current.value.type == 'R'} onClick={handleSpeakIt}><IconPlayerPlayFilled class="bg-round-6"/></SButton>
-                <div class="grow text-center">{index.value+1}/{signals.studies.value.length}</div>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleFinished}><IconCircleLetterF class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}><IconCut class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}><IconAlertCircleFilled class="bg-round-6"/></SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}><IconRefresh class="bg-round-6"/></SButton>
+                <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_">
+                    <IconCircleLetterA class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
+                    <IconCheck class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="Z/M">
+                    <IconX class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value && current.value.type == 'R'} onClick={handleSpeakIt}>
+                    <IconPlayerPlayFilled class="bg-round-6"/>
+                </SButton>
+                <div class="grow text-center">{index.value+1}/{signals.tasks.value.length}</div>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(14)}>
+                    <IconCircleLetterF class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}>
+                    <IconCut class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>
+                    <IconAlertCircleFilled class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}>
+                    <IconRefresh class="bg-round-6"/>
+                </SButton>
                 <div>{current.value.level}</div>
             </div>
             {(signals.isPhaseAnswer.value || current.value.type == 'R') && <div class="text-4xl font-bold">{current.value.word}</div>}
-            {signals.isPhaseAnswer.value && <div class="text-2xl">{current.value.phonetic}</div>}
-            {signals.isPhaseAnswer.value && <div class="grow text-2xl">{current.value.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
+            {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
+            {signals.isPhaseAnswer.value && <div class="grow text-2xl">{dict.value?.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
         </div>
-        <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? current.value.sound : undefined} autoplay/>
+        <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
     </Dialog>;
 }

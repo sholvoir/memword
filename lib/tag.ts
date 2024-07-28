@@ -46,5 +46,6 @@ export const TagName: Record<Tag, string> = {
     GR: '美国研究生入学考试(GRE)',
     GM: '研究生管理科入学考试(GMAT)',
     BE: '商业环境与概念注册会计师考试(BEC)',
-    LH: '作者收集'
+    LH: '作者收集',
+    __: '全部词汇'
 }
