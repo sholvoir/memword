@@ -2,7 +2,7 @@
 /// <reference lib="webworker" />
 
 import { type Tag } from "@sholvoir/vocabulary";
-import { requestInit, ok, notFound, badRequest, responseInit } from 'jsr:@sholvoir/generic@^0.0.5/http';
+import { requestInit, ok, notFound, badRequest, responseInit } from '@sholvoir/generic/http';
 import { ITask, MAX_NEXT, TaskType, TaskTypes } from "./itask.ts";
 import { IDiction } from "./idict.ts";
 import { initStats, adjTaskToStats, IStats, BLevel, bLevelIncludes, statsFormat } from './istat.ts';
