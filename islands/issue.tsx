@@ -17,8 +17,8 @@ export default () => {
     return <Dialog title="提交问题">
         <div class="p-2 h-full flex flex-col">
             <label>请在这里描述你的问题:</label>
-            <TAInput name="issue" class="w-full h-96 grow" binding={issue}>{issue.value}</TAInput>
-            <div class="flex gap-2 mt-2 justify-end">
+            <TAInput name="issue" class="w-full grow" binding={issue}>{issue.value}</TAInput>
+            <div class="flex gap-2 mt-2 pb-2 justify-end">
                 <NButton class="w-32" onClick={closeDialog}>取消</NButton>
                 <PButton class="w-32" onClick={handleSubmitClick}>提交</PButton>
             </div>
