@@ -45,7 +45,7 @@ export const getUser = () => {
 
 export const init = () => {
     const user = signals.user.value;
-    if (!user) return;
+    if (!user) return showDialog({dial: 'about'});
     worker.onSettingChanged = (setting) => signals.setting.value = setting;
     worker.onStatsChanged = (stats) => signals.stats.value = stats;
     worker.init(user);
