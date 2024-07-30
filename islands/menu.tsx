@@ -1,4 +1,4 @@
-import { showDialog, closeDialog, Dial } from '../lib/mem.ts';
+import { showDialog, Dial } from '../lib/mem.ts';
 import Dialog from './dialog.tsx';
 
 export default () => {

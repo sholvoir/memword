@@ -5,7 +5,7 @@ import { useEffect } from "preact/hooks";
 import { ISetting } from "../lib/isetting.ts";
 import { ITask } from "../lib/itask.ts";
 import { signals, startStudy, getUser, showDialog, hideTips, init, close, IDialog } from "../lib/mem.ts";
-import { worker } from "../lib/worker.ts";
+import { getSetting, getStats } from "../lib/worker.ts";
 import Start from './start.tsx';
 import Stats from './stats.tsx';
 import About from './about.tsx';
@@ -22,10 +22,10 @@ import RButton from './button-ripple.tsx';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
-    signals.user = useSignal<string>(getUser());
-    signals.setting = useSignal<ISetting>(worker.setting);
+    signals.user = useSignal(getUser());
+    signals.setting = useSignal<ISetting>(getSetting());
     signals.dialogs = useSignal<Array<IDialog>>([]);
-    signals.stats  = useSignal(worker.stats);
+    signals.stats  = useSignal(getStats());
     signals.tasks = useSignal<Array<ITask>>([]);
     signals.tips = useSignal('');
     signals.isPhaseAnswer = useSignal(false);

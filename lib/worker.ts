@@ -13,6 +13,8 @@ const dictExpire = 7 * 24 * 60 * 60;
 
 const g = {
     user: '',
+    setting: defaultSetting(),
+    stats: initStats(),
     dictDB: undefined as IDBDatabase | undefined,
     userDB: undefined as IDBDatabase | undefined,
     vocabulary: {} as Record<string, Array<Tag>>,
@@ -24,18 +26,18 @@ const getVocabularyUrl = () => localStorage.getItem('_vocabulary_url');
 
 export const now = () => Math.floor(Date.now() / 1000);
 export const syncSetting = async () => {
-    const res = await fetch('/setting', requestInit(worker.setting));
+    const res = await fetch('/setting', requestInit(g.setting));
     if (res.ok) {
         const setting: ISetting = await res.json();
-        if (setting.version > worker.setting.version) {
-            setSetting(worker.setting = setting);
+        if (setting.version > g.setting.version) {
+            setSetting(g.setting = setting);
             if (worker.onSettingChanged) worker.onSettingChanged(setting);
         }
     }
 };
 
-export const setSetting = (setting: ISetting) => localStorage.setItem('_setting', JSON.stringify(worker.setting = setting));
-const getSetting = () => {
+export const setSetting = (setting: ISetting) => localStorage.setItem('_setting', JSON.stringify(g.setting = setting));
+export const getSetting = () => {
     const result = localStorage.getItem('_setting');
     if (result) {
         const setting = JSON.parse(result) as ISetting;
@@ -45,7 +47,7 @@ const getSetting = () => {
 };
 
 const setStats = (stats: IStats) => {
-    localStorage.setItem('_stats', JSON.stringify(worker.stats = stats));
+    localStorage.setItem('_stats', JSON.stringify(g.stats = stats));
     if (worker.onStatsChanged) worker.onStatsChanged(stats);
 }
 
@@ -181,7 +183,7 @@ export const getEpisode = (types?: string, tag?: Tag, blevel?: BLevel) => new Pr
             && (!tag || g.vocabulary[task.word]?.includes(tag))
             && (!blevel || bLevelIncludes(blevel, task.level)))
             tasks.push(task);
-        if (tasks.length < worker.setting.sprint) cursor.continue();
+        if (tasks.length < g.setting.sprint) cursor.continue();
         else resolve(tasks);
     }
 });
@@ -245,7 +247,7 @@ export const addTasks = (types: string, tag: Tag) => new Promise<void>((resolve,
     const transaction = g.userDB!.transaction('task', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => {
-        setStats(worker.stats);
+        setStats(g.stats);
         syncTasks();
         resolve();
     }
@@ -255,26 +257,26 @@ export const addTasks = (types: string, tag: Tag) => new Promise<void>((resolve,
             if (!(e.target as IDBRequest).result) {
                 const task = newTask(type as TaskType, word);
                 const tags = g.vocabulary[task.word];
-                adjTaskToStats(task, worker.stats, tags, -1);
+                adjTaskToStats(task, g.stats, tags, -1);
                 letNever(task, time);
                 objectStore.add(task);
-                adjTaskToStats(task, worker.stats, tags, 1);
+                adjTaskToStats(task, g.stats, tags, 1);
             }
         }
     }
 });
 
 export const updateStats = () => new Promise<void>((resolve, reject) => {
-    const nstats: IStats = { ...worker.stats, time: now() };
+    const nstats: IStats = { ...g.stats, time: now() };
     const request = g.userDB!.transaction('task', 'readonly').objectStore('task')
-        .index('last').openCursor(IDBKeyRange.bound(worker.stats.time, nstats.time));
+        .index('last').openCursor(IDBKeyRange.bound(g.stats.time, nstats.time));
     request.onerror = reject;
     request.onsuccess = () => {
         const cursor = request.result;
         if (!cursor) return resolve(setStats(nstats));
         const task = cursor.value as ITask;
         const tags = g.vocabulary[task.word];
-        adjTaskToStats(task, worker.stats, tags, -1);
+        adjTaskToStats(task, g.stats, tags, -1);
         adjTaskToStats(task, nstats, tags, 1);
         cursor.continue();
     }
@@ -303,20 +305,22 @@ export const study = (otask: ITask) => new Promise<void>((resolve, reject) => {
         const task = (e.target as IDBRequest).result as ITask;
         if (!task) return reject('Not Found!');
         const tags = g.vocabulary[task.word];
-        adjTaskToStats(task, worker.stats, tags, -1);
+        adjTaskToStats(task, g.stats, tags, -1);
         if (level >= 15) level = 15;
         else level++
         task.level = level;
         task.last = now();
         task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(39 * level ** 3 * 1.5 ** level);
         objectStore.put(task);
-        adjTaskToStats(task, worker.stats, tags, 1);
+        adjTaskToStats(task, g.stats, tags, 1);
     }
 });
 
 const init = async (user: string ) => {
     g.dictDB = await openDictDB();
-    g.userDB = await openUserDB(user);
+    g.userDB = await openUserDB(g.user = user);
+    g.setting = getSetting();
+    g.stats = getStats();
 
     const res1 = await fetch(vocabularyUrl, { cache: 'force-cache' });
     if (res1.ok) {
@@ -370,7 +374,5 @@ const logout = async (cleanUser: boolean, cleanDict: boolean) => {
 export const worker = {
     onSettingChanged: null as (((setting: ISetting) => void) | null),
     onStatsChanged: null as (((stats: IStats) => void) | null),
-    setting: getSetting(),
-    stats: getStats(),
     init, close, logout
 };
