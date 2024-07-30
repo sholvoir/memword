@@ -44,6 +44,9 @@ export const getUser = () => {
 };
 
 export const init = () => {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) reg.unregister();
+    });
     const user = signals.user.value;
     if (!user) return;
     worker.onSettingChanged = (setting) => signals.setting.value = setting;
