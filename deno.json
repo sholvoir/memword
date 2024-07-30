@@ -36,9 +36,9 @@
     "preact": "https://esm.sh/preact@10.22.0",
     "preact/": "https://esm.sh/preact@10.22.0/",
     "tabler_icons/": "https://deno.land/x/tabler_icons_tsx@0.0.7/tsx/",
-    "tailwindcss": "npm:tailwindcss@3.4.7",
-    "tailwindcss/": "npm:/tailwindcss@3.4.7/",
-    "tailwindcss/plugin": "npm:/tailwindcss@3.4.7/plugin.js"
+    "tailwindcss": "npm:tailwindcss@3.4.4",
+    "tailwindcss/": "npm:/tailwindcss@3.4.4/",
+    "tailwindcss/plugin": "npm:/tailwindcss@3.4.4/plugin.js"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
