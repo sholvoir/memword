@@ -6,8 +6,8 @@ import { IDiction } from "./idict.ts";
 import { type BLevel, initStats, adjTaskToStats, IStats, bLevelIncludes, statsFormat } from './istat.ts';
 import { defaultSetting, ISetting, settingFormat } from "./isetting.ts";
 
-const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.9/vocabulary.txt';
-const revisionUrl = 'https://www.micit.co/vocabulary/0.0.9/revision.txt';
+const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.11/vocabulary.txt';
+const revisionUrl = 'https://www.micit.co/vocabulary/0.0.11/revision.txt';
 const dictApi = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 
