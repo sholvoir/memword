@@ -1,5 +1,6 @@
 import { useSignal } from "@preact/signals";
-import { signals, showTips, signup, login } from '../lib/mem.ts';
+import { signals, showTips } from '../lib/mem.ts';
+import { signup, login } from '../lib/worker.ts';
 import PButton from './button-prime.tsx';
 import AButton from './button-anchor.tsx';
 import TInput from './input-text.tsx';

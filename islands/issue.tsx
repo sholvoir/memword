@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { submitIssue } from "../lib/mem.ts";
+import { submitIssue } from "../lib/worker.ts";
 import { showTips, closeDialog } from '../lib/mem.ts';
 import NButton from './button-normal.tsx';
 import PButton from './button-prime.tsx'

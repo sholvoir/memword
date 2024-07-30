@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, submitIssue, showTips } from '../lib/mem.ts';
+import { signals, closeDialog, showTips } from '../lib/mem.ts';
+import { updateStats, submitIssue, syncTasks, deleteTask, getDict } from '../lib/worker.ts'
 import { IDict } from "dict/lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
-import { requestInit } from "@sholvoir/generic/http";
+import { study } from "../lib/worker.ts";
 import Dialog from './dialog.tsx';
 import SButton from './button-anti-shake.tsx';
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
@@ -25,26 +26,28 @@ export default () => {
     const finish = () => {
         closeDialog();
         signals.stats.value = { ...signals.stats.value };
-        fetch('/update-stats');
-        fetch('/sync-tasks');
+        updateStats();
+        syncTasks();
     }
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
-    const getDict = async () => {
-        const req = await fetch(`/dict?word=${current.value.word}`);
-        if (req.ok) dict.value = await req.json();
+    const getDiction = async () => {
+        const d = await getDict(current.value.word);
+        if (d) dict.value = d;
+        else console.error('Not Found!');
     }
     const handleRefresh = async () => {
-        const req = await fetch(`/dict?word=${current.value.word}`, { cache: 'reload' });
-        if (req.ok) dict.value = await req.json();
+        const d = await getDict(current.value.word, true);
+        if (d) dict.value = d;
+        else console.error('Not Found!');
     };
     const handleIKnown = (level?: number) => {
         if (level !== undefined) current.value.level = level;
-        fetch('/study', requestInit(current.value));
+        study(current.value);
         signals.isPhaseAnswer.value = false;
         if (++index.value >= signals.tasks.value.length) return finish();
         current.value = signals.tasks.value[index.value];
-        getDict();
+        getDiction();
     };
     const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L')
         && dict.value.sound
@@ -64,10 +67,10 @@ export default () => {
         else showTips('Submit Success!');
     };
     const handleDeleteTask = () => {
-        fetch('/delete-task', requestInit(JSON.stringify(current.value)));
+        deleteTask(current.value);
         signals.tasks.value = [...signals.tasks.value.slice(0, index.value), ...signals.tasks.value.slice(index.value+1)];
         current.value = signals.tasks.value[index.value];
-        getDict();
+        getDiction();
         signals.isPhaseAnswer.value = false;
     };
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
@@ -108,7 +111,7 @@ export default () => {
     }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);
-        getDict();
+        getDiction();
         return () => document.removeEventListener('keyup', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>

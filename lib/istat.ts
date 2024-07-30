@@ -1,5 +1,5 @@
 import { Tag, Tags } from "@sholvoir/vocabulary";
-import { ITask, TaskTypes } from "./itask.ts";
+import { ITask, TASK_TYPES } from "./itask.ts";
 
 export const statsFormat = '0.0.5';
 export const BLevels = ['never','start','medium','familiar','skilled','finished'] as const;
@@ -37,7 +37,7 @@ export const bLevelIncludes = (blevel: BLevel, level: number) => {
 
 export const initStats = (time = 0) => {
     const stats = { format: statsFormat, time, all: {}, task: {} } as IStats;
-    for (const type of TaskTypes) for (const tag of Tags) {
+    for (const type of TASK_TYPES) for (const tag of Tags) {
         const k = `${type}${tag}`;
         stats.all[k] = newStat();
         stats.task[k] = newStat();

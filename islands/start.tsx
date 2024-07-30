@@ -1,8 +1,9 @@
 import { Signal, useSignal } from "@preact/signals";
-import { TaskType, TaskTypes } from "../lib/itask.ts";
+import { TaskType, TASK_TYPES } from "../lib/itask.ts";
 import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from "../lib/tag.ts";
 import { showDialog, closeDialog, showTips, startStudy } from "../lib/mem.ts";
+import { addTasks } from "../lib/worker.ts";
 import Dialog from './dialog.tsx';
 import Checkbox from './checkbox.tsx';
 import Select from './select-single.tsx';
@@ -11,18 +12,18 @@ import PButton from './button-prime.tsx';
 
 export default () => {
     const checkTaskTypes = {} as Record<TaskType, Signal<boolean>>;
-    for (const type of TaskTypes) checkTaskTypes[type] = useSignal(false);
+    for (const type of TASK_TYPES) checkTaskTypes[type] = useSignal(false);
     const sTag = useSignal<Tag>('OG');
     const handleOkClick = async () => {
-        const types: TaskType[] = [];
-        if (checkTaskTypes['L'].value) types.push('L');
-        if (checkTaskTypes['R'].value) types.push('R');
+        let types = '';
+        if (checkTaskTypes['L'].value) types += 'L';
+        if (checkTaskTypes['R'].value) types += 'R';
         if (!types.length) return showTips('请选择至少一种训练类型!');
         closeDialog();
         showDialog({dial: 'wait', prompt: '请稍候...' });
-        await fetch(`/add-tasks?types=${types.join('')}&tag=${sTag.value}`);
+        await addTasks(types, sTag.value);
         closeDialog();
-        startStudy(types.join(''), sTag.value);
+        startStudy(types, sTag.value);
     }
     return <Dialog title="开始学习">
         <div class="p-2 h-full flex flex-col gap-2">

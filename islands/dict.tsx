@@ -1,5 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { signals, showDialog, showTips } from "../lib/mem.ts";
+import { search } from "../lib/worker.ts";
 import TInput from './input-text.tsx';
 import Dialog from './dialog.tsx';
 
@@ -8,9 +9,8 @@ export default () => {
     const handleSearchClick = async () => {
         const text = word.value.trim();
         if (!text) return;
-        const req = await fetch(`/search?word=${encodeURIComponent(text)}`);
-        if (!req.ok) return showTips('Not Found!');
-        const task = await req.json();
+        const task = await search(text);
+        if (!task) return showTips('Not Found!');
         signals.tasks.value = [task];
         signals.isPhaseAnswer.value = true;
         showDialog({ dial: 'study' });

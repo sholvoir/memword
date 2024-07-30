@@ -1,14 +1,15 @@
-export const settingFormat = '0.0.4';
+export const settingFormat = '0.0.5';
 
 export interface ISetting {
     format: string;
+    version: number;
     sprint: number;
     books: Array<string>;
-    unsynced?: true
 };
 
 export const defaultSetting = () => ({
     format: settingFormat,
+    version: 0,
     sprint: 10,
     books: ['R__', 'L__']
 }) as ISetting;

@@ -2,10 +2,10 @@
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { defaultSetting, ISetting } from "../lib/isetting.ts";
+import { ISetting } from "../lib/isetting.ts";
 import { ITask } from "../lib/itask.ts";
-import { initStats } from "../lib/istat.ts";
 import { signals, startStudy, getUser, showDialog, hideTips, init, close, IDialog } from "../lib/mem.ts";
+import { worker } from "../lib/worker.ts";
 import Start from './start.tsx';
 import Stats from './stats.tsx';
 import About from './about.tsx';
@@ -23,9 +23,9 @@ import RButton from './button-ripple.tsx';
 export default () => {
     if (!IS_BROWSER) return <div/>;
     signals.user = useSignal<string>(getUser());
-    signals.setting = useSignal<ISetting>(defaultSetting());
+    signals.setting = useSignal<ISetting>(worker.setting);
     signals.dialogs = useSignal<Array<IDialog>>([]);
-    signals.stats  = useSignal(initStats());
+    signals.stats  = useSignal(worker.stats);
     signals.tasks = useSignal<Array<ITask>>([]);
     signals.tips = useSignal('');
     signals.isPhaseAnswer = useSignal(false);
@@ -43,7 +43,7 @@ export default () => {
         case 'dict': return <Dict {...rest}/>;
         case 'menu': return <Menu {...rest}/>;
     } };
-    useEffect(() => (init().catch(console.error), close), []);
+    useEffect(() => (init(), close), []);
     return <>
         <div class="fixed top-0 inset-x-0 bg-slate-200 dark:bg-slate-800 flex flex-col" style={`bottom:${signals.user.value?'60px':'0'}`}>{signals.user.value && <Stats/>}</div>
         {signals.user.value && <div class="fixed inset-x-0 bottom-0 px-4 pb-2 bg-slate-300 dark:bg-slate-700 fill-slate-800 dark:fill-slate-300 flex gap-3 justify-between">
