@@ -45,6 +45,7 @@ export default () => {
         if (level !== undefined) current.value.level = level;
         study(current.value);
         signals.isPhaseAnswer.value = false;
+        dict.value = {};
         if (++index.value >= signals.tasks.value.length) return finish();
         current.value = signals.tasks.value[index.value];
         getDiction();
@@ -70,8 +71,9 @@ export default () => {
         deleteTask(current.value);
         signals.tasks.value = [...signals.tasks.value.slice(0, index.value), ...signals.tasks.value.slice(index.value+1)];
         current.value = signals.tasks.value[index.value];
-        getDiction();
         signals.isPhaseAnswer.value = false;
+        dict.value = {};
+        getDiction();
     };
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
         endY += y;
