@@ -24,7 +24,7 @@
         @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
     }
     .text-thick-shadow {
-        @apply [text-shadow:1px_1px_1px_#E2E8F0,-1px_1px_1px_#E2E8F0,1px_-1px_1px_#E2E8F0,-1px_-1px_1px_#E2E8F0] dark:[text-shadow:1px_1px_1px_#1E293B,-1px_1px_1px_#1E293B,1px_-1px_1px_#1E293B,-1px_-1px_1px_#1E293B]
+        @apply [text-shadow:0_0_5px_#FFF,2px_2px_5px_#FFF,-2px_2px_5px_#FFF,2px_-2px_5px_#FFF,-2px_-2px_5px_#FFF] dark:[text-shadow:0_0_5px_#000,2px_2px_5px_#000,-2px_2px_5px_#000,2px_-2px_5px_#000,-2px_-2px_5px_#000]
     }
 }
 

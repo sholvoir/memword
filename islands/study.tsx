@@ -151,7 +151,7 @@ export default () => {
             </div>
             {(signals.isPhaseAnswer.value || current.value.type == 'R') && <div class="text-4xl font-bold">{current.value.word}</div>}
             {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
-            {signals.isPhaseAnswer.value && <div class="grow text-2xl">{dict.value?.trans?.split('\n').map(t => <p>{t}</p>)}</div>}
+            {signals.isPhaseAnswer.value && <div class="grow text-2xl">{dict.value?.trans?.split('\n').map(t => <p class="my-2">{t}</p>)}</div>}
         </div>
         <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
     </Dialog>;
