@@ -16,6 +16,7 @@ import IconCheck from "tabler_icons/check.tsx";
 import IconCut from "tabler_icons/cut.tsx";
 import IconX from "tabler_icons/x.tsx";
 
+const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
 let startY = 0;
 let endY = 0;
 
@@ -111,6 +112,12 @@ export default () => {
         if (e.clientY > rect.top + rect.height / 2) handleShowAnswer();
         else if (e.clientY > rect.top + 36) handleSpeakIt();
     }
+    const splite = (w: string) => {
+        const x = spliteNum.exec(w);
+        if (!x) return <div/>;
+        const [_, l, n] = x;
+        return <div class="text-4xl font-bold">{l}<sup>{n}</sup></div>;
+    }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);
         getDiction();
@@ -149,7 +156,7 @@ export default () => {
                 </SButton>
                 <div>{current.value.level}</div>
             </div>
-            {(signals.isPhaseAnswer.value || current.value.type == 'R') && <div class="text-4xl font-bold">{current.value.word}</div>}
+            {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
             {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
             {signals.isPhaseAnswer.value && <div class="grow text-2xl">{dict.value?.trans?.split('\n').map(t => <p class="my-2">{t}</p>)}</div>}
         </div>
