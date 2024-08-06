@@ -5,6 +5,8 @@
 @layer base {
     input, textarea {
         border-color: #78716C;
+        border-width: 1px;
+        padding: 3px 6px;
         background-color: transparent;
         outline: none;
     }
@@ -18,8 +20,20 @@
             -webkit-text-fill-color: #E7E5E4;
         }
     }
+    .input_4Xa52>div {
+        @apply bg-slate-200 dark:bg-slate-800
+    }
 }
 @layer components {
+    .title {
+        @apply bg-slate-300 dark:bg-slate-900 w-[env(titlebar-area-width,100%)] ml-[env(titlebar-area-x,0)] h-[env(titlebar-area-height,38px)] flex justify-center items-center font-bold
+    }
+    .body {
+        @apply bg-slate-200 dark:bg-slate-800
+    }
+    .tail {
+        @apply bg-slate-300 dark:bg-slate-700 fill-slate-800 dark:fill-slate-300
+    }
     .bg-round-6 {
         @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
     }

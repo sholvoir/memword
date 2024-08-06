@@ -26,7 +26,7 @@
     "$fresh/": "https://deno.land/x/fresh@1.6.8/",
     "@preact/signals": "https://esm.sh/*@preact/signals@1.3.0",
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.8.0",
-    "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.4/",
+    "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.5/",
     "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.0.1/",
     "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.8",
     "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.5",
