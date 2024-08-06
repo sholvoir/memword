@@ -5,10 +5,9 @@ import { TagName } from "../lib/tag.ts";
 import { showDialog, closeDialog, showTips, startStudy } from "../lib/mem.ts";
 import { addTasks } from "../lib/worker.ts";
 import Dialog from './dialog.tsx';
-import Checkbox from './checkbox.tsx';
-import Select from './select-single.tsx';
-import NButton from './button-normal.tsx';
-import PButton from './button-prime.tsx';
+import Checkbox from '@sholvoir/components/islands/checkbox.tsx';
+import Select from '@sholvoir/components/islands/select-single.tsx';
+import Button from '@sholvoir/components/islands/button-ripple.tsx';
 
 export default () => {
     const checkTaskTypes = {} as Record<TaskType, Signal<boolean>>;
@@ -33,8 +32,8 @@ export default () => {
                 <Checkbox label="阅读" binding={checkTaskTypes['R']}/>
             </div>
             <div class="flex gap-2 pb-2 justify-end">
-                <NButton class="w-32" onClick={closeDialog}>取消</NButton>
-                <PButton class="w-32" onClick={handleOkClick}>确定</PButton>
+                <Button class="btn-normal w-32" onClick={closeDialog}>取消</Button>
+                <Button class="btn-prime w-32" onClick={handleOkClick}>确定</Button>
             </div>
         </div>
     </Dialog>;

@@ -2,11 +2,11 @@ import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { signals, closeDialog, showTips } from '../lib/mem.ts';
 import { updateStats, submitIssue, syncTasks, deleteTask, getDict } from '../lib/worker.ts'
-import { IDict } from "dict/lib/idict.ts";
+import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
 import { study } from "../lib/worker.ts";
 import Dialog from './dialog.tsx';
-import SButton from './button-anti-shake.tsx';
+import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
 import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
 import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
@@ -22,7 +22,7 @@ let endY = 0;
 export default () => {
     const index = useSignal(0);
     const current = useSignal<ITask>(signals.tasks.value[0]);
-    const dict = useSignal<IDict>({});
+    const dict = useSignal<IDiction | undefined>(undefined);
     const finish = () => {
         closeDialog();
         signals.stats.value = { ...signals.stats.value };
@@ -45,13 +45,13 @@ export default () => {
         if (level !== undefined) current.value.level = level;
         study(current.value);
         signals.isPhaseAnswer.value = false;
-        dict.value = {};
+        dict.value = undefined;
         if (++index.value >= signals.tasks.value.length) return finish();
         current.value = signals.tasks.value[index.value];
         getDiction();
     };
     const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L')
-        && dict.value.sound
+        && dict.value?.sound
         && player.current?.play();
     const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
     const handleKeyPress = (event: KeyboardEvent ) => {
@@ -72,7 +72,7 @@ export default () => {
         signals.tasks.value = [...signals.tasks.value.slice(0, index.value), ...signals.tasks.value.slice(index.value+1)];
         current.value = signals.tasks.value[index.value];
         signals.isPhaseAnswer.value = false;
-        dict.value = {};
+        dict.value = undefined;
         getDiction();
     };
     const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
@@ -117,10 +117,10 @@ export default () => {
         return () => document.removeEventListener('keyup', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class="relative p-2 h-full flex flex-col bg-cover bg-center text-thick-shadow [outline:none]"
+        <div class={`relative p-2 h-full flex flex-col bg-cover bg-center [outline:none]${signals.isPhaseAnswer.value ? ' text-thick-shadow' : ''}`}
             tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
-            style={(signals.isPhaseAnswer.value && dict.value.pic) ? `background-image: url(${dict.value.pic});` : ''}>
+            style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
             <div class="flex gap-2 text-lg">
                 <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_">
                     <IconCircleLetterA class="bg-round-6"/>

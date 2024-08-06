@@ -1,9 +1,8 @@
 import { useSignal } from "@preact/signals";
 import { showDialog, closeDialog, signals } from '../lib/mem.ts';
 import { logout } from '../lib/mem.ts';
-import Checkbox from './checkbox.tsx';
-import NButton from './button-normal.tsx';
-import PButton from './button-prime.tsx';
+import Checkbox from '@sholvoir/components/islands/checkbox.tsx';
+import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import Dialog from './dialog.tsx';
 
 export default () => {
@@ -23,8 +22,8 @@ export default () => {
                 <Checkbox name="cleanDict" label="删除缓存的词典" binding={cleanDict} />
             </div>
             <div class="flex gap-2">
-                <NButton class="grow" onClick={closeDialog}>取消</NButton>
-                <PButton class="grow" onClick={handleSignoutClick}>登出</PButton>
+                <Button class="btn-normal grow" onClick={closeDialog}>取消</Button>
+                <Button class="btn-prime grow" onClick={handleSignoutClick}>登出</Button>
             </div>
         </div>
     </Dialog>;

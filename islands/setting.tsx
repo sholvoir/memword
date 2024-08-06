@@ -4,10 +4,9 @@ import { useSignal } from "@preact/signals";
 import { signals, closeDialog } from "../lib/mem.ts";
 import { TaskTypeName, TASK_TYPES } from "../lib/itask.ts";
 import { now, setSetting, syncSetting } from "../lib/worker.ts";
-import NButton from './button-normal.tsx';
-import PButton from './button-prime.tsx';
-import TInput from './input-text.tsx';
-import MSelect from './select-multi.tsx';
+import Button from '@sholvoir/components/islands/button-ripple.tsx';
+import TInput from '@sholvoir/components/islands/input-text.tsx';
+import MSelect from '@sholvoir/components/islands/select-multi.tsx';
 import Dialog from './dialog.tsx';
 
 export default () => {
@@ -31,8 +30,8 @@ export default () => {
                 <TInput num name="sprint" binding={sprint} class="grow"/>
             </div>
             <div class="flex justify-end gap-2 pb-2">
-                <NButton class="w-32" onClick={closeDialog}>取消</NButton>
-                <PButton class="w-32" onClick={handleOKClick}>确定</PButton>
+                <Button class="w-32 btn-normal" onClick={closeDialog}>取消</Button>
+                <Button class="w-32 btn-prime" onClick={handleOKClick}>确定</Button>
             </div>
         </div>
     </Dialog>

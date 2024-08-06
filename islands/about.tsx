@@ -1,6 +1,6 @@
 import { signals, showDialog } from '../lib/mem.ts';
 import Dialog from './dialog.tsx';
-import RButton from './button-ripple.tsx';
+import RButton from '@sholvoir/components/islands/button-ripple.tsx';
 
 export default () => <Dialog title="快乐背单词" noback={!signals.user.value}>
     <div class="[&>div]:w-full [&>div]:min-h-80 [&>div]:p-5 [&>div]:flex [&>div]:flex-col [&>div]:justify-center [&>div>h1]:mb-4 [&>div>h1]:text-5xl [&>div>p]:text-2xl font-extrabold odd:[&>div]:bg-slate-200 odd:[&>div]:text-slate-800 even:[&>div]:bg-slate-800 even:[&>div]:text-slate-300 [&>div:nth-child(even)]:text-right [&>div:nth-child(odd)_b]:text-orange-600 [&>div:nth-child(even)_b]:text-orange-400">

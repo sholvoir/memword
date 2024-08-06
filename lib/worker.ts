@@ -7,7 +7,6 @@ import { type BLevel, initStats, adjTaskToStats, IStats, bLevelIncludes, statsFo
 import { defaultSetting, ISetting, settingFormat } from "./isetting.ts";
 
 const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.11/vocabulary.txt';
-const revisionUrl = 'https://www.micit.co/vocabulary/0.0.11/revision.txt';
 const dictApi = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 
@@ -17,8 +16,7 @@ const g = {
     stats: initStats(),
     dictDB: undefined as IDBDatabase | undefined,
     userDB: undefined as IDBDatabase | undefined,
-    vocabulary: {} as Record<string, Array<Tag>>,
-    revision: {} as Record<string, string>
+    vocabulary: {} as Record<string, Array<Tag>>
 };
 
 const setVocabularyUrl = (url: string) => localStorage.setItem('_vocabulary_url', url);
@@ -157,14 +155,6 @@ export const deleteTask = async (task: ITask) => {
 };
 
 export const search = async (word: string) => {
-    if (!g.vocabulary[word]) {
-        if (!g.revision[word]) {
-            if (!g.vocabulary[word.toLowerCase()]) {
-                if (!g.revision[word.toLowerCase()]) return undefined;
-                else word = g.revision[word.toLowerCase()];
-            } else word = word.toLowerCase();
-        } else word = g.revision[word];
-    }
     let task = await getTask('R', word);
     if (!task) putTask(task = { type: 'R', word, last: now(), next: 0, level: 0 });
     return task;
@@ -328,15 +318,7 @@ const init = async (user: string ) => {
         for (let line of (await res1.text()).split('\n')) if (line = line.trim()) {
             const [word, ...tags] = line.split(delimiter).map(w=>w.trim());
             g.vocabulary[word] = tags as Array<Tag>;
-        }
-    }
-
-    const res2 = await fetch(revisionUrl, { cache: 'force-cache' });
-    if (res2.ok) {
-        const delimiter = /: */;
-        for (let line of (await res2.text()).split('\n')) if (line = line.trim()) {
-            const [word, replace] = line.split(delimiter).map(w=>w.trim());
-            g.revision[word] = replace;
+            worker.vocabulary.push(word);
         }
     }
     
@@ -372,6 +354,7 @@ const logout = async (cleanUser: boolean, cleanDict: boolean) => {
 };
 
 export const worker = {
+    vocabulary: [] as Array<string>,
     onSettingChanged: null as (((setting: ISetting) => void) | null),
     onStatsChanged: null as (((stats: IStats) => void) | null),
     init, close, logout

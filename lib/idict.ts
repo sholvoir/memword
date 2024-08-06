@@ -1,4 +1,4 @@
-import { IDict } from "dict/lib/idict.ts";
+import { IDict } from "@sholvoir/dict/lib/idict.ts";
 
 export interface IDiction extends IDict {
     word: string;

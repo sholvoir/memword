@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import { JSX } from "preact";
 import { Tag } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { TaskType, TaskTypeName } from "../lib/itask.ts";
@@ -8,7 +9,7 @@ import Stat from './stat.tsx';
 
 const sum = (s: number, b: number) => s + b;
 
-export default () => {
+export default (props: JSX.HTMLAttributes<HTMLDivElement>) => {
     const getResult = () => {
         const result = [] as Array<any>;
         const stats = signals.stats.value;
@@ -26,8 +27,5 @@ export default () => {
         for (const ttag of signals.setting.value.books) push(ttag);
         return result;
     }
-    return <>
-        <div class="shrink-0 px-2 w-[env(titlebar-area-width,100%)] ml-[env(titlebar-area-x,0)] h-[env(titlebar-area-height,38px)] [app-region:drag] bg-slate-300 dark:bg-slate-900 flex justify-center items-center font-bold">学习进度</div>
-        <div class="grow overflow-y-auto"><div class="p-2 flex flex-wrap justify-between gap-4">{getResult()}</div></div>
-    </>;
+    return <div {...props}><div class="p-2 flex flex-wrap justify-between gap-4">{getResult()}</div></div>;
 }

@@ -28,7 +28,7 @@ export const handler: Handlers<any, MemState> = {
                     await collection.updateOne(filter, { $set })
                 } 
             }
-        })} catch { return internalServerError }
+        })} catch (e) { console.error(e); return internalServerError }
         console.log(`API '/task' POST ${ctx.state.user} ${lastgt} with tasks ${clientTasks.length}, return ${serverTasks.length}.`);
         return new Response(JSON.stringify(serverTasks), responseInit );
     }

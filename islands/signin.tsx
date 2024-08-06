@@ -1,9 +1,9 @@
 import { useSignal } from "@preact/signals";
 import { signals, showTips } from '../lib/mem.ts';
 import { signup, login } from '../lib/worker.ts';
-import PButton from './button-prime.tsx';
-import AButton from './button-anchor.tsx';
-import TInput from './input-text.tsx';
+import Button from '@sholvoir/components/islands/button-ripple.tsx';
+import AButton from '@sholvoir/components/islands/button-base.tsx';
+import TInput from '@sholvoir/components/islands/input-text.tsx';
 import Dialog from './dialog.tsx';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
@@ -42,12 +42,12 @@ export default () => {
         <div class="p-2 h-full w-64 mx-auto flex flex-col gap-4">
             <div class="flex flex-col">
                 <TInput name="email" placeholder="Email" binding={email} />
-                <AButton class="block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
+                <AButton class="btn-anchor block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
                     Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
                 </AButton>
             </div>
             <TInput name="password" placeholder="Password" binding={password} />
-            <PButton onClick={handleClickLogin}>确定</PButton>
+            <Button class="btn-prime" onClick={handleClickLogin}>确定</Button>
         </div>
     </Dialog>
 }

@@ -1,9 +1,8 @@
 import { useSignal } from "@preact/signals";
 import { submitIssue } from "../lib/worker.ts";
 import { showTips, closeDialog } from '../lib/mem.ts';
-import NButton from './button-normal.tsx';
-import PButton from './button-prime.tsx'
-import TAInput from './input-textarea.tsx';
+import Button from '@sholvoir/components/islands/button-ripple.tsx';
+import TAInput from '@sholvoir/components/islands/input-textarea.tsx';
 import Dialog from './dialog.tsx';
 
 export default () => {
@@ -19,8 +18,8 @@ export default () => {
             <label>请在这里描述你的问题:</label>
             <TAInput name="issue" class="w-full grow" binding={issue}>{issue.value}</TAInput>
             <div class="flex gap-2 mt-2 pb-2 justify-end">
-                <NButton class="w-32" onClick={closeDialog}>取消</NButton>
-                <PButton class="w-32" onClick={handleSubmitClick}>提交</PButton>
+                <Button class="w-32 btn-normal" onClick={closeDialog}>取消</Button>
+                <Button class="w-32 btn-prime" onClick={handleSubmitClick}>提交</Button>
             </div>
         </div>
     </Dialog>
