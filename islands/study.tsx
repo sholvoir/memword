@@ -116,7 +116,7 @@ export default () => {
         const x = spliteNum.exec(w);
         if (!x) return <div/>;
         const [_, l, n] = x;
-        return <div class="text-4xl font-bold">{l}<sup>{n}</sup></div>;
+        return <div class="text-4xl font-bold">{l}<sup class="text-lg">{n}</sup></div>;
     }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);
