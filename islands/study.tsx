@@ -142,7 +142,7 @@ export default () => {
                     <IconPlayerPlayFilled class="bg-round-6"/>
                 </SButton>
                 <div class="grow text-center">{index.value+1}/{signals.tasks.value.length}</div>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(14)}>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(13)}>
                     <IconCircleLetterF class="bg-round-6"/>
                 </SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}>

@@ -6,7 +6,7 @@ import { IDiction } from "./idict.ts";
 import { type BLevel, initStats, adjTaskToStats, IStats, bLevelIncludes, statsFormat } from './istat.ts';
 import { defaultSetting, ISetting, settingFormat } from "./isetting.ts";
 
-const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.13/vocabulary.txt';
+const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.14/vocabulary.txt';
 const dictApi = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 
