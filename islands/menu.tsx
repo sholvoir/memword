@@ -4,7 +4,11 @@ import Dialog from './dialog.tsx';
 
 export default () => {
     const open = (e: Event) => showDialog({dial: (e.target as HTMLMenuElement).title as Dial});
-    const cached = () => cacheDict().then(() => showTips('辞典缓存完毕！'));
+    const cached = async () => {
+        showTips('开始缓存……');
+        await cacheDict();
+        showTips('缓存完毕！');
+    }
     return <Dialog title="菜单">
         <div class="p-2 [&>menu]:p-2 [&>menu]:cursor-pointer [&>div]:h-px [&>div]:bg-slate-500">
             <menu title="issue" onClick={open}>报告问题</menu>
