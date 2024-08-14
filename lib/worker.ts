@@ -125,6 +125,14 @@ export const getDict = async (word: string, reload?: true) => {
     }
 };
 
+export const cacheDict = async () => {
+    for (const word of worker.vocabulary) if (!await getDiction(word)) {
+        const dict = await fetchDiction(word);
+        if (dict) await putDiction(dict);
+        else console.error(`Can not fetch word: ${word}.`)
+    }
+}
+
 const openUserDB = (user: string) => new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(user, 1);
     request.onerror = reject;
