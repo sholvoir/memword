@@ -20,7 +20,10 @@ export const signals = {} as {
     isPhaseAnswer: Signal<boolean>;
 }
 export const hideTips = () => signals.tips.value = '';
-export const showTips = (content: string) => { signals.tips.value = content; setTimeout(hideTips, 3000) };
+export const showTips = (content: string, autohide = true) => {
+    signals.tips.value = content;
+    if (autohide) setTimeout(hideTips, 3000)
+};
 export const showDialog = (d: IDialog) => signals.dialogs.value = [...signals.dialogs.value, d];
 export const closeDialog = () => signals.dialogs.value = signals.dialogs.value.slice(0, -1);
 

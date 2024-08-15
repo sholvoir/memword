@@ -5,8 +5,8 @@ import Dialog from './dialog.tsx';
 export default () => {
     const open = (e: Event) => showDialog({dial: (e.target as HTMLMenuElement).title as Dial});
     const cached = async () => {
-        showTips('开始缓存……');
-        await cacheDict();
+        showTips('开始缓存……', false);
+        for await (const element of cacheDict()) showTips(`${Math.round(element * 1000)/10}%`, false);
         showTips('缓存完毕！');
     }
     return <Dialog title="菜单">

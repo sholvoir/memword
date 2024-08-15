@@ -125,11 +125,16 @@ export const getDict = async (word: string, reload?: true) => {
     }
 };
 
-export const cacheDict = async () => {
-    for (const word of worker.vocabulary) if (!await getDiction(word)) {
-        const dict = await fetchDiction(word);
-        if (dict) await putDiction(dict);
-        else console.error(`Can not fetch word: ${word}.`)
+export const cacheDict = async function*() {
+    let i = 0;
+    const n = worker.vocabulary.length;
+    for (const word of worker.vocabulary) {
+        if (!await getDiction(word)) {
+            const dict = await fetchDiction(word);
+            if (dict) await putDiction(dict);
+            else console.error(`Can not fetch word: ${word}.`)
+        }
+        yield (++i) / n;
     }
 }
 
