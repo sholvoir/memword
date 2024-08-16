@@ -32,7 +32,7 @@ import * as $stat from "./islands/stat.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
 import * as $waiting from "./islands/waiting.tsx";
-import { type Manifest } from "$fresh/server.ts";
+import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
