@@ -1,12 +1,12 @@
 import Dialog from './dialog.tsx';
-import IconCut from "tabler_icons/cut.tsx";
-import IconRefresh from "tabler_icons/refresh.tsx";
-import IconAlertCircleFilled from "tabler_icons/alert-circle-filled.tsx";
-import IconPlayerPlayFilled from "tabler_icons/player-play-filled.tsx";
-import IconCircleLetterF from "tabler_icons/circle-letter-f.tsx";
-import IconCircleLetterA from "tabler_icons/circle-letter-a.tsx";
-import IconCheck from "tabler_icons/check.tsx";
-import IconX from "tabler_icons/x.tsx";
+import IconCut from "@preact-icons/tb/TbCut";
+import IconRefresh from "@preact-icons/tb/TbRefresh";
+import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
+import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
+import IconCircleLetterF from "@preact-icons/tb/TbCircleLetterF";
+import IconCircleLetterA from "@preact-icons/tb/TbCircleLetterA";
+import IconCheck from "@preact-icons/tb/TbCheck";
+import IconX from "@preact-icons/tb/TbX";
 
 export default () => <Dialog title="帮助"><ol class="list-decimal py-2 pr-2 pl-8 [&>li]:mx-2">
     <li>如何使用本软件？
