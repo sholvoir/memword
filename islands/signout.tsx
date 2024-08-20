@@ -22,8 +22,8 @@ export default () => {
                 <Checkbox name="cleanDict" label="删除缓存的词典" binding={cleanDict} />
             </div>
             <div class="flex gap-2">
-                <Button class="btn-normal grow" onClick={closeDialog}>取消</Button>
-                <Button class="btn-prime grow" onClick={handleSignoutClick}>登出</Button>
+                <Button class="button btn-normal grow" onClick={closeDialog}>取消</Button>
+                <Button class="button btn-prime grow" onClick={handleSignoutClick}>登出</Button>
             </div>
         </div>
     </Dialog>;

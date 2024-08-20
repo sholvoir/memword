@@ -47,7 +47,7 @@ export default () => {
                 </AButton>
             </div>
             <TInput name="password" placeholder="Password" binding={password} />
-            <Button class="btn-prime" onClick={handleClickLogin}>确定</Button>
+            <Button class="button btn-prime" onClick={handleClickLogin}>确定</Button>
         </div>
     </Dialog>
 }

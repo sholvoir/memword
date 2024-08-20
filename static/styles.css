@@ -40,6 +40,9 @@
     .text-thick-shadow {
         @apply [text-shadow:0_0_5px_#FFF,2px_2px_5px_#FFF,-2px_2px_5px_#FFF,2px_-2px_5px_#FFF,-2px_-2px_5px_#FFF] dark:[text-shadow:0_0_5px_#000,2px_2px_5px_#000,-2px_2px_5px_#000,2px_-2px_5px_#000,-2px_-2px_5px_#000]
     }
+    .button {
+        @apply rounded-md p-2 border
+    }
     .btn-anchor {
         @apply text-blue-800 dark:text-blue-300 hover:underline disabled:opacity-50 active:bg-pink-800
     }
@@ -50,6 +53,6 @@
         @apply bg-orange-400 disabled:hover:bg-orange-400 dark:bg-orange-700 dark:disabled:hover:bg-orange-700 hover:bg-orange-500
     }
     .select {
-        @apply border border-solid border-gray-500 p-2 fill-slate-800 dark:fill-slate-300 [scrollbar-color:#64748B_transparent] hover:[&>div]:bg-slate-300 dark:hover:[&>div]:bg-slate-700
+        @apply border border-solid border-gray-500 p-2 fill-slate-800 dark:fill-slate-300 [scrollbar-color:#64748B_transparent] hover:[&>div]:bg-slate-300 dark:hover:[&>div]:bg-slate-700 overflow-y-auto
     }
 }
