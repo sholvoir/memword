@@ -41,7 +41,7 @@
         @apply [text-shadow:0_0_5px_#FFF,2px_2px_5px_#FFF,-2px_2px_5px_#FFF,2px_-2px_5px_#FFF,-2px_-2px_5px_#FFF] dark:[text-shadow:0_0_5px_#000,2px_2px_5px_#000,-2px_2px_5px_#000,2px_-2px_5px_#000,-2px_-2px_5px_#000]
     }
     .button {
-        @apply rounded-md p-2 border
+        @apply rounded-md p-2 border border-slate-500
     }
     .btn-anchor {
         @apply text-blue-800 dark:text-blue-300 hover:underline disabled:opacity-50 active:bg-pink-800
