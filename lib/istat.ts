@@ -38,9 +38,9 @@ export const bLevelIncludes = (blevel: BLevel, level: number) => {
 export const initStats = (time = 0) => {
     const stats = { format: statsFormat, time, all: {}, task: {} } as IStats;
     for (const type of TASK_TYPES) for (const tag of Tags) {
-        const k = `${type}${tag}`;
-        stats.all[k] = newStat();
-        stats.task[k] = newStat();
+        const ttag = `${type}${tag}`;
+        stats.all[ttag] = newStat();
+        stats.task[ttag] = newStat();
     }
     return stats;
 };
@@ -48,7 +48,6 @@ export const initStats = (time = 0) => {
 export const adjTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>, direction = 0) => {
     const ttag = `${task.type}__`;
     if (task.level != 0 || task.next < stats.time) stats.all[ttag][task.level] += direction;
-    if (Number.isNaN(stats.all[ttag][task.level])) console.log(task, stats, tags);
     if (task.next < stats.time) stats.task[ttag][task.level] += direction;
     for (const tag of tags) {
         const k = `${task.type}${tag}`;

@@ -6,7 +6,7 @@ import { IDiction } from "./idict.ts";
 import { type BLevel, initStats, adjTaskToStats, IStats, bLevelIncludes, statsFormat } from './istat.ts';
 import { defaultSetting, ISetting, settingFormat } from "./isetting.ts";
 
-const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.14/vocabulary.txt';
+const vocabularyUrl = 'https://www.micit.co/vocabulary/0.0.15/vocabulary.txt';
 const dictApi = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 
@@ -191,7 +191,7 @@ export const getEpisode = (types?: string, tag?: Tag, blevel?: BLevel) => new Pr
     }
 });
 
-const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
+const getTasks = (last: number) => new Promise<Array<ITask|undefined>>((resolve, reject) => {
     const request = g.userDB!.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
@@ -262,8 +262,8 @@ export const addTasks = (types: string, tag: Tag) => new Promise<void>((resolve,
                 const tags = g.vocabulary[task.word];
                 adjTaskToStats(task, g.stats, tags, -1);
                 letNever(task, time);
-                objectStore.add(task);
                 adjTaskToStats(task, g.stats, tags, 1);
+                objectStore.add(task);
             }
         }
     }

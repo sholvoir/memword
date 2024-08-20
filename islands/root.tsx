@@ -47,6 +47,6 @@ export default () => {
     return <div class="h-[100dvh]">
         {signals.user.value && <Home/>}
         {signals.dialogs.value.map(dialog)}
-        {signals.tips.value && <div class="fixed top-0 inset-x-6 h-[38px] px-2 text-slate-200 bg-orange-600 flex justify-center items-center" onClick={hideTips}>{signals.tips.value}</div>}
+        {signals.tips.value && <div class="fixed top-0 inset-x-8 h-[38px] px-2 text-slate-200 bg-orange-600 flex justify-center items-center" onClick={hideTips}>{signals.tips.value}</div>}
     </div>;
 }
