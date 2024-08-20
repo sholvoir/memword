@@ -20,6 +20,6 @@ export default ({title, children, onCancel, noback, onMenuClick }: IDialogProps 
                 {!onMenuClick && <SButton class="[app-region:no-drag]" onClick={onMenuClick}><IconDots class="w-6 h-6"/></SButton>}
             </div>
         </div>
-        <div class="body grow overflow-y-auto ">{children}</div>
+        <div class="body grow overflow-y-auto">{children}</div>
     </div>
 }
