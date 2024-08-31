@@ -126,9 +126,11 @@ export const getDict = async (word: string, reload?: true) => {
 };
 
 export const cacheDict = async function*() {
+    const tasks = await getTasks(0);
     let i = 0;
-    const n = worker.vocabulary.length;
-    for (const word of worker.vocabulary) {
+    const n = tasks.length;
+    for (const task of tasks) if (task?.word){
+        const word = task.word;
         if (!await getDiction(word)) {
             const dict = await fetchDiction(word);
             if (dict) await putDiction(dict);
