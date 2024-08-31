@@ -26,7 +26,7 @@
 }
 @layer components {
     .tip {
-        @apply bg-slate-300 dark:bg-slate-900 w-[calc(env(titlebar-area-width,100%)-40px)] ml-[calc(env(titlebar-area-x,0)+20px)] h-[env(titlebar-area-height,38px)] flex justify-center items-center font-bold
+        @apply bg-slate-300 dark:bg-slate-900 w-[calc(env(titlebar-area-width,100%)-64px)] ml-[calc(env(titlebar-area-x,0)+32px)] h-[env(titlebar-area-height,38px)] flex justify-center items-center font-bold
     }
     .title {
         @apply bg-slate-300 dark:bg-slate-900 w-[env(titlebar-area-width,100%)] ml-[env(titlebar-area-x,0)] h-[env(titlebar-area-height,38px)] flex justify-center items-center font-bold
@@ -47,7 +47,7 @@
         @apply rounded-md p-2 border border-slate-500
     }
     .btn-anchor {
-        @apply text-blue-800 dark:text-blue-300 hover:underline disabled:opacity-50 active:bg-pink-800
+        @apply text-slate-800 dark:text-slate-300 hover:underline disabled:opacity-50 active:bg-orange-800
     }
     .btn-normal {
         @apply bg-slate-400 hover:bg-slate-500 disabled:hover:bg-slate-400 dark:bg-slate-700 disabled:hover:dark:bg-slate-700
@@ -56,6 +56,6 @@
         @apply bg-orange-400 disabled:hover:bg-orange-400 dark:bg-orange-700 dark:disabled:hover:bg-orange-700 hover:bg-orange-500
     }
     .select {
-        @apply border border-solid border-gray-500 p-2 fill-slate-800 dark:fill-slate-300 [scrollbar-color:#64748B_transparent] hover:[&>div]:bg-slate-300 dark:hover:[&>div]:bg-slate-700 overflow-y-auto
+        @apply border border-solid border-slate-500 p-2 fill-slate-800 dark:fill-slate-300 [scrollbar-color:#64748B_transparent] hover:[&>div]:bg-slate-300 dark:hover:[&>div]:bg-slate-700 overflow-y-auto
     }
 }
