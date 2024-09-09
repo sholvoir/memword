@@ -225,27 +225,40 @@ export const syncTasks = async (lastTime?: number) => {
     setSyncTime(thisTime);
 };
 
-const clarifyTasks = () => new Promise<void>((resolve, reject) => {
-    const request = g.userDB!.transaction('task', 'readwrite').objectStore('task').openCursor();
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return resolve();
-        const task = cursor.value as ITask;
-        let modified = false;
-        if (task.level > 15) {
-            task.level = 15;
-            modified = true;
+const clarify = async () => {
+    await new Promise<void>((resolve, reject) => {
+        const request = g.userDB!.transaction('task', 'readwrite').objectStore('task').openCursor();
+        request.onerror = reject;
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return resolve();
+            const task = cursor.value as ITask;
+            let modified = false;
+            if (task.level > 15) {
+                task.level = 15;
+                modified = true;
+            }
+            if (!g.vocabulary[task.word]) {
+                task.last = now();
+                task.next = MAX_NEXT;
+                modified = true;
+            }
+            if (modified) cursor.update(task);
+            cursor.continue();
         }
-        if (!g.vocabulary[task.word]) {
-            task.last = now();
-            task.next = MAX_NEXT;
-            modified = true;
+    });
+    await new Promise<void>((resolve, reject) => {
+        const request = g.dictDB!.transaction('dict', 'readwrite').objectStore('dict').openCursor();
+        request.onerror = reject;
+        request.onsuccess = () => {
+            const cursor = request.result;
+            if (!cursor) return resolve();
+            const dict = cursor.value as IDiction;
+            if (!g.vocabulary[dict.word]) cursor.delete();
+            cursor.continue();
         }
-        if (modified) cursor.update(task);
-        cursor.continue();
-    }
-});
+    })
+}
 
 export const addTasks = (types: string, tag: Tag) => new Promise<void>((resolve, reject) => {
     const time = now();
@@ -339,7 +352,7 @@ const init = async (user: string ) => {
     
     const _vocabulary_url = getVocabularyUrl();
     if (vocabularyUrl !== _vocabulary_url) {
-        await clarifyTasks();
+        await clarify();
         setVocabularyUrl(vocabularyUrl);
     }
     
