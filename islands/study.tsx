@@ -160,9 +160,9 @@ export default () => {
             </div>
             {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
             {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
-            {signals.isPhaseAnswer.value && <div class="grow text-2xl overflow-y-auto">
-                {dict.value?.trans?.split('\n').map((t: string) => <p class="my-2">{t}</p>)}
-                {dict.value?.def?.split('\n').map((t: string) => <p class="my-2">{t.startsWith(' ')?`&ensp;&bull;${t}`:t}</p>)}
+            {signals.isPhaseAnswer.value && <div class="grow text-2xl overflow-y-auto [&>p]:my-2">
+                {dict.value?.trans?.split('\n').map((t: string) => <p>{t}</p>)}
+                {dict.value?.def?.split('\n').map((t: string) => t.startsWith(' ')?<p>&ensp;&bull;{t}</p>:<p>{t}</p>)}
             </div>}
         </div>
         <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
