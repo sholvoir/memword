@@ -38,6 +38,7 @@ export default () => {
         else console.error('Not Found!');
     }
     const handleRefresh = async () => {
+        showTips("Get Server Data...");
         const d = await getDict(current.value.word, true);
         if (d) dict.value = d;
         else console.error('Not Found!');
@@ -64,6 +65,7 @@ export default () => {
         }
     };
     const handleReportIssue = async () => {
+        showTips('Submiting...', false);
         const resp = await submitIssue(current.value.word);
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
@@ -158,7 +160,10 @@ export default () => {
             </div>
             {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
             {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
-            {signals.isPhaseAnswer.value && <div class="grow text-2xl">{dict.value?.trans?.split('\n').map(t => <p class="my-2">{t}</p>)}</div>}
+            {signals.isPhaseAnswer.value && <div class="grow text-2xl overflow-y-auto">
+                {dict.value?.trans?.split('\n').map((t: string) => <p class="my-2">{t}</p>)}
+                {dict.value?.def?.split('\n').map((t: string) => <p class="my-2">{t.startsWith(' ')?`&ensp;&bull;${t}`:t}</p>)}
+            </div>}
         </div>
         <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
     </Dialog>;
