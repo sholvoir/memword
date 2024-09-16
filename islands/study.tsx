@@ -118,7 +118,7 @@ export default () => {
         const x = spliteNum.exec(w);
         if (!x) return <div/>;
         const [_, l, n] = x;
-        return <div class="text-4xl font-bold">{l}<sup class="text-lg">{n}</sup></div>;
+        return <div class="shrink-0 text-4xl font-bold">{l}<sup class="text-lg">{n}</sup></div>;
     }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);
@@ -130,7 +130,7 @@ export default () => {
             tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
             style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
-            <div class="flex gap-2 text-lg">
+            <div class="shrink-0 flex gap-2 text-lg">
                 <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_">
                     <IconCircleLetterA class="bg-round-6"/>
                 </SButton>
@@ -159,11 +159,13 @@ export default () => {
                 <div>{current.value.level}</div>
             </div>
             {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
-            {signals.isPhaseAnswer.value && <div class="text-2xl">{dict.value?.phonetic}</div>}
-            {signals.isPhaseAnswer.value && <div class="grow text-2xl overflow-y-auto [&>p]:my-2">
-                {dict.value?.trans?.split('\n').map((t: string) => <p>{t}</p>)}
-                {dict.value?.def?.split('\n').map((t: string) => t.startsWith(' ')?<p>&ensp;&bull;{t}</p>:<p>{t}</p>)}
-            </div>}
+            {signals.isPhaseAnswer.value && <div class="shrink-0 text-2xl">{dict.value?.phonetic}</div>}
+            <div class="grow overflow-y-auto">
+                {signals.isPhaseAnswer.value && <div class="[&>p]:my-2">
+                    {dict.value?.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
+                    {dict.value?.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="[font-size:1.125rem] [line-height:1.25rem]">&ensp;&bull;{t}</p>:<p class="text-lg">{t}</p>)}
+                </div>}
+            </div>
         </div>
         <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
     </Dialog>;

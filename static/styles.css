@@ -41,7 +41,7 @@
         @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
     }
     .text-thick-shadow {
-        @apply [text-shadow:0_0_5px_#FFF,2px_2px_5px_#FFF,-2px_2px_5px_#FFF,2px_-2px_5px_#FFF,-2px_-2px_5px_#FFF] dark:[text-shadow:0_0_5px_#000,2px_2px_5px_#000,-2px_2px_5px_#000,2px_-2px_5px_#000,-2px_-2px_5px_#000]
+        @apply [-webkit-text-stroke:0.125em_#fff] dark:[-webkit-text-stroke:0.125em_#000] [paint-order:stroke]
     }
     .button {
         @apply rounded-md p-2 border border-slate-500
