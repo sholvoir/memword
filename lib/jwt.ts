@@ -9,6 +9,7 @@ export const setAuth = async (resp: Response, aud?: string) => {
     if (aud) {
         const cookie: Cookie = { name: 'auth', value: await jwt.createToken(maxAge, { aud }), maxAge };
         setCookie(resp.headers, cookie);
+        resp.headers.append("Cache-Control", "private, max-age=31536000");
     }
     else deleteCookie(resp.headers, 'auth');
     return resp;
