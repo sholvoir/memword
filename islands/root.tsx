@@ -19,7 +19,6 @@ import Dict from './dict.tsx';
 import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 
-
 export default () => {
     if (!IS_BROWSER) return <div/>;
     signals.user = useSignal(getUser());
