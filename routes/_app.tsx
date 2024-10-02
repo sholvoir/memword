@@ -1,5 +1,4 @@
 import { type PageProps } from "$fresh/server.ts";
-import { asset } from "$fresh/runtime.ts"
 
 export default ({ Component }: PageProps) => <html lang="en">
     <head>
@@ -21,7 +20,7 @@ export default ({ Component }: PageProps) => <html lang="en">
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/input-text.css" crossOrigin="" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/checkbox.css" crossOrigin="" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/select.css" crossOrigin="" />
-        <link rel="stylesheet" href={asset("/styles.css")} />
+        <link rel="stylesheet" href="/styles.css" />
     </head>
     <body class="bg-slate-300 text-slate-800 dark:bg-slate-900 dark:text-slate-300" style="font-family: 'Noto Sans SC', 'Noto Sans', system-ui, sans-serif;">
         <Component />
