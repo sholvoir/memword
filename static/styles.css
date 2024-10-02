@@ -34,14 +34,14 @@
     .body {
         @apply bg-slate-200 dark:bg-slate-800
     }
+    .study-translucent {
+        @apply bg-[#E2E8F0A0] dark:bg-[#1E293BA0]
+    }
     .tail {
         @apply bg-slate-300 dark:bg-slate-700 fill-slate-800 dark:fill-slate-300
     }
     .bg-round-6 {
         @apply bg-slate-200 dark:bg-slate-800 rounded-md w-6 h-6;
-    }
-    .text-thick-shadow {
-        @apply [-webkit-text-stroke:0.125em_#fff] dark:[-webkit-text-stroke:0.125em_#000] [paint-order:stroke]
     }
     .button {
         @apply rounded-md p-2 border border-slate-500
