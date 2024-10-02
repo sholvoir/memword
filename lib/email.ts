@@ -1,6 +1,6 @@
 import { type IMail } from '@sholvoir/deno-smtp';
 
-const MAIL_URL = 'https://mail-bkz6cj2wxq-uc.a.run.app';
+const MAIL_URL = 'https://mail-378494546801.us-central1.run.app';
 
 const headers = new Headers([
     ['Content-Type', 'application/json'],
