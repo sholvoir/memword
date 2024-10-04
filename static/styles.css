@@ -35,7 +35,7 @@
         @apply bg-slate-200 dark:bg-slate-800
     }
     .study-translucent {
-        @apply bg-[#E2E8F0A0] dark:bg-[#1E293BA0]
+        @apply bg-[#E2E8F0B0] dark:bg-[#1E293BB0]
     }
     .tail {
         @apply bg-slate-300 dark:bg-slate-700 fill-slate-800 dark:fill-slate-300
