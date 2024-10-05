@@ -160,9 +160,9 @@ export default () => {
                     <div>{current.value.level}</div>
                 </div>
                 <div class="grow px-2 h-full">
-                    <div class="pb-2 flex flex-wrap justify-between">
+                    <div class="pb-2 flex gap-2 flex-wrap justify-between">
                         {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
-                        {signals.isPhaseAnswer.value && <div class="text-2xl my-auto">{dict.value?.phonetic}</div>}
+                        {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{dict.value?.phonetic}</div>}
                     </div>
                     {signals.isPhaseAnswer.value && <div>
                         {dict.value?.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
