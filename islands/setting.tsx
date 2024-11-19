@@ -1,9 +1,8 @@
 import { Tags } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog } from "../lib/mem.ts";
+import { signals, closeDialog, now, setSetting, syncSetting } from "../lib/mem.ts";
 import { TaskTypeName, TASK_TYPES } from "../lib/itask.ts";
-import { now, setSetting, syncSetting } from "../lib/worker.ts";
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import TInput from '@sholvoir/components/islands/input-text.tsx';
 import MSelect from '@sholvoir/components/islands/select-multi.tsx';

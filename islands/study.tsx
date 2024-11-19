@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, showTips } from '../lib/mem.ts';
-import { updateStats, submitIssue, syncTasks, deleteTask, getDict } from '../lib/worker.ts'
+import { signals, closeDialog, showTips, updateStats, submitIssue, syncTasks, deleteTask, getDict, study  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
-import { study } from "../lib/worker.ts";
 import Dialog from './dialog.tsx';
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";

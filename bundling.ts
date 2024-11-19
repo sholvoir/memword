@@ -1,3 +1,13 @@
-import { bundle } from "@deno/emit";
-const { code } = await bundle(new URL("./lib/worker.ts", import.meta.url).href, { importMap: './deno.json', minify: true });
-await Deno.writeTextFile('./static/service-worker.js', code);
+import * as esbuild from 'esbuild';
+import { denoPlugins } from "esbuild-deno-loader";
+
+await esbuild.build({
+    plugins: denoPlugins(),
+    entryPoints: ['./lib/worker.ts'],
+    outfile: "./static/service-worker.js",
+    bundle: true,
+    format: 'esm',
+    //minify: true
+});
+
+esbuild.stop();

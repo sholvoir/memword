@@ -1,6 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { submitIssue } from "../lib/worker.ts";
-import { showTips, closeDialog } from '../lib/mem.ts';
+import { showTips, closeDialog, submitIssue } from '../lib/mem.ts';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import TAInput from '@sholvoir/components/islands/input-textarea.tsx';
 import Dialog from './dialog.tsx';

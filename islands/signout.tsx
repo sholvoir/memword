@@ -1,6 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { showDialog, closeDialog, signals } from '../lib/mem.ts';
-import { logout } from '../lib/mem.ts';
+import { showDialog, closeDialog, signals, logout } from '../lib/mem.ts';
 import Checkbox from '@sholvoir/components/islands/checkbox.tsx';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import Dialog from './dialog.tsx';

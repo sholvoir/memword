@@ -1,5 +1,4 @@
-import { type Dial, showDialog, showTips } from '../lib/mem.ts';
-import { cacheDict } from "../lib/worker.ts";
+import { type Dial, showDialog, showTips, cacheDict } from '../lib/mem.ts';
 import Dialog from './dialog.tsx';
 
 export default () => {
