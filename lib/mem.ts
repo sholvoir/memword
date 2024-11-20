@@ -5,6 +5,7 @@ import { JWT } from '@sholvoir/generic/jwt';
 import { type Tag } from "@sholvoir/vocabulary";
 import { requestInit } from '@sholvoir/generic/http';
 import { IDiction } from "./idict.ts";
+import { IMessage } from "./imessage.ts";
 import { defaultSetting, ISetting, settingFormat } from "./isetting.ts";
 import { type TaskType, ITask, letDelete, letNever, MAX_NEXT, newTask, TASK_TYPES } from "./itask.ts";
 import { type BLevel, initStats, adjTaskToStats, IStats, bLevelIncludes, statsFormat } from './istat.ts';
@@ -377,6 +378,15 @@ export const study = (otask: ITask) => new Promise<void>((resolve, reject) => {
 });
 
 export const init = async () => {
+    if ("serviceWorker" in navigator) {
+        await navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.onmessage = (e: MessageEvent<IMessage>) => {
+            switch (e.data.type) {
+                case 'setting': setSetting(signals.setting.value = e.data.data); break;
+                case 'stats': setStats(signals.stats.value = e.data.data); break;
+            }
+        }
+    }
     const user = signals.user.value;
     if (!user) return showDialog({dial: 'about'});
     g.dictDB = await openDictDB();
