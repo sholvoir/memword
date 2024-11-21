@@ -17,31 +17,21 @@ import {
 import denoConfig from "../deno.json" with { type: "json" };
 
 declare const self: ServiceWorkerGlobalScope;
-self.oninstall = (e) => e.waitUntil(handleInstall());
+self.oninstall = (e) => e.waitUntil(self.skipWaiting());
 self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
 const DICT_API = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 const cacheName = `MemWord-V${denoConfig.version}`;
-const staticFiles = ['/', '/icon/icon-192.png', '/icon/icon-1024.png', '/styles.css'];
 const g = { stats: initStats() };
+
 const sendMessage = async (msg: IMessage) => {
     for (const client of await self.clients.matchAll()) client.postMessage(msg);
 }
 
-const handleInstall = async () => {
-    await (await caches.open(cacheName)).addAll(staticFiles);
-    await self.skipWaiting();
-};
-
 const handleActivate = async () => {
-    if (self.registration.navigationPreload)
-        await self.registration.navigationPreload.enable();
-    for (const cacheKey of await caches.keys()) {
-        if (cacheKey !== cacheName)
-            await caches.delete(cacheKey)
-    }
+    for (const cacheKey of await caches.keys()) if (cacheKey !== cacheName) await caches.delete(cacheKey)
     await self.clients.claim();
 };
 
@@ -50,7 +40,8 @@ const putInCache = async (request: Request, response: Response) => {
 };
 
 const handleFetch = async (request: Request) => {
-    switch (new URL(request.url).pathname) {
+    const url = new URL(request.url)
+    switch (url.pathname) {
         case '/vocabulary': return fetchVocabulary();
         case '/dict': return await fetchDict(request);
         case '/search': return await fetchSearch(request);
@@ -70,13 +61,12 @@ const handleFetch = async (request: Request) => {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
             const responseFromNetwork = await fetch(request);
-            if (responseFromNetwork.ok)
+            if (responseFromNetwork.ok && !url.pathname.includes('_frsh'))
                 putInCache(request, responseFromNetwork.clone());
             return responseFromNetwork;
         }
     }
 };
-
 
 const fetchDiction = async (word: string) => {
     const resp1 = await fetch(`${DICT_API}/${encodeURIComponent(word)}`, { cache: 'reload' });

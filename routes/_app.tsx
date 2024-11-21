@@ -5,7 +5,7 @@ export default ({ Component }: PageProps) => <html lang="en">
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>MemWord</title>
-        <link rel="icon" type="image/png" sizes="192x192" href="/icon/icon-192.png" />
+        <link rel="icon" type="image/svg+xml" href="/icon/icon.svg" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-startup-image" href="/icon/icon-1024.png" />
         <meta name="apple-mobile-web-app-title" content="MemWord" />
