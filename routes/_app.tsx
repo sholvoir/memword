@@ -13,16 +13,13 @@ export default ({ Component }: PageProps) => <html lang="en">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#CBD5E1" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans+TC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/button-ripple.css" crossOrigin="" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/input-text.css" crossOrigin="" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/checkbox.css" crossOrigin="" />
         <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/select.css" crossOrigin="" />
         <link rel="stylesheet" href="/styles.css" />
     </head>
-    <body class="bg-slate-300 text-slate-800 dark:bg-slate-900 dark:text-slate-300" style="font-family: 'Noto Sans SC', 'Noto Sans', system-ui, sans-serif;">
+    <body class="bg-slate-300 text-slate-800 dark:bg-slate-900 dark:text-slate-300">
         <Component />
     </body>
 </html>;

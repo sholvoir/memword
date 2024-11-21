@@ -8,7 +8,6 @@ import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
 import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
 import IconCircleLetterF from "@preact-icons/tb/TbCircleLetterF";
-import IconCircleLetterA from "@preact-icons/tb/TbCircleLetterA";
 import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
@@ -51,8 +50,8 @@ export default () => {
         current.value = signals.tasks.value[index.value];
         getDiction();
     };
-    const handleSpeakIt = () => signals.isPhaseAnswer.value && dict.value?.sound && player.current?.play();
-    const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
+    const handleSpeakIt = () => dict.value?.sound && player.current?.play();
+    const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
             case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
@@ -93,12 +92,9 @@ export default () => {
     };
     const handleTouchEnd = (e: Event) => {
         const div = e.currentTarget as HTMLDivElement;
-        if (Math.abs(endY - startY) < 1) {
+        if (Math.abs(endY - startY) < 5) {
             div.style.top = '0';
-            const rect = div.getBoundingClientRect();
-            if (startY < rect.top + 36) return;
-            if (!signals.isPhaseAnswer.value && startY > rect.top + rect.height / 2) handleShowAnswer();
-            else handleSpeakIt();
+            handleClick();
         } else if (signals.isPhaseAnswer.value) {
             if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, () => handleIKnown(0));
             else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -60, handleIKnown);
@@ -106,11 +102,7 @@ export default () => {
         }
     };
     const handleTouchCancel = (e: TouchEvent) => (e.currentTarget as HTMLDivElement).style.top = '0';
-    const handleClick = (e: MouseEvent) => {
-        const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-        if (e.clientY > rect.top + rect.height / 2) handleShowAnswer();
-        else if (e.clientY > rect.top + 36) handleSpeakIt();
-    }
+    const handleClick = () => signals.isPhaseAnswer.value ? handleSpeakIt() : handleShowAnswer();
     const splite = (w: string) => {
         const x = spliteNum.exec(w);
         if (!x) return <div/>;
@@ -124,14 +116,11 @@ export default () => {
     }, []);
     return <Dialog title="学习" onCancel={finish}>
         <div class={`relative h-full bg-cover bg-center [outline:none]`}
-            tabIndex={-1} onClick={handleClick} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
+            tabIndex={-1} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
             style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
             <div class="h-full study-translucent flex flex-col">
                 <div class="shrink-0 p-2 flex gap-2 text-lg">
-                    <SButton disabled={signals.isPhaseAnswer.value} onClick={handleShowAnswer} title="_">
-                        <IconCircleLetterA class="bg-round-6"/>
-                    </SButton>
                     <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
                         <IconCheck class="bg-round-6"/>
                     </SButton>
@@ -156,7 +145,7 @@ export default () => {
                     </SButton>
                     <div>{current.value.level}</div>
                 </div>
-                <div class="grow px-2 h-full">
+                <div class="grow px-2 h-full" onClick={handleClick}>
                     <div class="pb-2 flex gap-2 flex-wrap justify-between">
                         {splite(current.value.word)}
                         {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{dict.value?.phonetic}</div>}
@@ -168,6 +157,6 @@ export default () => {
                 </div>
             </div>
         </div>
-        <audio ref={player} src={signals.isPhaseAnswer.value ? dict.value?.sound : undefined} autoplay/>
+        <audio ref={player} src={dict.value?.sound}/>
     </Dialog>;
 }
