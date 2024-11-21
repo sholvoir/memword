@@ -14,6 +14,7 @@ import {
     getDiction, getEpisode, getKv, getTask, getTasks, mergeTasks, putDiction, putTask,
     setKv, totalStats, updateStats, vocabulary, init as indexdbInit
 } from "./indexdb.ts";
+import denoConfig from "../deno.json" with { type: "json" };
 
 declare const self: ServiceWorkerGlobalScope;
 self.oninstall = (e) => e.waitUntil(handleInstall());
@@ -22,7 +23,7 @@ self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
 const DICT_API = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
-const cacheName = 'MemWord-V1';
+const cacheName = `MemWord-V${denoConfig.version}`;
 const staticFiles = ['/', '/icon/icon-192.png', '/icon/icon-1024.png', '/styles.css'];
 const g = { stats: initStats() };
 const sendMessage = async (msg: IMessage) => {

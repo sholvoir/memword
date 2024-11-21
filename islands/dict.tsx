@@ -9,8 +9,9 @@ export default () => {
     const handleSearchClick = async () => {
         const text = word.value.trim();
         if (!text) return;
-        const task = await search(text);
-        if (!task) return showTips('Not Found!');
+        const res = await search(text);
+        if (!res.ok) return showTips('Not Found!');
+        const task = await res.json();
         signals.tasks.value = [task];
         signals.isPhaseAnswer.value = true;
         showDialog({ dial: 'study' });
