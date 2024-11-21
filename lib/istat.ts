@@ -1,7 +1,8 @@
 import { Tag, Tags } from "@sholvoir/vocabulary";
-import { ITask, TASK_TYPES } from "./itask.ts";
+import { isNever, ITask } from "./itask.ts";
 
-export const statsFormat = '0.0.5';
+export const statsFormat = '0.1.0';
+
 export const BLevels = ['never','start','medium','familiar','skilled','finished'] as const;
 export type BLevel = typeof BLevels[number];
 export type IBStat = Record<BLevel, number>;
@@ -11,8 +12,8 @@ const newStat = (): IStat => [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 export interface IStats {
     format: string;
     time: number;
-    all: Record<string, IStat>;
-    task: Record<string, IStat>;
+    all: Record<Tag, IStat>;
+    task: Record<Tag, IStat>;
 }
 
 export const BLevelName: Record<BLevel, string> = {
@@ -37,22 +38,21 @@ export const bLevelIncludes = (blevel: BLevel, level: number) => {
 
 export const initStats = (time = 0) => {
     const stats = { format: statsFormat, time, all: {}, task: {} } as IStats;
-    for (const type of TASK_TYPES) for (const tag of Tags) {
-        const ttag = `${type}${tag}`;
-        stats.all[ttag] = newStat();
-        stats.task[ttag] = newStat();
+    for (const tag of Tags) {
+        stats.all[tag] = newStat();
+        stats.task[tag] = newStat();
     }
     return stats;
 };
 
 export const adjTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>, direction = 0) => {
-    const ttag = `${task.type}__`;
-    if (task.level != 0 || task.next < stats.time) stats.all[ttag][task.level] += direction;
-    if (task.next < stats.time) stats.task[ttag][task.level] += direction;
+    if (!isNever(task)) {
+        stats.all['__'][task.level] += direction;
+        if (task.next < stats.time) stats.task['__'][task.level] += direction;
+    }
     for (const tag of tags) {
-        const k = `${task.type}${tag}`;
-        stats.all[k][task.level] += direction;
-        if (task.next < stats.time) stats.task[k][task.level] += direction;
+        stats.all[tag][task.level] += direction;
+        if (task.next < stats.time) stats.task[tag][task.level] += direction;
     }
 };
 

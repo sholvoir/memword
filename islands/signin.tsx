@@ -1,5 +1,6 @@
 import { useSignal } from "@preact/signals";
-import { signals, showTips, signup, login } from '../lib/mem.ts';
+import { signup, login } from '../lib/mem.ts';
+import { showTips, signals } from "../lib/signals.ts";
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import AButton from '@sholvoir/components/islands/button-base.tsx';
 import TInput from '@sholvoir/components/islands/input-text.tsx';

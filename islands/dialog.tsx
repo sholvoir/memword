@@ -1,5 +1,5 @@
 import { JSX } from "preact";
-import { closeDialog } from '../lib/mem.ts'
+import { closeDialog } from '../lib/signals.ts'
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconChevronLeft from "@preact-icons/tb/TbChevronLeft";
 import IconDots from "@preact-icons/tb/TbDots";

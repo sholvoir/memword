@@ -1,4 +1,4 @@
-import { signals, showDialog } from '../lib/mem.ts';
+import { signals, showDialog } from '../lib/signals.ts';
 import Dialog from './dialog.tsx';
 import RButton from '@sholvoir/components/islands/button-ripple.tsx';
 

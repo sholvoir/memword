@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
 import { responseInit, ok, internalServerError } from "@sholvoir/generic/http";
-import { MemState } from '../../../lib/server.ts';
+import { MemState } from '../../../lib/fresh.ts';
 import { ISetting } from "../../../lib/isetting.ts";
 
 const catalog = 'setting';

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { signals, closeDialog, showTips, updateStats, submitIssue, syncTasks, deleteTask, getDict, study  } from '../lib/mem.ts';
+import { updateStats, submitIssue, syncTasks, deleteTask, getDict, study  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
 import Dialog from './dialog.tsx';
@@ -13,6 +13,7 @@ import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
+import { closeDialog, showTips, signals } from "../lib/signals.ts";
 
 const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
 let startY = 0;
@@ -50,9 +51,7 @@ export default () => {
         current.value = signals.tasks.value[index.value];
         getDiction();
     };
-    const handleSpeakIt = () => (signals.isPhaseAnswer.value || current.value.type == 'L')
-        && dict.value?.sound
-        && player.current?.play();
+    const handleSpeakIt = () => signals.isPhaseAnswer.value && dict.value?.sound && player.current?.play();
     const handleShowAnswer = () => signals.isPhaseAnswer.value || (signals.isPhaseAnswer.value = true);
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
@@ -98,7 +97,7 @@ export default () => {
             div.style.top = '0';
             const rect = div.getBoundingClientRect();
             if (startY < rect.top + 36) return;
-            if (!signals.isPhaseAnswer.value && (current.value.type == 'R' || startY > rect.top + rect.height / 2)) handleShowAnswer();
+            if (!signals.isPhaseAnswer.value && startY > rect.top + rect.height / 2) handleShowAnswer();
             else handleSpeakIt();
         } else if (signals.isPhaseAnswer.value) {
             if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, () => handleIKnown(0));
@@ -139,7 +138,7 @@ export default () => {
                     <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="Z/M">
                         <IconX class="bg-round-6"/>
                     </SButton>
-                    <SButton disabled={!signals.isPhaseAnswer.value && current.value.type == 'R'} onClick={handleSpeakIt}>
+                    <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
                         <IconPlayerPlayFilled class="bg-round-6"/>
                     </SButton>
                     <div class="grow text-center">{index.value+1}/{signals.tasks.value.length}</div>
@@ -159,7 +158,7 @@ export default () => {
                 </div>
                 <div class="grow px-2 h-full">
                     <div class="pb-2 flex gap-2 flex-wrap justify-between">
-                        {(signals.isPhaseAnswer.value || current.value.type == 'R') && splite(current.value.word)}
+                        {splite(current.value.word)}
                         {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{dict.value?.phonetic}</div>}
                     </div>
                     {signals.isPhaseAnswer.value && <div>
@@ -169,6 +168,6 @@ export default () => {
                 </div>
             </div>
         </div>
-        <audio ref={player} src={(signals.isPhaseAnswer.value || current.value.type == 'L') ? dict.value?.sound : undefined} autoplay/>
+        <audio ref={player} src={signals.isPhaseAnswer.value ? dict.value?.sound : undefined} autoplay/>
     </Dialog>;
 }

@@ -6,7 +6,7 @@ const serverApi: ServerApi = { version: ServerApiVersion.v1, strict: true, depre
 
 type RunType = (client: MongoClient) => Promise<any>
 async function mongorun (func: RunType) {
-    const client = new MongoClient(uri, { serverApi } as any);
+    const client = new MongoClient(uri, { serverApi });
     await client.connect();
     await func(client);
     await client.close();

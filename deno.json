@@ -1,5 +1,6 @@
 {
   "lock": false,
+  "version": "0.1.0",
   "unstable": ["kv"],
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
@@ -20,7 +21,7 @@
     }
   },
   "exclude": [
-    "**/_fresh/*"
+    "**/_fresh/*", "static/service-worker.js"
   ],
   "imports": {
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
@@ -30,7 +31,7 @@
     "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.8/",
     "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.9",
     "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.0.2/",
-    "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.8",
+    "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.10",
     "@sholvoir/vocabulary": "jsr:@sholvoir/vocabulary@^0.0.16",
     "@std/http": "jsr:@std/http@^1.0.8",
     "esbuild": "npm:esbuild@^0.24.0",

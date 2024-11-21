@@ -4,7 +4,8 @@ import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { ISetting } from "../lib/isetting.ts";
 import { ITask } from "../lib/itask.ts";
-import { signals, getUser, hideTips, init, close, IDialog, getSetting, getStats } from "../lib/mem.ts";
+import { getUser, init, getSetting, getStats } from "../lib/mem.ts";
+import { IDialog, signals, hideTips } from "../lib/signals.ts";
 import Home from "./home.tsx";
 import Start from './start.tsx';
 import About from './about.tsx';
@@ -41,7 +42,7 @@ export default () => {
         case 'dict': return <Dict {...rest}/>;
         case 'menu': return <Menu {...rest}/>;
     } };
-    useEffect(() => (init(), close), []);
+    useEffect(() => { init() }, []);
     return <div class="h-[100dvh]">
         {signals.user.value && <Home/>}
         {signals.dialogs.value.map(dialog)}

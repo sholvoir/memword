@@ -2,6 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import { badRequest, internalServerError } from '@sholvoir/generic/http';
 import { sendEmail } from "../lib/email.ts";
 import { IPass } from "../lib/ipass.ts";
+import { now } from "../lib/common.ts";
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 const catalog = 'password';
@@ -15,7 +16,7 @@ export const handler: Handlers = {
             const email = decodeURIComponent(rawEmail).toLowerCase();
             if (!emailPattern.test(email)) return badRequest;
             const password = Math.random().toString(36).slice(7);
-            const pass: IPass = { password, expire: Math.round(Date.now() / 1000) + 5 * 60 };
+            const pass: IPass = { password, expire: now() + 5 * 60 };
             const kv = await Deno.openKv(kvPath);
             await kv.set([catalog, btoa(email).replaceAll('=', '')], pass);
             kv.close();
