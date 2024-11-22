@@ -58,7 +58,7 @@ export const study = (otask: ITask) => fetch('/study', requestInit(otask));
 export const putSetting = (setting: ISetting) => fetch('/setting', requestInit(setting));
 export const signup = (email: string) => fetch(`/signup?email=${encodeURIComponent(email)}`);
 export const login = (email: string, password: string) => fetch('/login', requestInit({ email, password }));
-export const submitIssue = (issue: string) => fetch(`/issue`, requestInit(issue));
+export const submitIssue = (issue: string) => fetch(`/issue`, requestInit({issue}));
 export const deleteTask = (task: ITask) => fetch('delete', requestInit(task));
 export const search = (text: string) => fetch(`/search?word=${encodeURIComponent(text)}`);
 export const updateStats = () => fetch('/update');

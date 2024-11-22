@@ -7,11 +7,12 @@ export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
         const email = atob(ctx.state.user);
         console.log(`API '/issue' POST ${ctx.state.user}`);
+        const issue = (await req.json()).issue;
         return await sendEmail({
-            from: email,
+            from: 'MEMWORD <memword.sholvoir@gmail.com>',
             to: 'sovar.he@gmail.com',
             subject: `Issue Report from ${email}`,
-            content: await req.text()
+            content: issue
         })
     }
 };

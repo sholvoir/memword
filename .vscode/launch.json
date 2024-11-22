@@ -15,9 +15,7 @@
                 "run",
                 "--inspect-wait",
                 "--allow-all",
-                "--watch=static/,routes/",
-                "--env",
-                "dev.ts"
+                "--env"
             ],
             "attachSimplePort": 9229
         }

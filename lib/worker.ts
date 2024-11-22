@@ -12,7 +12,7 @@ import { ITask, letDelete, MAX_NEXT, newTask } from "./itask.ts";
 import {
     addIssue, addTasks, clarifyDiction, clarifyTask, clearDict, clearKv, clearTask,
     getDiction, getEpisode, getKv, getTask, getTasks, mergeTasks, putDiction, putTask,
-    setKv, totalStats, updateStats, vocabulary, init as indexdbInit
+    setKv, totalStats, updateStats, vocabulary, init as indexdbInit, deleteIssue, getIssues
 } from "./indexdb.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
@@ -42,21 +42,21 @@ const putInCache = async (request: Request, response: Response) => {
 const handleFetch = async (request: Request) => {
     const url = new URL(request.url)
     switch (url.pathname) {
-        case '/vocabulary': return fetchVocabulary();
-        case '/dict': return await fetchDict(request);
-        case '/search': return await fetchSearch(request);
-        case '/setting': return await putSetting(request);
-        case '/episode': return await fetchEpisode(request);
+        case '/vocabulary': return jsonResponse(Object.keys(vocabulary));
+        case '/dict': return await handleFetchDict(request);
+        case '/search': return await handleFetchSearch(request);
+        case '/setting': return await handlePutSetting(request);
+        case '/episode': return await handleFetchEpisode(request);
         case '/update': upStats(); return ok;
-        case '/delete': return await deleteTask(request);
+        case '/delete': return await handleDeleteTask(request);
         case '/sync': syncTasks(); return ok;
-        case '/add': return fetchAdd(request);
-        case '/study': await postStudy(request);return ok;
-        case '/issue': return submitIssue(request);
+        case '/add': return handleFetchAdd(request);
+        case '/study': await handlePostStudy(request);return ok;
+        case '/issue': return handlePostIssue(request);
         case '/cache': cacheDict(); return ok;
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
-        case '/logout': return await fetchLogout(request);
+        case '/logout': return await handleFetchLogout(request);
         default: {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
@@ -112,7 +112,16 @@ const cacheDict = async () => {
     }
 };
 
-const fetchDict = async (req: Request) => {
+const submitIssues = async () => {
+    const issues = await getIssues();
+    for (const issue of issues) {
+        const res = await fetch('/issue', requestInit(issue));
+        if (!res.ok) break;
+        await deleteIssue(issue.id);
+    }
+}
+
+const handleFetchDict = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const word = params.get('word');
     const reload = params.get('reload');
@@ -135,14 +144,14 @@ const fetchDict = async (req: Request) => {
     return dict ? jsonResponse(dict) : notFound;
 };
 
-const deleteTask = async (req: Request) => {
+const handleDeleteTask = async (req: Request) => {
     const task = await req.json() as ITask;
     letDelete(task);
     putTask(task);
     return ok;
 };
 
-const fetchAdd = async (req: Request) => {
+const handleFetchAdd = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const tag = params.get('tag') as Tag | null;
     if (!tag) return badRequest;
@@ -153,7 +162,7 @@ const fetchAdd = async (req: Request) => {
     return ok;
 };
 
-const postStudy = async (req: Request) => {
+const handlePostStudy = async (req: Request) => {
     const otask = await req.json() as ITask;
     const task = await getTask(otask.word);
     if (!task) return notFound;
@@ -170,7 +179,7 @@ const postStudy = async (req: Request) => {
     return ok;
 }
 
-const fetchEpisode = async (req: Request) => {
+const handleFetchEpisode = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const sprint = parseInt(params.get('sprint')!);
     const tag = params.get('tag') as Tag;
@@ -180,7 +189,7 @@ const fetchEpisode = async (req: Request) => {
     return jsonResponse(ts);
 };
 
-const putSetting = async (req: Request) => {
+const handlePutSetting = async (req: Request) => {
     const setting = await req.json() as ISetting;
     setting.version = now();
     setKv('_setting', setting);
@@ -188,7 +197,7 @@ const putSetting = async (req: Request) => {
     return ok;
 };
 
-const fetchLogout = async (req: Request) => {
+const handleFetchLogout = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const cleanCache = params.get('cleanCache');
     if (cleanCache) await clearDict();
@@ -197,16 +206,15 @@ const fetchLogout = async (req: Request) => {
     return ok;
 };
 
-const submitIssue = (req: Request) => {
-    const issue = new URL(req.url).searchParams.get('issue');
-    if (!issue) return badRequest;
-    addIssue(issue);
+const handlePostIssue = async (req: Request) => {
+    const data = await req.json();
+    if (!data) return badRequest;
+    await addIssue(data.issue);
+    submitIssues();
     return ok;
 };
 
-const fetchVocabulary = () => jsonResponse(Object.keys(vocabulary));
-
-const fetchSearch = async (req: Request) => {
+const handleFetchSearch = async (req: Request) => {
     const word = new URL(req.url).searchParams.get('word');
     if (!word) return badRequest;
     return jsonResponse((await getTask(word)) ?? newTask(word, now()));
@@ -229,6 +237,7 @@ const init = async () => {
     await syncSetting();
     await syncTasks();
     sendMessage({ type: 'stats', data: g.stats = await totalStats() });
+    submitIssues();
 };
 
 init();
