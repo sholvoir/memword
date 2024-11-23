@@ -42,21 +42,21 @@ const putInCache = async (request: Request, response: Response) => {
 const handleFetch = async (request: Request) => {
     const url = new URL(request.url)
     switch (url.pathname) {
-        case '/vocabulary': return jsonResponse(Object.keys(vocabulary));
-        case '/dict': return await handleFetchDict(request);
-        case '/search': return await handleFetchSearch(request);
-        case '/setting': return await handlePutSetting(request);
         case '/episode': return await handleFetchEpisode(request);
-        case '/update': upStats(); return ok;
+        case '/dict': return await handleFetchDict(request);
+        case '/cache': cacheDict(); return ok;
+        case '/setting': return await handlePutSetting(request);
+        case '/add': return handleFetchAdd(request);
         case '/delete': return await handleDeleteTask(request);
         case '/sync': syncTasks(); return ok;
-        case '/add': return handleFetchAdd(request);
-        case '/study': await handlePostStudy(request);return ok;
+        case '/study': return await handlePostStudy(request);
         case '/issue': return handlePostIssue(request);
-        case '/cache': cacheDict(); return ok;
+        case '/search': return await handleFetchSearch(request);
+        case '/update': upStats(); return ok;
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
         case '/logout': return await handleFetchLogout(request);
+        case '/vocabulary': return jsonResponse(Object.keys(vocabulary));
         default: {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
@@ -145,7 +145,9 @@ const handleFetchDict = async (req: Request) => {
 };
 
 const handleDeleteTask = async (req: Request) => {
-    const task = await req.json() as ITask;
+    const word = new URL(req.url).searchParams.get('word');
+    if (!word) return badRequest;
+    const task = await getTask(word);
     letDelete(task);
     putTask(task);
     return ok;

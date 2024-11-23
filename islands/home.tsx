@@ -1,5 +1,4 @@
-import { startStudy } from "../lib/mem.ts";
-import { showDialog } from "../lib/signals.ts";
+import { showDialog, startStudy } from "../lib/signals.ts";
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import Stats from './stats.tsx';
 import IconDict from "./icon-dict.tsx";

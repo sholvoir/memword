@@ -1,11 +1,11 @@
 import { useSignal } from "@preact/signals";
 import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from "../lib/tag.ts";
-import { startStudy, addTasks } from "../lib/mem.ts";
+import { addTasks } from "../lib/mem.ts";
+import { startStudy, closeDialog, showDialog } from "../lib/signals.ts";
 import Dialog from './dialog.tsx';
 import Select from '@sholvoir/components/islands/select-single.tsx';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
-import { closeDialog, showDialog } from "../lib/signals.ts";
 
 export default () => {
     const sTag = useSignal<Tag>('OG');

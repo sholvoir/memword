@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import {signout } from '../lib/mem.ts';
+import {logout } from '../lib/mem.ts';
 import Checkbox from '@sholvoir/components/islands/checkbox.tsx';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
 import Dialog from './dialog.tsx';
@@ -11,7 +11,7 @@ export default () => {
         signals.user.value = '';
         closeDialog();
         showDialog({dial: 'about'});
-        signout(cleanCache.value);
+        logout(cleanCache.value);
     };
     
     return <Dialog title="登出">

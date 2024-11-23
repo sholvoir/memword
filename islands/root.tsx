@@ -4,8 +4,8 @@ import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { ISetting } from "../lib/isetting.ts";
 import { ITask } from "../lib/itask.ts";
-import { getUser, init, getSetting, getStats } from "../lib/mem.ts";
-import { IDialog, signals, hideTips } from "../lib/signals.ts";
+import { getUser, getSetting, getStats } from "../lib/mem.ts";
+import { IDialog, signals, init, hideTips, showDialog } from "../lib/signals.ts";
 import Home from "./home.tsx";
 import Start from './start.tsx';
 import About from './about.tsx';
@@ -28,6 +28,7 @@ export default () => {
     signals.tasks = useSignal<Array<ITask>>([]);
     signals.tips = useSignal('');
     signals.isPhaseAnswer = useSignal(false);
+    signals.vocabulary = useSignal([]);
 
     const dialog = ({dial, ...rest}: IDialog) => { switch (dial) {
         case "wait": return <Waiting {...rest}/>;
@@ -42,7 +43,7 @@ export default () => {
         case 'dict': return <Dict {...rest}/>;
         case 'menu': return <Menu {...rest}/>;
     } };
-    useEffect(() => { init() }, []);
+    useEffect(() => { init(); !signals.user.value && showDialog({dial: 'about'}) }, []);
     return <div class="h-[100dvh]">
         {signals.user.value && <Home/>}
         {signals.dialogs.value.map(dialog)}

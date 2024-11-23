@@ -3,8 +3,7 @@ import { JSX } from "preact";
 import { Tag } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { iStatToIBStat } from "../lib/istat.ts";
-import { startStudy } from '../lib/mem.ts';
-import { signals } from "../lib/signals.ts";
+import { signals, startStudy } from "../lib/signals.ts";
 import Stat from './stat.tsx';
 
 const sum = (s: number, b: number) => s + b;

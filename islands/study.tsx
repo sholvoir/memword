@@ -31,15 +31,15 @@ export default () => {
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
     const getDiction = async () => {
-        const d = await getDict(current.value.word);
-        if (d) dict.value = d;
-        else console.error('Not Found!');
+        const res = await getDict(current.value.word);
+        if (!res.ok) showTips(`Not Found ${current.value.word}`);
+        else dict.value = await res.json();
     }
     const handleRefresh = async () => {
         showTips("Get Server Data...");
-        const d = await getDict(current.value.word, true);
-        if (d) dict.value = d;
-        else console.error('Not Found!');
+        const res = await getDict(current.value.word, true);
+        if (res.ok) dict.value = await res.json();
+        else showTips(`Not Found ${current.value.word}`);
     };
     const handleIKnown = (level?: number) => {
         if (level !== undefined) current.value.level = level;

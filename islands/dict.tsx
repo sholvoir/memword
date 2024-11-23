@@ -2,7 +2,7 @@ import { useSignal } from "@preact/signals";
 import { signals, showDialog, showTips } from "../lib/signals.ts";
 import TInput from '@sholvoir/components/islands/input-text.tsx';
 import Dialog from './dialog.tsx';
-import { g, search } from "../lib/mem.ts";
+import { search } from "../lib/mem.ts";
 
 export default () => {
     const word = useSignal('');
@@ -18,6 +18,6 @@ export default () => {
     }
     return <Dialog title="词典">
         <TInput type="search" name="word" placeholder="word" class="m-2 w-[calc(100%-16px)]"
-            binding={word} onChange={handleSearchClick} options={g.vocabulary}/>
+            binding={word} onChange={handleSearchClick} options={signals.vocabulary.value}/>
     </Dialog>;
 }
