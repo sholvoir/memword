@@ -24,7 +24,7 @@ self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 const DICT_API = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 const cacheName = `MemWord-V${denoConfig.version}`;
-const g = { stats: initStats() };
+const g = { inited: false, stats: initStats() };
 
 const sendMessage = async (msg: IMessage) => {
     for (const client of await self.clients.matchAll()) client.postMessage(msg);
@@ -41,6 +41,7 @@ const putInCache = async (request: Request, response: Response) => {
 };
 
 const handleFetch = async (request: Request) => {
+    if (!g.inited) await init();
     const url = new URL(request.url)
     switch (url.pathname) {
         case '/episode': return await handleFetchEpisode(request);
@@ -241,6 +242,5 @@ const init = async () => {
     await syncTasks();
     sendMessage({ type: 'stats', data: g.stats = await totalStats() });
     submitIssues();
+    g.inited = true;
 };
-
-init();
