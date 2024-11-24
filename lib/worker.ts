@@ -31,6 +31,7 @@ const sendMessage = async (msg: IMessage) => {
 }
 
 const handleActivate = async () => {
+    await self.registration?.navigationPreload.disable();
     for (const cacheKey of await caches.keys()) if (cacheKey !== cacheName) await caches.delete(cacheKey)
     await self.clients.claim();
 };

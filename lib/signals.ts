@@ -6,7 +6,9 @@ import { IMessage } from "./imessage.ts";
 import { ISetting } from "./isetting.ts";
 import { ITask } from "./itask.ts";
 import { getEpisode, getVocabulary, setSetting, setStats } from "./mem.ts";
+import denoConfig from "../deno.json" with { type: "json" };
 
+export const version = denoConfig.version;
 export type Dial = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
 export interface IDialog { dial: Dial, [key: string]: any }
 export const signals = {} as {
