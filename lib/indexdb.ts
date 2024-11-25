@@ -1,120 +1,174 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-cond-assign
 
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats, adjTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
-import { ITask, letDelete, neverTask, newTask, shouldDelete } from "./itask.ts";
+import { ITask, letDelete, MAX_NEXT, neverTask, newTask, shouldDelete } from "./itask.ts";
 import { IDiction } from "./idict.ts";
 import { now } from "./common.ts";
 
 type kvKey = '_vocabulary-url'|'_sync-time'|'_setting';
-const g = {} as { db: IDBDatabase };
+interface IVocabulary { word: string; tags: Array<Tag> }
+let db: IDBDatabase;
 
-export const vocabulary: Record<string, Array<Tag>> = {};
+export const init = () => new Promise<void>((resolve, reject) => {
+    if (db) return resolve();
+    const request = indexedDB.open('memword', 1);
+    request.onerror = reject;
+    request.onsuccess = () => { db = request.result; resolve(); }
+    request.onupgradeneeded = () => {
+        const d = request.result;
+        d.createObjectStore('kv', { keyPath: 'key' });
+        d.createObjectStore('dict', { keyPath: 'word' });
+        d.createObjectStore('issue', { keyPath: 'id', autoIncrement: true });
+        d.createObjectStore('vocabulary', { keyPath: 'word'});
+        const taskStore = d.createObjectStore('task', { keyPath: 'word' });
+        taskStore.createIndex('last', 'last');
+        taskStore.createIndex('next', 'next');
+    }
+});
 
 export const clearDict = () => new Promise((resolve, reject) => {
-    const request = g.db.transaction('dict', 'readwrite').objectStore('dict').clear();
+    const request = db.transaction('dict', 'readwrite').objectStore('dict').clear();
     request.onerror = reject;
     request.onsuccess = resolve;
 });
 
 export const clearTask = () => new Promise((resolve, reject) => {
-    const request = g.db.transaction('task', 'readwrite').objectStore('task').clear();
+    const request = db.transaction('task', 'readwrite').objectStore('task').clear();
     request.onerror = reject;
     request.onsuccess = resolve;
 });
 
 export const clearKv = () => new Promise((resolve, reject) => {
-    const request = g.db.transaction('kv', 'readwrite').objectStore('kv').clear();
+    const request = db.transaction('kv', 'readwrite').objectStore('kv').clear();
     request.onerror = reject;
     request.onsuccess = resolve;
 });
 
 export const getKv = (key: kvKey) => new Promise<any>((resolve, reject) => {
-    const request = g.db.transaction('kv', 'readonly').objectStore('kv').get(key);
+    const request = db.transaction('kv', 'readonly').objectStore('kv').get(key);
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result && request.result.value);
 });
 
 export const setKv = (key: kvKey, value: any) => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('kv', 'readwrite').objectStore('kv').put({ key, value });
+    const request = db.transaction('kv', 'readwrite').objectStore('kv').put({ key, value });
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
+export const getVocabulary = () => new Promise<Array<string>>((resolve, reject) => {
+    const vocabulary: Array<string> = [];
+    const request = db.transaction('vocabulary', 'readonly').objectStore('vocabulary').openCursor();
+    request.onerror = reject;
+    request.onsuccess = e => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return resolve(vocabulary);
+        vocabulary.push((cursor.value as IVocabulary).word);
+        cursor.continue();
+    }
+});
+
+export const updateVocabulary = (lines: Array<string>) => new Promise<void>((resolve, reject) => {
+    const delimiter = /[,:] */;
+    const transaction = db.transaction('vocabulary', 'readwrite');
+    const vStore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => resolve();
+    vStore.clear().onsuccess = () => {
+        for (let line of lines) if (line = line.trim()) {
+            const [word, ...tags] = line.split(delimiter).map(w => w.trim());
+            vStore.add({word, tags})
+        }
+    }
+});
+
 export const getIssues = () => new Promise<Array<{id: number, issue: string}>>((resolve, reject) => {
-    const request = g.db.transaction('issue', 'readonly').objectStore('issue').getAll();
+    const request = db.transaction('issue', 'readonly').objectStore('issue').getAll();
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
 export const addIssue = (issue: string) => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('issue', 'readwrite').objectStore('issue').add({issue});
+    const request = db.transaction('issue', 'readwrite').objectStore('issue').add({issue});
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 export const deleteIssue = (id: number) => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('issue', 'readwrite').objectStore('issue').delete(id);
+    const request = db.transaction('issue', 'readwrite').objectStore('issue').delete(id);
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 export const getDiction = (word: string) => new Promise<IDiction | undefined>((resolve, reject) => {
-    const request = g.db.transaction('dict', 'readonly').objectStore('dict').get(word);
+    const request = db.transaction('dict', 'readonly').objectStore('dict').get(word);
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
 export const putDiction = (diction: IDiction) => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('dict', 'readwrite').objectStore('dict').put(diction);
+    const request = db.transaction('dict', 'readwrite').objectStore('dict').put(diction);
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
 export const clarifyDiction = () => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('dict', 'readwrite').objectStore('dict').openCursor();
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
+    const transaction = db.transaction(['dict', 'vocabulary'], 'readwrite');
+    const vstore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.objectStore('dict').openCursor().onsuccess = (e) => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return resolve();
         const dict = cursor.value as IDiction;
-        if (!vocabulary[dict.word]) cursor.delete();
-        cursor.continue();
+        vstore.get(dict.word).onsuccess = (e) => {
+            if (!(e.target as IDBRequest).result) cursor.delete();
+            cursor.continue();
+        }
     }
 });
 
 export const getTask = (word: string) => new Promise<ITask>((resolve, reject) => {
-    const request = g.db.transaction('task', 'readonly').objectStore('task').get(word);
+    const request = db.transaction('task', 'readonly').objectStore('task').get(word);
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
 export const putTask = (task: ITask) => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('task', 'readwrite').objectStore('task').put(task);
+    const request = db.transaction('task', 'readwrite').objectStore('task').put(task);
     request.onerror = reject;
     request.onsuccess = () => resolve();
 });
 
-
 export const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, reject) => {
-    const request = g.db.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
+    const request = db.transaction('task', 'readonly').objectStore('task').index('last').getAll(IDBKeyRange.lowerBound(last));
     request.onerror = reject;
     request.onsuccess = () => resolve(request.result);
 });
 
-export const addTasks = (words: Array<string>) => new Promise<void>((resolve, reject) => {
-    const transaction = g.db.transaction('task', 'readwrite');
+export const addTasks = (tag: Tag) => new Promise<void>((resolve, reject) => {
+    const time = now();
+    const transaction = db.transaction(['task', 'vocabulary'], 'readwrite');
+    const tStore = transaction.objectStore('task');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
-    const objectStore = transaction.objectStore('task');
-    const time = now();
-    for (const word in words)
-        objectStore.get(word).onsuccess = (e) =>
-            (e.target as IDBRequest).result || objectStore.add(newTask(word, time));
+    transaction.objectStore('vocabulary').openCursor().onsuccess = e => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return;
+        const vocab = cursor.value as IVocabulary;
+        if (!vocab.tags.includes(tag)) cursor.continue();
+        else {
+            tStore.get(vocab.word).onsuccess = (e1) => {
+                const task = (e1.target as IDBRequest).result;
+                if (!task) tStore.add(newTask(vocab.word, time));
+                cursor.continue();
+            }
+        }
+    }
 });
 
 export const mergeTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, reject) => {
-    const transaction = g.db.transaction('task', 'readwrite');
+    const transaction = db.transaction('task', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const objectStore = transaction.objectStore('task');
@@ -129,85 +183,96 @@ export const mergeTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, r
 });
 
 export const clarifyTask = () => new Promise<void>((resolve, reject) => {
-    const request = g.db.transaction('task', 'readwrite').objectStore('task').openCursor();
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
+    const transaction = db.transaction(['task', 'vocabulary'], 'readwrite');
+    const vstore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.objectStore('task').openCursor().onsuccess = (e) => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return resolve();
         const task = cursor.value as ITask;
-        let modified = false;
-        if (task.level > 15) {
-            task.level = 15;
-            modified = true;
+        vstore.get(task.word).onsuccess = (e) => {
+            let modified = false;
+            if (task.level > 15) modified = ((task.level = 15), true);
+            if (!(e.target as IDBRequest).result) modified = (letDelete(task), true);
+            if (modified) cursor.update(task);
+            cursor.continue();
         }
-        if (!vocabulary[task.word]) {
-            letDelete(task);
-            modified = true;
-        }
-        if (modified) cursor.update(task);
-        cursor.continue();
     }
 });
 
 export const getEpisode = (sprint: number, tag?: Tag, blevel?: BLevel) => new Promise<Array<ITask>>((resolve, reject) => {
     const tasks: Array<ITask> = [];
-    const request = g.db.transaction('task', 'readonly').objectStore('task')
-        .index('next').openCursor(IDBKeyRange.upperBound(now()), "prev");
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return resolve(tasks);
+    const transaction = db.transaction(['task', 'vocabulary'], 'readonly');
+    const vstore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => resolve(tasks);
+    transaction.objectStore('task').index('next').openCursor(IDBKeyRange.upperBound(now()), "prev").onsuccess = (e) => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return;
         const task = cursor.value as ITask;
-        if ((!tag || vocabulary[task.word]?.includes(tag))
-            && (!blevel || bLevelIncludes(blevel, task.level)))
-            tasks.push(task);
-        if (tasks.length < sprint) cursor.continue();
-        else resolve(tasks);
+        vstore.get(task.word).onsuccess = e => {
+            if ((!tag || (e.target as IDBRequest).result?.tags?.includes(tag)) && (!blevel || bLevelIncludes(blevel, task.level)))
+                tasks.push(task);
+            if (tasks.length < sprint) cursor.continue();
+            else resolve(tasks);
+        }
     }
 });
 
 export const totalStats = () => new Promise<IStats>((resolve, reject) => {
     const stats = initStats(now());
-    const transaction = g.db.transaction('task', 'readonly');
+    const transaction = db.transaction(['task', 'vocabulary'], 'readonly');
+    const tStore = transaction.objectStore('task');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve(stats);
-    const objectStore = transaction.objectStore('task');
-    for (const word in vocabulary)
-        objectStore.get(word).onsuccess = (e) => {
-            const task = (e.target as IDBRequest).result as ITask ?? neverTask(word);
-            adjTaskToStats(task, stats, vocabulary[word], 1);
+    transaction.objectStore('vocabulary').openCursor().onsuccess = e => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return;
+        const vocab = cursor.value as IVocabulary;
+        tStore.get(vocab.word).onsuccess = (e1) => {
+            const task = (e1.target as IDBRequest<ITask>).result ?? neverTask(vocab.word);
+            adjTaskToStats(task, stats, vocab.tags, 1);
+            cursor.continue();
         }
+    }
 });
 
 export const updateStats = (oldStats: IStats) => new Promise<IStats>((resolve, reject) => {
     const nstats: IStats = { ...oldStats, time: now() };
-    const request = g.db.transaction('task', 'readonly').objectStore('task')
-        .index('last').openCursor(IDBKeyRange.bound(oldStats.time, nstats.time));
-    request.onerror = reject;
-    request.onsuccess = () => {
-        const cursor = request.result;
-        if (!cursor) return resolve(nstats);
+    const transaction = db.transaction(['task', 'vocabulary'], 'readonly');
+    const vStore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => resolve(nstats);
+    transaction.objectStore('task').index('last').openCursor(IDBKeyRange.bound(oldStats.time, nstats.time)).onsuccess = (e) => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return;
         const task = cursor.value as ITask;
-        const tags = vocabulary[task.word];
-        adjTaskToStats(task, oldStats, tags, -1);
-        adjTaskToStats(task, nstats, tags, 1);
-        cursor.continue();
+        vStore.get(task.word).onsuccess = e1 => {
+            const tags = (e1.target as IDBRequest<IVocabulary>).result.tags;
+            adjTaskToStats(task, oldStats, tags, -1);
+            adjTaskToStats(task, nstats, tags, 1);
+            cursor.continue();
+        }
     }
 });
 
-export const init = async () => {
-    g.db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('memword', 1);
-        request.onerror = reject;
-        request.onsuccess = () => resolve(request.result);
-        request.onupgradeneeded = () => {
-            const d = request.result;
-            d.createObjectStore('kv', { keyPath: 'key' });
-            d.createObjectStore('dict', { keyPath: 'word' });
-            d.createObjectStore('issue', { keyPath: 'id', autoIncrement: true });
-            const taskStore = d.createObjectStore('task', { keyPath: 'word' });
-            taskStore.createIndex('last', 'last');
-            taskStore.createIndex('next', 'next');
+export const studyWord = (word: string, level: number, stats: IStats) => new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(['task', 'vocabulary'], 'readwrite');
+    const tStore = transaction.objectStore('task');
+    const vStore = transaction.objectStore('vocabulary');
+    transaction.onerror = reject;
+    transaction.oncomplete = () => resolve();
+    tStore.get(word).onsuccess = (e1) => {
+        const task = (e1.target as IDBRequest<ITask>).result;
+        if (!task) return;
+        vStore.get(word).onsuccess = (e2) => {
+            const vocab = (e2.target as IDBRequest<IVocabulary>).result;
+            if (!vocab) return;
+            adjTaskToStats(task, stats, vocab.tags, -1);
+            task.level = level >= 15 ? 15 : ++level;
+            task.last = now();
+            task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(39 * level ** 3 * 1.5 ** level);
+            tStore.put(task).onsuccess = () => adjTaskToStats(task, stats, vocab.tags, 1);
         }
-    });
-}
+    }
+})

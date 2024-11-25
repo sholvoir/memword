@@ -1,7 +1,7 @@
 import { Tags } from "@sholvoir/vocabulary";
 import { TagName } from '../lib/tag.ts';
 import { useSignal } from "@preact/signals";
-import { setSetting, putSetting } from "../lib/mem.ts";
+import { setSetting, syncSetting } from "../lib/mem.ts";
 import { closeDialog, signals } from "../lib/signals.ts";
 import { now } from "../lib/common.ts";
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
@@ -16,7 +16,7 @@ export default () => {
     const handleOKClick = () => {
         signals.setting.value = { ...signals.setting.value, version: now(), sprint: sprint.value, books: books.value };
         setSetting(signals.setting.value);
-        putSetting(signals.setting.value);
+        syncSetting(signals.setting.value);
         closeDialog();
     }
     const options = [];

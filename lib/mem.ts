@@ -47,11 +47,11 @@ export const getDict = (word: string, reload?: true) => {
 };
 
 export const cacheDict = () => fetch('/cache');
-export const putSetting = (setting: ISetting) => fetch('/setting', requestInit(setting));
+export const syncSetting = (setting: ISetting) => fetch('/setting', requestInit(setting));
 export const addTasks = (tag: Tag) => fetch(`/add?tag=${encodeURIComponent(tag)}`);
 export const deleteTask = (task: ITask) => fetch(`/delete?word=${task.word}`);
 export const syncTasks = () => fetch('/sync');
-export const study = (otask: ITask) => fetch('/study', requestInit(otask));
+export const study = (otask: ITask) => fetch(`/study?word=${otask.word}&level=${otask.level}`);
 export const submitIssue = (issue: string) => fetch(`/issue`, requestInit({issue}));
 export const search = (text: string) => fetch(`/search?word=${encodeURIComponent(text)}`);
 export const updateStats = () => fetch('/update');

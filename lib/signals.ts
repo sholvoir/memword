@@ -2,10 +2,9 @@
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats } from "./istat.ts";
 import { Signal } from "@preact/signals";
-import { IMessage } from "./imessage.ts";
 import { ISetting } from "./isetting.ts";
 import { ITask } from "./itask.ts";
-import { getEpisode, getVocabulary, setSetting, setStats } from "./mem.ts";
+import * as mem from "./mem.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
 export const version = denoConfig.version;
@@ -30,7 +29,7 @@ export const showTips = (content: string, autohide = true) => {
 };
 
 export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
-    const res = await getEpisode(signals.setting.value.sprint, tag, blevel);
+    const res = await mem.getEpisode(signals.setting.value.sprint, tag, blevel);
     if (!res.ok) return showTips('Network Error!');
     const tasks = await res.json() as Array<ITask>
     if (!tasks.length) {
@@ -44,15 +43,15 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
 };
 
 export const init = async () => {
-    if ("serviceWorker" in navigator) {
-        await navigator.serviceWorker.register('/service-worker.js');
-        navigator.serviceWorker.onmessage = (e: MessageEvent<IMessage>) => {
-            switch (e.data.type) {
-                case 'setting': e.data.data.version > signals.setting.value.version && setSetting(signals.setting.value = e.data.data); break;
-                case 'stats': setStats(signals.stats.value = e.data.data); break;
-            }
-        }
+    if ("serviceWorker" in navigator)await navigator.serviceWorker.register('/service-worker.js');
+    const res1 = await mem.syncSetting(signals.setting.value);
+    if (res1.ok) {
+        const nsetting = await res1.json() as ISetting;
+        if (nsetting.version > signals.setting.value.version)
+            mem.setSetting(signals.setting.value = nsetting)
     }
-    const res = await getVocabulary();
-    if (res.ok) signals.vocabulary.value = await res.json();
+    const res2 = await mem.updateStats();
+    if (res2.ok) mem.setStats(signals.stats.value = await res2.json());
+    const res3 = await mem.getVocabulary();
+    if (res3.ok) signals.vocabulary.value = await res3.json();
 };

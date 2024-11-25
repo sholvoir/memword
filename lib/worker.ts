@@ -1,19 +1,13 @@
-// deno-lint-ignore-file no-cond-assign
 /// <reference lib="webworker" />
 
 import { type Tag } from "@sholvoir/vocabulary";
-import { type BLevel, adjTaskToStats, initStats } from "./istat.ts";
+import { type BLevel, initStats } from "./istat.ts";
 import { badRequest, jsonResponse, notFound, ok, requestInit } from "@sholvoir/generic/http";
-import { VOCABULARY_URL, now } from "./common.ts";
+import { now } from "./common.ts";
 import { IDiction } from "./idict.ts";
-import { IMessage } from "./imessage.ts";
 import { ISetting, defaultSetting } from "./isetting.ts";
-import { ITask, letDelete, MAX_NEXT, newTask } from "./itask.ts";
-import {
-    addIssue, addTasks, clarifyDiction, clarifyTask, clearDict, clearKv, clearTask,
-    getDiction, getEpisode, getKv, getTask, getTasks, mergeTasks, putDiction, putTask,
-    setKv, totalStats, updateStats, vocabulary, init as indexdbInit, deleteIssue, getIssues
-} from "./indexdb.ts";
+import { letDelete, newTask } from "./itask.ts";
+import * as idb from "./indexdb.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
 declare const self: ServiceWorkerGlobalScope;
@@ -21,14 +15,11 @@ self.oninstall = (e) => e.waitUntil(self.skipWaiting());
 self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
+const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.0.28.txt';
 const DICT_API = 'https://dict.micit.co/api';
 const dictExpire = 7 * 24 * 60 * 60;
 const cacheName = `MemWord-V${denoConfig.version}`;
 const g = { inited: false, stats: initStats() };
-
-const sendMessage = async (msg: IMessage) => {
-    for (const client of await self.clients.matchAll()) client.postMessage(msg);
-}
 
 const handleActivate = async () => {
     await self.registration?.navigationPreload.disable();
@@ -47,18 +38,18 @@ const handleFetch = async (request: Request) => {
         case '/episode': return await handleFetchEpisode(request);
         case '/dict': return await handleFetchDict(request);
         case '/cache': cacheDict(); return ok;
-        case '/setting': return await handlePutSetting(request);
+        case '/setting': return await handleSyncSetting(request);
         case '/add': return handleFetchAdd(request);
         case '/delete': return await handleDeleteTask(request);
         case '/sync': syncTasks(); return ok;
-        case '/study': return await handlePostStudy(request);
+        case '/study': return await handleFetchStudy(request);
         case '/issue': return handlePostIssue(request);
         case '/search': return await handleFetchSearch(request);
-        case '/update': upStats(); return ok;
+        case '/update': return updateStats();
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
         case '/logout': return await handleFetchLogout(request);
-        case '/vocabulary': return jsonResponse(Object.keys(vocabulary));
+        case '/vocabulary': return jsonResponse(await idb.getVocabulary());
         default: {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
@@ -81,45 +72,45 @@ const fetchDiction = async (word: string) => {
 
 const syncTasks = async (lastTime?: number) => {
     const thisTime = now();
-    if (!lastTime) lastTime = (await getKv('_sync-time')) ?? 0;
-    const resp = await fetch(`/task?lastgt=${lastTime}`, requestInit(await getTasks(lastTime!)));
+    if (!lastTime) lastTime = (await idb.getKv('_sync-time')) ?? 0;
+    const resp = await fetch(`/task?lastgt=${lastTime}`, requestInit(await idb.getTasks(lastTime!)));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
     const ntasks = await resp.json();
-    await mergeTasks(ntasks);
-    await setKv('_sync-time', thisTime);
+    await idb.mergeTasks(ntasks);
+    await idb.setKv('_sync-time', thisTime);
 };
 
 const syncSetting = async (setting?: ISetting) => {
-    if (!setting) setting = (await getKv('_setting')) ?? defaultSetting();
+    if (!setting) setting = (await idb.getKv('_setting')) ?? defaultSetting();
     const res = await fetch('/setting', requestInit(setting));
     if (res.ok) {
         const nsetting: ISetting = await res.json();
-        if (nsetting.version > setting!.version) {
-            await setKv('_setting', nsetting);
-            sendMessage({ type: 'setting', data: nsetting });
-        }
+        if (nsetting.version > setting!.version) await idb.setKv('_setting', nsetting);
     }
 };
 
-const upStats = async () => await sendMessage({ type: 'stats', data: g.stats = await updateStats(g.stats) });
+const updateStats = async () => {
+    g.stats = await idb.updateStats(g.stats);
+    return jsonResponse(g.stats);
+}
 
 const cacheDict = async () => {
-    for (const task of await getTasks(0)) if (task?.word) {
+    for (const task of await idb.getTasks(0)) if (task?.word) {
         const word = task.word;
-        if (!await getDiction(word)) {
+        if (!await idb.getDiction(word)) {
             const dict = await fetchDiction(word);
-            if (dict) await putDiction(dict);
+            if (dict) await idb.putDiction(dict);
             else console.error(`Can not fetch word: ${word}.`)
         }
     }
 };
 
 const submitIssues = async () => {
-    const issues = await getIssues();
+    const issues = await idb.getIssues();
     for (const issue of issues) {
         const res = await fetch('/issue', requestInit(issue));
         if (!res.ok) break;
-        await deleteIssue(issue.id);
+        await idb.deleteIssue(issue.id);
     }
 }
 
@@ -131,16 +122,16 @@ const handleFetchDict = async (req: Request) => {
     let dict: IDiction | undefined = undefined;
     if (reload) {
         dict = await fetchDiction(word);
-        if (dict) putDiction(dict);
-        else dict = await getDiction(word);
+        if (dict) idb.putDiction(dict);
+        else dict = await idb.getDiction(word);
     } else {
-        dict = await getDiction(word);
+        dict = await idb.getDiction(word);
         if (dict) {
             if (dict.version + dictExpire < now())
-                fetchDiction(word).then(d => d ? putDiction(d) : undefined);
+                fetchDiction(word).then(d => d ? idb.putDiction(d) : undefined);
         } else {
             dict = await fetchDiction(word);
-            if (dict) putDiction(dict);
+            if (dict) idb.putDiction(dict);
         }
     }
     return dict ? jsonResponse(dict) : notFound;
@@ -149,9 +140,9 @@ const handleFetchDict = async (req: Request) => {
 const handleDeleteTask = async (req: Request) => {
     const word = new URL(req.url).searchParams.get('word');
     if (!word) return badRequest;
-    const task = await getTask(word);
+    const task = await idb.getTask(word);
     letDelete(task);
-    putTask(task);
+    idb.putTask(task);
     return ok;
 };
 
@@ -159,27 +150,17 @@ const handleFetchAdd = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const tag = params.get('tag') as Tag | null;
     if (!tag) return badRequest;
-    const words = [];
-    for (const word in vocabulary) if (vocabulary[word]?.includes(tag)) words.push(word);
-    await addTasks(words);
-    sendMessage({ type: 'stats', data: g.stats = await totalStats() });
+    await idb.addTasks(tag);
+    g.stats = await idb.totalStats();
     return ok;
 };
 
-const handlePostStudy = async (req: Request) => {
-    const otask = await req.json() as ITask;
-    const task = await getTask(otask.word);
-    if (!task) return notFound;
-    let level = otask.level;
-    const tags = vocabulary[task.word];
-    adjTaskToStats(task, g.stats, tags, -1);
-    if (level >= 15) level = 15;
-    else level++
-    task.level = level;
-    task.last = now();
-    task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(39 * level ** 3 * 1.5 ** level);
-    await putTask(task);
-    adjTaskToStats(task, g.stats, tags, 1);
+const handleFetchStudy = async (req: Request) => {
+    const params = new URL(req.url).searchParams;
+    const word = params.get('word');
+    const level = +(params.get('level')??0);
+    if (!word) return badRequest;
+    await idb.studyWord(word, level, g.stats);
     return ok;
 }
 
@@ -189,31 +170,32 @@ const handleFetchEpisode = async (req: Request) => {
     const tag = params.get('tag') as Tag;
     const blevel = params.get('blevel') as BLevel;
     if (isNaN(sprint)) return badRequest;
-    const ts = await getEpisode(sprint, tag, blevel);
+    const ts = await idb.getEpisode(sprint, tag, blevel);
     return jsonResponse(ts);
 };
 
-const handlePutSetting = async (req: Request) => {
-    const setting = await req.json() as ISetting;
-    setting.version = now();
-    setKv('_setting', setting);
-    syncSetting(setting);
-    return ok;
+const handleSyncSetting = async (req: Request) => {
+    const nsetting = await req.json() as ISetting;
+    const osetting = await idb.getKv('_setting') as ISetting;
+    if (nsetting.version <= osetting.version) return jsonResponse(osetting);
+    idb.setKv('_setting', nsetting);
+    syncSetting(nsetting);
+    return jsonResponse(nsetting);
 };
 
 const handleFetchLogout = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const cleanCache = params.get('cleanCache');
-    if (cleanCache) await clearDict();
-    await clearTask();
-    await clearKv();
+    if (cleanCache) await idb.clearDict();
+    await idb.clearTask();
+    await idb.clearKv();
     return ok;
 };
 
 const handlePostIssue = async (req: Request) => {
     const data = await req.json();
     if (!data) return badRequest;
-    await addIssue(data.issue);
+    await idb.addIssue(data.issue);
     submitIssues();
     return ok;
 };
@@ -221,26 +203,24 @@ const handlePostIssue = async (req: Request) => {
 const handleFetchSearch = async (req: Request) => {
     const word = new URL(req.url).searchParams.get('word');
     if (!word) return badRequest;
-    return jsonResponse((await getTask(word)) ?? newTask(word, now()));
+    return jsonResponse((await idb.getTask(word)) ?? newTask(word, now()));
 };
 
 const init = async () => {
-    await indexdbInit();
-    const res = await fetch(VOCABULARY_URL, { cache: 'force-cache' });
-    const delimiter = /[,:] */;
-    if (res.ok) for (let line of (await res.text()).split('\n')) if (line = line.trim()) {
-        const [word, ...tags] = line.split(delimiter).map(w => w.trim());
-        vocabulary[word] = tags as Array<Tag>;
+    if (!g.inited) {
+        await idb.init();
+        const _vocabulary_url: string = await idb.getKv('_vocabulary-url');
+        if (VOCABULARY_URL !== _vocabulary_url) {
+            const res = await fetch(VOCABULARY_URL, { cache: 'force-cache' });
+            if (res.ok) await idb.updateVocabulary((await res.text()).split('\n'));
+            await idb.clarifyTask();
+            await idb.clarifyDiction();
+            await idb.setKv('_vocabulary-url', VOCABULARY_URL);
+        }
+        await syncSetting();
+        await syncTasks();
+        g.stats = await idb.totalStats();
+        submitIssues();
+        g.inited = true;
     }
-    const _vocabulary_url: string = await getKv('_vocabulary-url');
-    if (VOCABULARY_URL !== _vocabulary_url && Object.keys(vocabulary).length > 20000) {
-        await clarifyTask();
-        await clarifyDiction();
-        await setKv('_vocabulary-url', VOCABULARY_URL);
-    }
-    await syncSetting();
-    await syncTasks();
-    sendMessage({ type: 'stats', data: g.stats = await totalStats() });
-    submitIssues();
-    g.inited = true;
 };
