@@ -32,29 +32,29 @@ const putInCache = async (request: Request, response: Response) => {
 };
 
 const handleFetch = async (request: Request) => {
-    if (!g.inited) await init();
-    const url = new URL(request.url)
-    switch (url.pathname) {
-        case '/episode': return await handleFetchEpisode(request);
-        case '/dict': return await handleFetchDict(request);
-        case '/cache': cacheDict(); return ok;
-        case '/setting': return await handleSyncSetting(request);
-        case '/add': return handleFetchAdd(request);
-        case '/delete': return await handleDeleteTask(request);
-        case '/sync': syncTasks(); return ok;
-        case '/study': return await handleFetchStudy(request);
-        case '/issue': return handlePostIssue(request);
-        case '/search': return await handleFetchSearch(request);
-        case '/update': return updateStats();
+    const pathname = new URL(request.url).pathname;
+    if (!g.inited && pathname.startsWith('/wkr')) await init();
+    switch (pathname) {
+        case '/wkr/episode': return await handleFetchEpisode(request);
+        case '/wkr/dict': return await handleFetchDict(request);
+        case '/wkr/cache': cacheDict(); return ok;
+        case '/wkr/setting': return await handleSyncSetting(request);
+        case '/wkr/add': return handleFetchAdd(request);
+        case '/wkr/delete': return await handleDeleteTask(request);
+        case '/wkr/sync': syncTasks(); return ok;
+        case '/wkr/study': return await handleFetchStudy(request);
+        case '/wkr/issue': return handlePostIssue(request);
+        case '/wkr/search': return await handleFetchSearch(request);
+        case '/wkr/update': return updateStats();
+        case '/wkr/vocabulary': return jsonResponse(await idb.getVocabulary());
+        case '/wkr/logout': return await handleFetchLogout(request);
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
-        case '/logout': return await handleFetchLogout(request);
-        case '/vocabulary': return jsonResponse(await idb.getVocabulary());
         default: {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
             const responseFromNetwork = await fetch(request);
-            if (responseFromNetwork.ok && !url.pathname.includes('_frsh'))
+            if (responseFromNetwork.ok && !pathname.includes('_frsh'))
                 putInCache(request, responseFromNetwork.clone());
             return responseFromNetwork;
         }
@@ -73,7 +73,7 @@ const fetchDiction = async (word: string) => {
 const syncTasks = async (lastTime?: number) => {
     const thisTime = now();
     if (!lastTime) lastTime = (await idb.getKv('_sync-time')) ?? 0;
-    const resp = await fetch(`/task?lastgt=${lastTime}`, requestInit(await idb.getTasks(lastTime!)));
+    const resp = await fetch(`/api/task?lastgt=${lastTime}`, requestInit(await idb.getTasks(lastTime!)));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
     const ntasks = await resp.json();
     await idb.mergeTasks(ntasks);
@@ -82,7 +82,7 @@ const syncTasks = async (lastTime?: number) => {
 
 const syncSetting = async (setting?: ISetting) => {
     if (!setting) setting = (await idb.getKv('_setting')) ?? defaultSetting();
-    const res = await fetch('/setting', requestInit(setting));
+    const res = await fetch('/api/setting', requestInit(setting));
     if (res.ok) {
         const nsetting: ISetting = await res.json();
         if (nsetting.version > setting!.version) await idb.setKv('_setting', nsetting);
@@ -108,7 +108,7 @@ const cacheDict = async () => {
 const submitIssues = async () => {
     const issues = await idb.getIssues();
     for (const issue of issues) {
-        const res = await fetch('/issue', requestInit(issue));
+        const res = await fetch('/api/issue', requestInit(issue));
         if (!res.ok) break;
         await idb.deleteIssue(issue.id);
     }
