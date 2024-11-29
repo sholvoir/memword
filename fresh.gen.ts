@@ -2,17 +2,16 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_root_auth_middleware from "./routes/(root)/(auth)/_middleware.ts";
-import * as $_root_auth_issue from "./routes/(root)/(auth)/issue.ts";
-import * as $_root_auth_setting from "./routes/(root)/(auth)/setting.ts";
-import * as $_root_auth_task from "./routes/(root)/(auth)/task.ts";
 import * as $_root_middleware from "./routes/(root)/_middleware.ts";
+import * as $_root_api_middleware from "./routes/(root)/api/_middleware.ts";
+import * as $_root_api_issue from "./routes/(root)/api/issue.ts";
+import * as $_root_api_setting from "./routes/(root)/api/setting.ts";
+import * as $_root_api_task from "./routes/(root)/api/task.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
-import * as $vocabulary from "./routes/vocabulary.ts";
 import * as $about from "./islands/about.tsx";
 import * as $dialog from "./islands/dialog.tsx";
 import * as $dict from "./islands/dict.tsx";
@@ -37,17 +36,16 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/(root)/(auth)/_middleware.ts": $_root_auth_middleware,
-    "./routes/(root)/(auth)/issue.ts": $_root_auth_issue,
-    "./routes/(root)/(auth)/setting.ts": $_root_auth_setting,
-    "./routes/(root)/(auth)/task.ts": $_root_auth_task,
     "./routes/(root)/_middleware.ts": $_root_middleware,
+    "./routes/(root)/api/_middleware.ts": $_root_api_middleware,
+    "./routes/(root)/api/issue.ts": $_root_api_issue,
+    "./routes/(root)/api/setting.ts": $_root_api_setting,
+    "./routes/(root)/api/task.ts": $_root_api_task,
     "./routes/(root)/index.tsx": $_root_index,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/login.ts": $login,
     "./routes/signup.ts": $signup,
-    "./routes/vocabulary.ts": $vocabulary,
   },
   islands: {
     "./islands/about.tsx": $about,

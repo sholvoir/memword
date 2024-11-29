@@ -22,11 +22,11 @@ export default () => {
     const index = useSignal(0);
     const current = useSignal<ITask>(signals.tasks.value[0]);
     const dict = useSignal<IDiction | undefined>(undefined);
-    const finish = () => {
+    const finish = async () => {
         closeDialog();
-        signals.stats.value = { ...signals.stats.value };
-        updateStats();
         syncTasks();
+        const res = await updateStats();
+        if (res.ok) signals.stats.value = await res.json();
     }
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);

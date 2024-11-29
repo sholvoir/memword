@@ -34,19 +34,20 @@ const putInCache = async (request: Request, response: Response) => {
 const handleFetch = async (request: Request) => {
     const pathname = new URL(request.url).pathname;
     if (!g.inited && pathname.startsWith('/wkr')) await init();
+    if (pathname.startsWith('/wkr')) console.log(pathname);
     switch (pathname) {
-        case '/wkr/episode': return await handleFetchEpisode(request);
-        case '/wkr/dict': return await handleFetchDict(request);
-        case '/wkr/cache': cacheDict(); return ok;
-        case '/wkr/setting': return await handleSyncSetting(request);
-        case '/wkr/add': return handleFetchAdd(request);
-        case '/wkr/delete': return await handleDeleteTask(request);
-        case '/wkr/sync': syncTasks(); return ok;
+        case '/wkr/get-episode': return await handleFetchEpisode(request);
+        case '/wkr/get-dict': return await handleFetchDict(request);
+        case '/wkr/cache-dict': cacheDict(); return ok;
+        case '/wkr/sync-setting': return await handleSyncSetting(request);
+        case '/wkr/add-tasks': return handleFetchAdd(request);
+        case '/wkr/delete-task': return await handleDeleteTask(request);
+        case '/wkr/sync-tasks': syncTasks(); return ok;
         case '/wkr/study': return await handleFetchStudy(request);
-        case '/wkr/issue': return handlePostIssue(request);
+        case '/wkr/submit-issue': return handlePostIssue(request);
         case '/wkr/search': return await handleFetchSearch(request);
-        case '/wkr/update': return updateStats();
-        case '/wkr/vocabulary': return jsonResponse(await idb.getVocabulary());
+        case '/wkr/update-stats': return updateStats();
+        case '/wkr/get-vocabulary': return jsonResponse(await idb.getVocabulary());
         case '/wkr/logout': return await handleFetchLogout(request);
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
@@ -151,8 +152,7 @@ const handleFetchAdd = async (req: Request) => {
     const tag = params.get('tag') as Tag | null;
     if (!tag) return badRequest;
     await idb.addTasks(tag);
-    g.stats = await idb.totalStats();
-    return ok;
+    return jsonResponse(g.stats = await idb.totalStats());
 };
 
 const handleFetchStudy = async (req: Request) => {
@@ -217,9 +217,8 @@ const init = async () => {
             await idb.clarifyDiction();
             await idb.setKv('_vocabulary-url', VOCABULARY_URL);
         }
-        await syncSetting();
-        await syncTasks();
         g.stats = await idb.totalStats();
+        syncTasks().then(idb.totalStats).then(stats => g.stats = stats);
         submitIssues();
         g.inited = true;
     }

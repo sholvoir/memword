@@ -2,7 +2,7 @@ import { useSignal } from "@preact/signals";
 import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from "../lib/tag.ts";
 import { addTasks } from "../lib/mem.ts";
-import { startStudy, closeDialog, showDialog } from "../lib/signals.ts";
+import { startStudy, closeDialog, showDialog, signals } from "../lib/signals.ts";
 import Dialog from './dialog.tsx';
 import Select from '@sholvoir/components/islands/select-single.tsx';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
@@ -12,7 +12,8 @@ export default () => {
     const handleOkClick = async () => {
         closeDialog();
         showDialog({dial: 'wait', prompt: '请稍候...' });
-        await addTasks(sTag.value);
+        const res = await addTasks(sTag.value);
+        if (res.ok) signals.stats = await res.json();
         closeDialog();
         startStudy(sTag.value);
     }
