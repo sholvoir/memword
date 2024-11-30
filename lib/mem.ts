@@ -55,6 +55,7 @@ export const study = (otask: ITask) => fetch(`/wkr/study?word=${otask.word}&leve
 export const submitIssue = (issue: string) => fetch(`/wkr/submit-issue`, requestInit({issue}));
 export const search = (text: string) => fetch(`/wkr/search?word=${encodeURIComponent(text)}`);
 export const updateStats = () => fetch('/wkr/update-stats');
+export const totalStats = () => fetch('/wkr/total-stats');
 export const getVocabulary = () => fetch('/wkr/get-vocabulary');
 export const logout = (cleanCache: boolean) => (localStorage.clear(), Cookies.remove('auth'), fetch(`/wkr/logout${cleanCache?'?cleanCache=1':''}`));
 

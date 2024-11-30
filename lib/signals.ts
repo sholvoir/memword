@@ -43,15 +43,19 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
 };
 
 export const init = async () => {
-    if ("serviceWorker" in navigator)await navigator.serviceWorker.register('/service-worker.js');
+    if ("serviceWorker" in navigator) await navigator.serviceWorker.register('/service-worker.js');
     const res1 = await mem.syncSetting(signals.setting.value);
     if (res1.ok) {
         const nsetting = await res1.json() as ISetting;
         if (nsetting.version > signals.setting.value.version)
             mem.setSetting(signals.setting.value = nsetting)
-    }
-    const res2 = await mem.updateStats();
-    if (res2.ok) mem.setStats(signals.stats.value = await res2.json());
-    const res3 = await mem.getVocabulary();
-    if (res3.ok) signals.vocabulary.value = await res3.json();
+    } else showTips("Worker Error, Need Relord.");
+    const res2 = await mem.syncTasks();
+    if (!res2.ok) showTips("Worker Error, Need Relord.");
+    const res3 = await mem.totalStats();
+    if (res3.ok) mem.setStats(signals.stats.value = await res3.json());
+    else  showTips("Worker Error, Need Relord.");
+    const res4 = await mem.getVocabulary();
+    if (res4.ok) signals.vocabulary.value = await res4.json();
+    else showTips("Worker Error, Need Relord.");
 };

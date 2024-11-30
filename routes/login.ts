@@ -16,7 +16,19 @@ export const handler: Handlers = {
             const kv = await Deno.openKv(kvPath);
             const res = await kv.get([catalog, id]);
             const pass = res.value as IPass;
-            if (!pass || pass.password != password || pass.expire < now()) return badRequest;
+            if (!pass) {
+                kv.close();
+                return badRequest;
+            }
+            if (pass.expire < now()) {
+                await kv.delete([catalog, id]);
+                kv.close();
+                return badRequest;
+            }
+            if (pass.password != password) {
+                kv.close();
+                return badRequest;
+            }
             await mongorun(async client => {
                 const db = client.db('task');
                 const collectionNames = (await db.collections()).map(conn => conn.collectionName);
@@ -27,6 +39,8 @@ export const handler: Handlers = {
                 }
             });
             console.log(`API '/login' POST ${id}`);
+            await kv.delete([catalog, id]);
+            kv.close();
             return await setAuth(new Response(), id);
         } catch { return internalServerError; }
     },
