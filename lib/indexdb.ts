@@ -253,7 +253,7 @@ export const totalStats = () => new Promise<IStats>((resolve, reject) => run(rej
 }));
 
 export const updateStats = () => new Promise<IStats>((resolve, reject) => run(reject, db => {
-    let nstats = initStats();
+    let nstats: IStats;
     const transaction = db.transaction(['kv', 'task', 'vocabulary'], 'readwrite');
     const kvStore = transaction.objectStore('kv');
     const tStore = transaction.objectStore('task');
@@ -262,7 +262,8 @@ export const updateStats = () => new Promise<IStats>((resolve, reject) => run(re
     transaction.oncomplete = () => resolve(nstats);
     kvStore.get('_stats').onsuccess = (e1) => {
         const kv = (e1.target as IDBRequest<IKV>).result;
-        const oldStats = kv ? kv.value : initStats();
+        if (!kv) return nstats = initStats();
+        const oldStats = kv.value;
         nstats = { ...oldStats, time: now() }
         tStore.index('last').openCursor(IDBKeyRange.bound(oldStats.time, nstats.time)).onsuccess = (e) => {
             const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
@@ -287,7 +288,8 @@ export const studyWord = (word: string, level: number) => new Promise<void>((res
     transaction.oncomplete = () => resolve();
     kvStore.get('_stats').onsuccess = (e1) => {
         const kv = (e1.target as IDBRequest<IKV>).result;
-        const stats = kv ? kv.value : initStats();
+        if (!kv) return;
+        const stats = kv.value;
         tStore.get(word).onsuccess = (e2) => {
             const task = (e2.target as IDBRequest<ITask>).result;
             if (!task) return;

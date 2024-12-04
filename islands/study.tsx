@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import { updateStats, submitIssue, syncTasks, deleteTask, getDict, study  } from '../lib/mem.ts';
+import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
 import Dialog from './dialog.tsx';
@@ -12,7 +12,7 @@ import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
-import { closeDialog, showTips, signals } from "../lib/signals.ts";
+import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 
 const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
 let startY = 0;
@@ -25,7 +25,7 @@ export default () => {
     const finish = async () => {
         closeDialog();
         syncTasks();
-        const res = await updateStats();
+        const res = await totalStats();
         if (res.ok) signals.stats.value = await res.json();
     }
     if (!current.value) return (finish(), <div/>);
@@ -38,6 +38,7 @@ export default () => {
     const handleRefresh = async () => {
         showTips("Get Server Data...");
         const res = await getDict(current.value.word, true);
+        hideTips();
         if (res.ok) dict.value = await res.json();
         else showTips(`Not Found ${current.value.word}`);
     };
