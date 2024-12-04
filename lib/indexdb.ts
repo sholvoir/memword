@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-explicit-any no-cond-assign
 
 import { type Tag } from "@sholvoir/vocabulary";
-import { type BLevel, IStats, adjTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
-import { ITask, letDelete, letNew, MAX_NEXT, neverTask, shouldDelete } from "./itask.ts";
+import { type BLevel, IStats, addTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
+import { ITask, letDelete, MAX_NEXT, neverTask, newTask, shouldDelete } from "./itask.ts";
 import { IDiction } from "./idict.ts";
 import { now } from "./common.ts";
 
-type kvKey = '_vocabulary-url'|'_sync-time'|'_setting'|'_stats';
+type kvKey = '_vocabulary-url'|'_sync-time'|'_setting';
 interface IKV { key: kvKey, value: any }
 interface IVocabulary { word: string; tags: Array<Tag> }
 let db: IDBDatabase;
@@ -147,37 +147,22 @@ export const getTasks = (last: number) => new Promise<Array<ITask>>((resolve, re
     request.onsuccess = () => resolve(request.result);
 }));
 
-export const addTasks = (tag: Tag) => new Promise<IStats>((resolve, reject) => run(reject, db => {
+export const addTasks = (tag: Tag) => new Promise<void>((resolve, reject) => run(reject, db => {
     const time = now();
-    let stats = initStats();
-    const transaction = db.transaction(['kv', 'task', 'vocabulary'], 'readwrite');
-    const kvStore = transaction.objectStore('kv')
+    const transaction = db.transaction(['task', 'vocabulary'], 'readwrite');
     const tStore = transaction.objectStore('task');
     const vStore = transaction.objectStore('vocabulary');
     transaction.onerror = reject;
-    transaction.oncomplete = () => resolve(stats);
-    kvStore.get('_stats').onsuccess = (e1) => {
-        const kv = (e1.target as IDBRequest<IKV>).result;
-        if (kv) stats = kv.value;
-        vStore.openCursor().onsuccess = (e2) => {
-            const cursor = (e2.target as IDBRequest<IDBCursorWithValue>).result;
-            if (!cursor) return kvStore.put({ key: '_stats', value: stats })
-            const vocab = cursor.value as IVocabulary;
-            if (!vocab.tags.includes(tag)) cursor.continue();
-            else {
-                tStore.get(vocab.word).onsuccess = (e3) => {
-                    const task = (e3.target as IDBRequest).result;
-                    if (!task) {
-                        const task = neverTask(vocab.word);
-                        adjTaskToStats(task, stats, vocab.tags, -1);
-                        letNew(task, time);
-                        adjTaskToStats(task, stats, vocab.tags, 1);
-                        tStore.add(task);
-                    }
-                    cursor.continue();
-                }
-            }
-        }
+    transaction.oncomplete = () => resolve();
+    vStore.openCursor().onsuccess = (e2) => {
+        const cursor = (e2.target as IDBRequest<IDBCursorWithValue>).result;
+        if (!cursor) return;
+        const vocab = cursor.value as IVocabulary;
+        if (vocab.tags.includes(tag)) tStore.get(vocab.word).onsuccess = (e3) => {
+            const task = (e3.target as IDBRequest).result;
+            if (!task) tStore.add(newTask(vocab.word, time));
+            cursor.continue();
+        }; else cursor.continue();
     }
 }));
 
@@ -233,78 +218,35 @@ export const getEpisode = (sprint: number, tag?: Tag, blevel?: BLevel) => new Pr
     }
 }));
 
-export const totalStats = () => new Promise<IStats>((resolve, reject) => run(reject, db => {
+export const getStats = () => new Promise<IStats>((resolve, reject) => run(reject, db => {
     const stats = initStats(now());
-    const transaction = db.transaction(['kv', 'task', 'vocabulary'], 'readwrite');
-    const kvStore = transaction.objectStore('kv');
+    const transaction = db.transaction(['task', 'vocabulary'], 'readonly');
     const tStore = transaction.objectStore('task');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve(stats);
     transaction.objectStore('vocabulary').openCursor().onsuccess = e => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-        if (!cursor) return kvStore.put({ key: '_stats', value: stats });
+        if (!cursor) return;
         const vocab = cursor.value as IVocabulary;
         tStore.get(vocab.word).onsuccess = (e1) => {
             const task = (e1.target as IDBRequest<ITask>).result ?? neverTask(vocab.word);
-            adjTaskToStats(task, stats, vocab.tags, 1);
+            addTaskToStats(task, stats, vocab.tags);
             cursor.continue();
         }
     }
 }));
 
-export const updateStats = () => new Promise<IStats>((resolve, reject) => run(reject, db => {
-    let nstats: IStats;
-    const transaction = db.transaction(['kv', 'task', 'vocabulary'], 'readwrite');
-    const kvStore = transaction.objectStore('kv');
-    const tStore = transaction.objectStore('task');
-    const vStore = transaction.objectStore('vocabulary');
-    transaction.onerror = reject;
-    transaction.oncomplete = () => resolve(nstats);
-    kvStore.get('_stats').onsuccess = (e1) => {
-        const kv = (e1.target as IDBRequest<IKV>).result;
-        if (!kv) return nstats = initStats();
-        const oldStats = kv.value;
-        nstats = { ...oldStats, time: now() }
-        tStore.index('last').openCursor(IDBKeyRange.bound(oldStats.time, nstats.time)).onsuccess = (e) => {
-            const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-            if (!cursor) return kvStore.put({ key: '_stats', value: nstats });
-            const task = cursor.value as ITask;
-            vStore.get(task.word).onsuccess = e1 => {
-                const tags = (e1.target as IDBRequest<IVocabulary>).result.tags;
-                adjTaskToStats(task, oldStats, tags, -1);
-                adjTaskToStats(task, nstats, tags, 1);
-                cursor.continue();
-            }
-        }
-    }
-}));
-
 export const studyWord = (word: string, level: number) => new Promise<void>((resolve, reject) => run(reject, db => {
-    const transaction = db.transaction(['kv', 'task', 'vocabulary'], 'readwrite');
-    const kvStore = transaction.objectStore('kv');
+    const transaction = db.transaction('task', 'readwrite');
     const tStore = transaction.objectStore('task');
-    const vStore = transaction.objectStore('vocabulary');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
-    kvStore.get('_stats').onsuccess = (e1) => {
-        const kv = (e1.target as IDBRequest<IKV>).result;
-        if (!kv) return;
-        const stats = kv.value;
-        tStore.get(word).onsuccess = (e2) => {
-            const task = (e2.target as IDBRequest<ITask>).result;
-            if (!task) return;
-            vStore.get(word).onsuccess = (e3) => {
-                const vocab = (e3.target as IDBRequest<IVocabulary>).result;
-                if (!vocab) return;
-                adjTaskToStats(task, stats, vocab.tags, -1);
-                task.level = level >= 15 ? 15 : ++level;
-                task.last = now();
-                task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(39 * level ** 3 * 1.5 ** level);
-                tStore.put(task).onsuccess = () => {
-                    adjTaskToStats(task, stats, vocab.tags, 1);
-                    kvStore.put({ key: '_stats', value: stats });
-                }
-            }
-        }
+    tStore.get(word).onsuccess = (e2) => {
+        const task = (e2.target as IDBRequest<ITask>).result;
+        if (!task) return;
+        task.level = level >= 15 ? 15 : ++level;
+        task.last = now();
+        task.next = level >= 15 ? MAX_NEXT : task.last + Math.round(39 * level ** 3 * 1.5 ** level);
+        tStore.put(task);
     }
 }));

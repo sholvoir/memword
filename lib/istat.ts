@@ -45,14 +45,14 @@ export const initStats = (time = 0) => {
     return stats;
 };
 
-export const adjTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>, direction = 0) => {
+export const addTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>) => {
     if (!isNever(task)) {
-        stats.all['__'][task.level] += direction;
-        if (task.next < stats.time) stats.task['__'][task.level] += direction;
+        stats.all['__'][task.level]++;
+        if (task.next < stats.time) stats.task['__'][task.level]++;
     }
     for (const tag of tags) {
-        stats.all[tag][task.level] += direction;
-        if (task.next < stats.time) stats.task[tag][task.level] += direction;
+        stats.all[tag][task.level]++;
+        if (task.next < stats.time) stats.task[tag][task.level]++;
     }
 };
 

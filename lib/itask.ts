@@ -16,6 +16,5 @@ export interface ITask {
 export const neverTask = (word: string): ITask => ({ word, last: 0, next: MAX_NEXT, level: 0 });
 export const isNever = (task: ITask) => task.last === 0;
 export const newTask = (word: string, time: number): ITask => ({word, last: time, next: 0, level: 0});
-export const letNew = (task: ITask, time: number) => { task.last = time; task.next = 0; };
 export const letDelete = (task: ITask) => { task.last = MAX_NEXT; };
 export const shouldDelete = (task: ITask) => task.last === MAX_NEXT;

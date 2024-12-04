@@ -52,8 +52,7 @@ const handleFetch = async (request: Request) => {
         case '/wkr/study': return await handleFetchStudy(request);
         case '/wkr/submit-issue': return handleIssue(request);
         case '/wkr/search': return await handleFetchSearch(request);
-        case '/wkr/update-stats': return jsonResponse(await idb.updateStats());
-        case '/wkr/total-stats': return jsonResponse(await idb.totalStats());
+        case '/wkr/get-stats': return jsonResponse(await idb.getStats());
         case '/wkr/get-vocabulary': return jsonResponse(await idb.getVocabulary());
         case '/wkr/logout': return await handleFetchLogout(request);
         case '/signup': return fetch(request);

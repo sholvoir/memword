@@ -1,6 +1,6 @@
 {
   "lock": false,
-  "version": "0.1.14",
+  "version": "0.1.15",
   "unstable": ["kv"],
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
