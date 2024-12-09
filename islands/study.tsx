@@ -14,14 +14,13 @@ import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 
-const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
-let startY = 0;
-let endY = 0;
-
 export default () => {
+    const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
     const index = useSignal(0);
     const current = useSignal<ITask>(signals.tasks.value[0]);
     const dict = useSignal<IDiction | undefined>(undefined);
+    const startY = useSignal(0);
+    const endY = useSignal(0);
     const finish = async () => {
         closeDialog();
         syncTasks();
@@ -75,34 +74,29 @@ export default () => {
         dict.value = undefined;
         getDiction();
     };
-    const moveDivThenRun = (div: HTMLDivElement, y: number, handle: () => void) => {
-        endY += y;
-        if (endY - startY > div.clientHeight || endY - startY < -div.clientHeight) {
+    const moveDivThenRun = (y: number, max:number, handle: () => void) => {
+        endY.value += y;
+        const diff = Math.abs(endY.value - startY.value);
+        if (diff > max) {
             handle();
-            setTimeout(() => {div.style.top = '0'}, 10)
+            setTimeout(() => {endY.value = startY.value = 0}, 10)
         } else {
-            div.style.top = `${endY - startY}px`;
-            setTimeout(moveDivThenRun, 20, div, y, handle);
+            setTimeout(moveDivThenRun, 20, y, max, handle);
         }
     };
-    const handleTouchStart = (e: TouchEvent) => endY = startY = e.touches[0].clientY;
-    const handleTouchMove = (e: TouchEvent) => {
-        e.preventDefault();
-        if (signals.isPhaseAnswer.value)
-            (e.currentTarget as HTMLDivElement).style.top = `${(endY = e.touches[0].clientY) - startY}px`;
-    };
-    const handleTouchEnd = (e: Event) => {
-        const div = e.currentTarget as HTMLDivElement;
-        if (Math.abs(endY - startY) < 5) {
-            div.style.top = '0';
-            handleClick();
-        } else if (signals.isPhaseAnswer.value) {
-            if (endY - startY >= div.clientHeight / 6) moveDivThenRun(div, 60, () => handleIKnown(0));
-            else if (endY - startY <= -div.clientHeight / 6) moveDivThenRun(div, -60, handleIKnown);
-            else div.style.top = '0';
+    const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = startY.value = e.touches[0].clientY);
+    const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = e.touches[0].clientY);
+    const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = startY.value = 0);
+    const handleTouchEnd = (e: TouchEvent) => {
+        if (e.preventDefault(), signals.isPhaseAnswer.value) {
+            const div = e.currentTarget as HTMLDivElement;
+            if (endY.value - startY.value >= div.clientHeight / 6)
+                moveDivThenRun(60, div.clientHeight, () => handleIKnown(0));
+            else if (endY.value - startY.value <= -div.clientHeight / 6)
+                moveDivThenRun(-60, div.clientHeight, handleIKnown);
+            else endY.value = startY.value = 0;
         }
     };
-    const handleTouchCancel = (e: TouchEvent) => (e.currentTarget as HTMLDivElement).style.top = '0';
     const handleClick = () => signals.isPhaseAnswer.value ? handleSpeakIt() : handleShowAnswer();
     const splite = (w: string) => {
         const x = spliteNum.exec(w);
@@ -119,7 +113,7 @@ export default () => {
         <div class={`relative h-full bg-cover bg-center [outline:none]`}
             tabIndex={-1} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
-            style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
+            style={`top: ${endY.value - startY.value}px; ${(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}`}>
             <div class="h-full study-translucent flex flex-col">
                 <div class="shrink-0 p-2 flex gap-2 text-lg">
                     <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
