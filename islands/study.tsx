@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
+import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
@@ -12,7 +13,6 @@ import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
-import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 
 export default () => {
     const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
@@ -74,26 +74,23 @@ export default () => {
         dict.value = undefined;
         getDiction();
     };
-    const moveDivThenRun = (y: number, max:number, handle: () => void) => {
+    const continueMove = (y: number, max:number) => {
         endY.value += y;
         const diff = Math.abs(endY.value - startY.value);
-        if (diff > max) {
-            handle();
-            setTimeout(() => {endY.value = startY.value = 0}, 10)
-        } else {
-            setTimeout(moveDivThenRun, 20, y, max, handle);
-        }
+        if (diff > max) setTimeout(() => {endY.value = startY.value = 0}, 10);
+        else setTimeout(continueMove, 20, y, max);
     };
-    const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = startY.value = e.touches[0].clientY);
-    const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = e.touches[0].clientY);
-    const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), signals.isPhaseAnswer.value) && (endY.value = startY.value = 0);
+    const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = e.touches[0].clientY);
+    const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), endY.value = e.touches[0].clientY);
+    const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = 0);
     const handleTouchEnd = (e: TouchEvent) => {
-        if (e.preventDefault(), signals.isPhaseAnswer.value) {
+        e.preventDefault();
+        const diff = endY.value - startY.value;
+        if (Math.abs(diff) < 5) (handleClick(), endY.value = startY.value = 0);
+        else if (signals.isPhaseAnswer.value) {
             const div = e.currentTarget as HTMLDivElement;
-            if (endY.value - startY.value >= div.clientHeight / 6)
-                moveDivThenRun(60, div.clientHeight, () => handleIKnown(0));
-            else if (endY.value - startY.value <= -div.clientHeight / 6)
-                moveDivThenRun(-60, div.clientHeight, handleIKnown);
+            if (diff >= div.clientHeight / 6) (handleIKnown(0), continueMove(60, div.clientHeight));
+            else if (diff <= -div.clientHeight / 6) (handleIKnown(), continueMove(-60, div.clientHeight));
             else endY.value = startY.value = 0;
         }
     };
@@ -110,9 +107,7 @@ export default () => {
         return () => document.removeEventListener('keyup', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class={`relative h-full bg-cover bg-center [outline:none]`}
-            tabIndex={-1} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}
+        <div class={`relative h-full bg-cover bg-center [outline:none]`} tabIndex={-1}
             style={`top: ${endY.value - startY.value}px; ${(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}`}>
             <div class="h-full study-translucent flex flex-col">
                 <div class="shrink-0 p-2 flex gap-2 text-lg">
@@ -140,7 +135,7 @@ export default () => {
                     </SButton>
                     <div>{current.value.level}</div>
                 </div>
-                <div class="grow px-2 h-full" onClick={handleClick}>
+                <div class="grow px-2 h-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} onClick={handleClick}>
                     <div class="pb-2 flex gap-2 flex-wrap justify-between">
                         {splite(current.value.word)}
                         {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{dict.value?.phonetic}</div>}
