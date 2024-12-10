@@ -85,13 +85,18 @@ export default () => {
     const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = 0);
     const handleTouchEnd = (e: TouchEvent) => {
         e.preventDefault();
-        const diff = endY.value - startY.value;
-        if (Math.abs(diff) < 5) (handleClick(), endY.value = startY.value = 0);
-        else if (signals.isPhaseAnswer.value) {
-            const div = e.currentTarget as HTMLDivElement;
-            if (diff >= div.clientHeight / 6) (handleIKnown(0), continueMove(60, div.clientHeight));
-            else if (diff <= -div.clientHeight / 6) (handleIKnown(), continueMove(-60, div.clientHeight));
-            else endY.value = startY.value = 0;
+        if (signals.isPhaseAnswer.value) {
+            const diff = endY.value - startY.value;
+            const max = (e.currentTarget as HTMLDivElement).clientHeight;
+            if (diff >= max / 6) (handleIKnown(0), continueMove(60, max));
+            else if (diff <= -max / 6) (handleIKnown(), continueMove(-60, max));
+            else {
+                endY.value = startY.value = 0;
+                if (Math.abs(diff) < 5) handleSpeakIt();
+            }
+        } else {
+            endY.value = startY.value = 0;
+            handleShowAnswer();
         }
     };
     const handleClick = () => signals.isPhaseAnswer.value ? handleSpeakIt() : handleShowAnswer();
