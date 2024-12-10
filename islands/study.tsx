@@ -74,11 +74,11 @@ export default () => {
         dict.value = undefined;
         getDiction();
     };
-    const continueMove = (y: number, max:number) => {
+    const continueMove = (y: number) => {
         endY.value += y;
         const diff = Math.abs(endY.value - startY.value);
-        if (diff > max) setTimeout(() => {endY.value = startY.value = 0}, 10);
-        else setTimeout(continueMove, 20, y, max);
+        if (diff > globalThis.innerHeight) setTimeout(() => {endY.value = startY.value = 0}, 10);
+        else setTimeout(continueMove, 20, y);
     };
     const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = e.touches[0].clientY);
     const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), endY.value = e.touches[0].clientY);
@@ -87,9 +87,9 @@ export default () => {
         e.preventDefault();
         if (signals.isPhaseAnswer.value) {
             const diff = endY.value - startY.value;
-            const max = (e.currentTarget as HTMLDivElement).clientHeight;
-            if (diff >= max / 6) (handleIKnown(0), continueMove(60, max));
-            else if (diff <= -max / 6) (handleIKnown(), continueMove(-60, max));
+            const max = globalThis.innerHeight;
+            if (diff >= max / 6) (handleIKnown(0), continueMove(60));
+            else if (diff <= -max / 6) (handleIKnown(), continueMove(-60));
             else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
