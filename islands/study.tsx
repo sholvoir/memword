@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
+import { wait } from "@sholvoir/generic/wait";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
-import Dialog from './dialog.tsx';
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
 import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
@@ -13,6 +13,7 @@ import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
+import Dialog from './dialog.tsx';
 
 export default () => {
     const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
@@ -74,22 +75,27 @@ export default () => {
         dict.value = undefined;
         getDiction();
     };
-    const continueMove = (y: number) => {
+    const continueMove = async (y: number) => {
         endY.value += y;
         const diff = Math.abs(endY.value - startY.value);
-        if (diff > globalThis.innerHeight) setTimeout(() => {endY.value = startY.value = 0}, 10);
-        else setTimeout(continueMove, 20, y);
+        if (diff > globalThis.innerHeight) {
+            await wait(10);
+            endY.value = startY.value = 0;
+        } else {
+            await wait(50);
+            await continueMove(y);
+        };
     };
     const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = e.touches[0].clientY);
     const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), endY.value = e.touches[0].clientY);
     const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = 0);
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = async (e: TouchEvent) => {
         e.preventDefault();
         if (signals.isPhaseAnswer.value) {
             const diff = endY.value - startY.value;
             const max = globalThis.innerHeight;
-            if (diff >= max / 6) (handleIKnown(0), continueMove(60));
-            else if (diff <= -max / 6) (handleIKnown(), continueMove(-60));
+            if (diff >= max / 6) (await continueMove(60), handleIKnown(0));
+            else if (diff <= -max / 6) (await continueMove(-60), handleIKnown());
             else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
