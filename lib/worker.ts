@@ -16,7 +16,7 @@ self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
 const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.0.31.txt';
-const DICT_API = 'https://dict.micit.co/api';
+const DICT_API = 'https://dict.micit.co';
 const dictExpire = 7 * 24 * 60 * 60;
 const cacheName = `MemWord-V${denoConfig.version}`;
 
@@ -69,7 +69,7 @@ const handleFetch = async (request: Request) => {
 };
 
 const fetchDiction = async (word: string) => {
-    const resp1 = await fetch(`${DICT_API}/${encodeURIComponent(word)}`, { cache: 'reload' });
+    const resp1 = await fetch(`${DICT_API}/pub/word?q=${encodeURIComponent(word)}`, { cache: 'reload' });
     if (!resp1.ok) return undefined;
     const dict: IDiction = await resp1.json();
     dict.word = word;
