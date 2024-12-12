@@ -16,7 +16,7 @@ import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
 import Dialog from './dialog.tsx';
 
-const audioUrl = (sound: string) => {
+const audioUrl = (sound?: string) => {
     if (!sound) return undefined;
     if (sound.startsWith("data:")) return sound;
     if (sound.startsWith("http")) return `${DICT_API}/pub/sound?q=${encodeURIComponent(sound)}`;
@@ -125,9 +125,9 @@ export default () => {
         return () => document.removeEventListener('keyup', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
-        <div class={`relative h-full bg-cover bg-center [outline:none]`} tabIndex={-1}
-            style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
-            <div class="h-full study-translucent flex flex-col" style={`top: ${endY.value - startY.value}px`}>
+        <div class={`relative h-full [outline:none]`} tabIndex={-1} style={`top: ${endY.value - startY.value}px`}>
+            <div class="h-full study-translucent flex bg-cover bg-center flex-col"
+                style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
                 <div class="shrink-0 p-2 flex gap-2 text-lg">
                     <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
                         <IconCheck class="bg-round-6"/>

@@ -17,7 +17,7 @@ export default () => {
         showDialog({ dial: 'study' });
     }
     return <Dialog title="词典">
-        <TInput type="search" name="word" placeholder="word" class="m-2 w-[calc(100%-16px)]"
+        <TInput autoCapitalize="none" type="search" name="word" placeholder="word" class="m-2 w-[calc(100%-16px)]"
             binding={word} onChange={handleSearchClick} options={signals.vocabulary.value}/>
     </Dialog>;
 }

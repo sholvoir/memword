@@ -41,12 +41,12 @@ export default () => {
     return <Dialog title="登录">
         <div class="p-2 h-full w-64 mx-auto flex flex-col gap-4">
             <div class="flex flex-col">
-                <TInput name="email" placeholder="Email" binding={email} />
+                <TInput name="email" placeholder="Email" autoCapitalize="none" binding={email} />
                 <AButton class="btn-anchor block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
                     Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
                 </AButton>
             </div>
-            <TInput name="password" placeholder="Password" binding={password} />
+            <TInput name="password" placeholder="Password" autoCapitalize="none" binding={password} />
             <Button class="button btn-prime" onClick={handleClickLogin}>确定</Button>
         </div>
     </Dialog>
