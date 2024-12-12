@@ -3,7 +3,7 @@
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel } from "./istat.ts";
 import { badRequest, jsonResponse, notFound, ok, requestInit } from "@sholvoir/generic/http";
-import { now } from "./common.ts";
+import { DICT_API, now } from "./common.ts";
 import { IDiction } from "./idict.ts";
 import { ISetting, defaultSetting } from "./isetting.ts";
 import { letDelete, newTask } from "./itask.ts";
@@ -16,7 +16,6 @@ self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
 const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.0.31.txt';
-const DICT_API = 'https://dict.micit.co';
 const dictExpire = 7 * 24 * 60 * 60;
 const workerVersion = denoConfig.version;
 const cacheName = `MemWord-V${workerVersion}`;

@@ -5,6 +5,7 @@ import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats, setStats  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
+import { DICT_API } from "../lib/common.ts";
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
 import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
@@ -14,6 +15,12 @@ import IconCheck from "@preact-icons/tb/TbCheck";
 import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
 import Dialog from './dialog.tsx';
+
+const audioUrl = (sound: string) => {
+    if (!sound) return undefined;
+    if (sound.startsWith("data:")) return sound;
+    if (sound.startsWith("http")) return `${DICT_API}/pub/sound?q=${encodeURIComponent(sound)}`;
+}
 
 export default () => {
     const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
@@ -158,6 +165,6 @@ export default () => {
                 </div>
             </div>
         </div>
-        <audio ref={player} src={dict.value?.sound}/>
+        <audio ref={player} src={audioUrl(dict.value?.sound)}/>
     </Dialog>;
 }
