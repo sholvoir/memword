@@ -89,7 +89,7 @@ export default () => {
             await wait(10);
             endY.value = startY.value = 0;
         } else {
-            await wait(40);
+            await wait(30);
             await continueMove(y);
         };
     };
