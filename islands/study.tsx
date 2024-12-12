@@ -2,7 +2,7 @@ import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { wait } from "@sholvoir/generic/wait";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
-import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats  } from '../lib/mem.ts';
+import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats, setStats  } from '../lib/mem.ts';
 import { IDiction } from "../lib/idict.ts";
 import { ITask } from "../lib/itask.ts";
 import SButton from '@sholvoir/components/islands/button-base.tsx';
@@ -26,7 +26,7 @@ export default () => {
         closeDialog();
         syncTasks();
         const res = await totalStats();
-        if (res.ok) signals.stats.value = await res.json();
+        if (res.ok) setStats(signals.stats.value = await res.json());
     }
     if (!current.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);

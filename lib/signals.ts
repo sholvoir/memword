@@ -44,18 +44,20 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
 
 export const init = async () => {
     if ("serviceWorker" in navigator) await navigator.serviceWorker.register('/service-worker.js');
+    const res0 = await mem.getWorkerVersion();
+    if (!res0.ok) return globalThis.location.reload();
+    if (version != (await res0.json()).version) return globalThis.location.reload();
     const res1 = await mem.syncSetting(signals.setting.value);
-    if (res1.ok) {
-        const nsetting = await res1.json() as ISetting;
-        if (nsetting.version > signals.setting.value.version)
-            mem.setSetting(signals.setting.value = nsetting)
-    } else showTips("Worker Error, Need Relord.");
+    if (!res1.ok) return globalThis.location.reload();
+    const nsetting = await res1.json() as ISetting;
+    if (nsetting.version > signals.setting.value.version)
+        mem.setSetting(signals.setting.value = nsetting);
     const res2 = await mem.syncTasks();
-    if (!res2.ok) showTips("Worker Error, Need Relord.");
+    if (!res2.ok) return globalThis.location.reload();
     const res3 = await mem.totalStats();
-    if (res3.ok) mem.setStats(signals.stats.value = await res3.json());
-    else  showTips("Worker Error, Need Relord.");
+    if (!res3.ok) return globalThis.location.reload();
+    mem.setStats(signals.stats.value = await res3.json());
     const res4 = await mem.getVocabulary();
-    if (res4.ok) signals.vocabulary.value = await res4.json();
-    else showTips("Worker Error, Need Relord.");
+    if (!res4.ok) return globalThis.location.reload();
+    signals.vocabulary.value = await res4.json();
 };

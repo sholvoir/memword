@@ -18,7 +18,8 @@ self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.0.31.txt';
 const DICT_API = 'https://dict.micit.co';
 const dictExpire = 7 * 24 * 60 * 60;
-const cacheName = `MemWord-V${denoConfig.version}`;
+const workerVersion = denoConfig.version;
+const cacheName = `MemWord-V${workerVersion}`;
 
 const handleActivate = async () => {
     await self.registration?.navigationPreload.disable();
@@ -42,6 +43,7 @@ const handleFetch = async (request: Request) => {
     const pathname = new URL(request.url).pathname;
     if (pathname.startsWith('/wkr')) console.log(pathname);
     switch (pathname) {
+        case '/wkr/version': return jsonResponse({version: workerVersion});
         case '/wkr/get-episode': return await handleFetchEpisode(request);
         case '/wkr/get-dict': return await handleFetchDict(request);
         case '/wkr/cache-dict': cacheDict(); return ok;

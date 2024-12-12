@@ -46,6 +46,7 @@ export const getDict = (word: string, reload?: true) => {
     return fetch(url);
 };
 
+export const getWorkerVersion = () => fetch('/wkr/version');
 export const cacheDict = () => fetch('/wkr/cache-dict');
 export const syncSetting = (setting: ISetting) => fetch('/wkr/sync-setting', requestInit(setting));
 export const addTasks = (tag: Tag) => fetch(`/wkr/add-tasks?tag=${encodeURIComponent(tag)}`);
