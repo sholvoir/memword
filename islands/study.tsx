@@ -23,7 +23,6 @@ const audioUrl = (sound?: string) => {
 }
 
 export default () => {
-    const spliteNum = /^([A-Za-zèé /&''.-]+)(\d*)/;
     const index = useSignal(0);
     const current = useSignal<ITask>(signals.tasks.value[0]);
     const dict = useSignal<IDiction | undefined>(undefined);
@@ -114,10 +113,8 @@ export default () => {
     };
     const handleClick = () => signals.isPhaseAnswer.value ? handleSpeakIt() : handleShowAnswer();
     const splite = (w: string) => {
-        const x = spliteNum.exec(w);
-        if (!x) return <div/>;
-        const [_, l, n] = x;
-        return <div class="text-4xl font-bold">{l}<sup class="text-lg">{n}</sup></div>;
+        const [word, n] = w.split('_');
+        return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
     }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);

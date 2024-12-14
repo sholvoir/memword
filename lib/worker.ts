@@ -15,7 +15,7 @@ self.oninstall = (e) => e.waitUntil(self.skipWaiting());
 self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 
-const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.0.31.txt';
+const VOCABULARY_URL = 'https://www.micit.co/vocabulary/vocabulary-0.1.1.txt';
 const dictExpire = 7 * 24 * 60 * 60;
 const workerVersion = denoConfig.version;
 const cacheName = `MemWord-V${workerVersion}`;
