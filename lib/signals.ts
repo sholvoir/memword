@@ -29,9 +29,11 @@ export const showTips = (content: string, autohide = true) => {
 };
 
 export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
+    showDialog({dial: 'wait', prompt: '请稍后...'});
     const res = await mem.getEpisode(signals.setting.value.sprint, tag, blevel);
     if (!res.ok) return showTips('Network Error!');
     const tasks = await res.json() as Array<IItem>
+    closeDialog();
     if (!tasks.length) {
         showTips('Congratulations! There are no more task need to do.');
         if (!tag && !blevel) showDialog({ dial: 'start' });
