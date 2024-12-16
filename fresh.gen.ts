@@ -13,6 +13,7 @@ import * as $_app from "./routes/_app.tsx";
 import * as $login from "./routes/login.ts";
 import * as $signup from "./routes/signup.ts";
 import * as $about from "./islands/about.tsx";
+import * as $add from "./islands/add.tsx";
 import * as $dialog from "./islands/dialog.tsx";
 import * as $dict from "./islands/dict.tsx";
 import * as $help from "./islands/help.tsx";
@@ -27,7 +28,6 @@ import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
 import * as $signin from "./islands/signin.tsx";
 import * as $signout from "./islands/signout.tsx";
-import * as $start from "./islands/start.tsx";
 import * as $stat from "./islands/stat.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
@@ -49,6 +49,7 @@ const manifest = {
   },
   islands: {
     "./islands/about.tsx": $about,
+    "./islands/add.tsx": $add,
     "./islands/dialog.tsx": $dialog,
     "./islands/dict.tsx": $dict,
     "./islands/help.tsx": $help,
@@ -63,7 +64,6 @@ const manifest = {
     "./islands/setting.tsx": $setting,
     "./islands/signin.tsx": $signin,
     "./islands/signout.tsx": $signout,
-    "./islands/start.tsx": $start,
     "./islands/stat.tsx": $stat,
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,

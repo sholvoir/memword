@@ -8,7 +8,7 @@ import * as mem from "./mem.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
 export const version = denoConfig.version;
-export type Dial = 'about'|'start'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'start'|'issue'|'study'|'setting'|'login'|'logout';
+export type Dial = 'about'|'add'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'issue'|'study'|'setting'|'login'|'logout';
 export interface IDialog { dial: Dial, [key: string]: any }
 export const signals = {} as {
     user: Signal<string>;
@@ -36,7 +36,7 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
     closeDialog();
     if (!tasks.length) {
         showTips('Congratulations! There are no more task need to do.');
-        if (!tag && !blevel) showDialog({ dial: 'start' });
+        if (!tag && !blevel) showDialog({ dial: 'add' });
     } else {
         signals.items.value = tasks;
         signals.isPhaseAnswer.value = false;

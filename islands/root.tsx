@@ -7,7 +7,7 @@ import { IItem } from "../lib/iitem.ts";
 import { getUser, getSetting, getStats } from "../lib/mem.ts";
 import { IDialog, signals, init, hideTips, showDialog } from "../lib/signals.ts";
 import Home from "./home.tsx";
-import Start from './start.tsx';
+import Add from './add.tsx';
 import About from './about.tsx';
 import Help from './help.tsx';
 import Signin from './signin.tsx';
@@ -32,7 +32,7 @@ export default () => {
 
     const dialog = ({dial, ...rest}: IDialog) => { switch (dial) {
         case "wait": return <Waiting {...rest}/>;
-        case 'start': return <Start {...rest}/>;
+        case 'add': return <Add {...rest}/>;
         case 'issue': return <Issue {...rest}/>;
         case 'study': return <Study {...rest}/>;
         case 'setting': return <Setting {...rest}/>;

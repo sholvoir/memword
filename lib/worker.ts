@@ -132,7 +132,8 @@ const handleFetchAdd = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const tag = params.get('tag') as Tag | null;
     if (!tag) return badRequest;
-    return jsonResponse(await idb.addTasks(tag));
+    await idb.addTasks(tag);
+    return ok;
 };
 
 const handleFetchStudy = async (req: Request) => {
