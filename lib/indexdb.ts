@@ -126,8 +126,8 @@ export const addTasks = (tag: Tag) => new Promise<void>((resolve, reject) => run
         const cursor = (e2.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return;
         const item = cursor.value as IItem;
-        if (item.tags.includes(tag) && isNever(item)) {
-            item.last = time;
+        if (item.tags.includes(tag) && item.level == 0) {
+            item.last = item.next = time;
             cursor.update(item);
         }
         cursor.continue();
