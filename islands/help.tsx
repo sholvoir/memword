@@ -1,10 +1,8 @@
 import Dialog from './dialog.tsx';
-import IconCut from "@preact-icons/tb/TbCut";
 import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
 import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
 import IconCircleLetterF from "@preact-icons/tb/TbCircleLetterF";
-import IconCircleLetterA from "@preact-icons/tb/TbCircleLetterA";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconX from "@preact-icons/tb/TbX";
 
@@ -19,12 +17,10 @@ export default () => <Dialog title="帮助"><ol class="list-decimal py-2 pr-2 pl
         <br/>答：完全不必操心这个事情，让系统决定，系统自动根据「艾宾浩斯」遗忘曲线来决定此时的最佳复习内容，你要做的事是每天利用碎片时间，拿出手机，开始「学习」。
     </li>
     <li>界面上的按钮是什么意思？
-        <br/><IconCircleLetterA class="w-6 h-6 inline-block"/>显示答案；
         <br/><IconCheck class="w-6 h-6 inline-block"/>我认识这个词；
         <br/><IconX class="w-6 h-6 inline-block"/>我不认识这个词；
         <br/><IconPlayerPlayFilled class="w-6 h-6 inline-block"/>: 再播一遍声音；
         <br/><IconCircleLetterF class="w-6 h-6 inline-block"/>: 这个词我已经掌握，直接标记为「已完成」；
-        <br/><IconCut class="w-6 h-6 inline-block"/>: 这个词是生僻词，从我的任务列表中删除；
         <br/><IconAlertCircleFilled class="w-6 h-6 inline-block"/>: 这个词的翻译/声音/音标，有问题/错误，请人工处理。
         <br/><IconRefresh class="w-6 h-6 inline-block"/>: 忽略本地词典缓冲，从服务器重新下载这个词的翻译/声音/音标。
     </li>

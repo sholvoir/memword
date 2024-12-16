@@ -3,7 +3,7 @@ import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { ISetting } from "../lib/isetting.ts";
-import { ITask } from "../lib/itask.ts";
+import { IItem } from "../lib/iitem.ts";
 import { getUser, getSetting, getStats } from "../lib/mem.ts";
 import { IDialog, signals, init, hideTips, showDialog } from "../lib/signals.ts";
 import Home from "./home.tsx";
@@ -25,7 +25,7 @@ export default () => {
     signals.setting = useSignal<ISetting>(getSetting());
     signals.dialogs = useSignal<Array<IDialog>>([]);
     signals.stats  = useSignal(getStats());
-    signals.tasks = useSignal<Array<ITask>>([]);
+    signals.items = useSignal<Array<IItem>>([]);
     signals.tips = useSignal('');
     signals.isPhaseAnswer = useSignal(false);
     signals.vocabulary = useSignal([]);
@@ -43,9 +43,9 @@ export default () => {
         case 'dict': return <Dict {...rest}/>;
         case 'menu': return <Menu {...rest}/>;
     } };
-    useEffect(() => { init(); !signals.user.value && showDialog({dial: 'about'}) }, []);
+    useEffect(() => {init()}, []);
     return <div class="h-[100dvh]">
-        {signals.user.value && <Home/>}
+        {signals.user.value ? <Home/> : <About/>}
         {signals.dialogs.value.map(dialog)}
         {signals.tips.value && <div class="tip" onClick={hideTips}>{signals.tips.value}</div>}
     </div>;

@@ -1,8 +1,8 @@
 import { useSignal } from "@preact/signals";
 import { signals, showDialog, showTips } from "../lib/signals.ts";
+import { search } from "../lib/mem.ts";
 import TInput from '@sholvoir/components/islands/input-text.tsx';
 import Dialog from './dialog.tsx';
-import { search } from "../lib/mem.ts";
 
 export default () => {
     const word = useSignal('');
@@ -11,8 +11,8 @@ export default () => {
         if (!text) return;
         const res = await search(text);
         if (!res.ok) return showTips('Not Found!');
-        const task = await res.json();
-        signals.tasks.value = [task];
+        const item = await res.json();
+        signals.items.value = [item];
         signals.isPhaseAnswer.value = true;
         showDialog({ dial: 'study' });
     }

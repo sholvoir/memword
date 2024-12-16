@@ -3,7 +3,7 @@ import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats } from "./istat.ts";
 import { Signal } from "@preact/signals";
 import { ISetting } from "./isetting.ts";
-import { ITask } from "./itask.ts";
+import { IItem } from "./iitem.ts";
 import * as mem from "./mem.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
@@ -16,7 +16,7 @@ export const signals = {} as {
     dialogs: Signal<Array<IDialog>>;
     stats: Signal<IStats>;
     tips: Signal<string>;
-    tasks: Signal<Array<ITask>>;
+    items: Signal<Array<IItem>>;
     isPhaseAnswer: Signal<boolean>;
     vocabulary: Signal<Array<string>>;
 };
@@ -31,12 +31,12 @@ export const showTips = (content: string, autohide = true) => {
 export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
     const res = await mem.getEpisode(signals.setting.value.sprint, tag, blevel);
     if (!res.ok) return showTips('Network Error!');
-    const tasks = await res.json() as Array<ITask>
+    const tasks = await res.json() as Array<IItem>
     if (!tasks.length) {
         showTips('Congratulations! There are no more task need to do.');
         if (!tag && !blevel) showDialog({ dial: 'start' });
     } else {
-        signals.tasks.value = tasks;
+        signals.items.value = tasks;
         signals.isPhaseAnswer.value = false;
         showDialog({ dial: 'study' });
     }

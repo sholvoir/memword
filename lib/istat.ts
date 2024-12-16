@@ -1,5 +1,6 @@
 import { Tag, Tags } from "@sholvoir/vocabulary";
-import { isNever, ITask } from "./itask.ts";
+import { isNever } from "./itask.ts";
+import { IItem } from "./iitem.ts";
 
 export const statsFormat = '0.1.0';
 
@@ -45,14 +46,14 @@ export const initStats = (time = 0) => {
     return stats;
 };
 
-export const addTaskToStats = (task: ITask, stats: IStats, tags: Array<Tag>) => {
-    if (!isNever(task)) {
-        stats.all['__'][task.level]++;
-        if (task.next < stats.time) stats.task['__'][task.level]++;
+export const addTaskToStats = (item: IItem, stats: IStats) => {
+    if (!isNever(item)) {
+        stats.all['__'][item.level]++;
+        if (item.next < stats.time) stats.task['__'][item.level]++;
     }
-    for (const tag of tags) {
-        stats.all[tag][task.level]++;
-        if (task.next < stats.time) stats.task[tag][task.level]++;
+    for (const tag of item.tags) {
+        stats.all[tag][item.level]++;
+        if (item.next < stats.time) stats.task[tag][item.level]++;
     }
 };
 

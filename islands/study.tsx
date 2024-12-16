@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "preact/hooks";
-import { useSignal } from "@preact/signals";
+import { useComputed, useSignal } from "@preact/signals";
 import { wait } from "@sholvoir/generic/wait";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
-import { submitIssue, syncTasks, deleteTask, getDict, study, totalStats, setStats  } from '../lib/mem.ts';
-import { IDiction } from "../lib/idict.ts";
-import { ITask } from "../lib/itask.ts";
+import { submitIssue, syncTasks, updateDict, study, totalStats, setStats  } from '../lib/mem.ts';
+import { IItem } from "../lib/iitem.ts";
 import { DICT_API } from "../lib/common.ts";
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
@@ -12,7 +11,6 @@ import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
 import IconCircleLetterF from "@preact-icons/tb/TbCircleLetterF";
 import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
-import IconCut from "@preact-icons/tb/TbCut";
 import IconX from "@preact-icons/tb/TbX";
 import Dialog from './dialog.tsx';
 
@@ -24,8 +22,7 @@ const audioUrl = (sound?: string) => {
 
 export default () => {
     const index = useSignal(0);
-    const current = useSignal<ITask>(signals.tasks.value[0]);
-    const dict = useSignal<IDiction | undefined>(undefined);
+    const curr = useComputed(() => signals.items.value[index.value]);
     const startY = useSignal(0);
     const endY = useSignal(0);
     const finish = async () => {
@@ -34,30 +31,23 @@ export default () => {
         const res = await totalStats();
         if (res.ok) setStats(signals.stats.value = await res.json());
     }
-    if (!current.value) return (finish(), <div/>);
+    if (!curr.value) return (finish(), <div/>);
     const player = useRef<HTMLAudioElement>(null);
-    const getDiction = async () => {
-        const res = await getDict(current.value.word);
-        if (!res.ok) showTips(`Not Found ${current.value.word}`);
-        else dict.value = await res.json();
-    }
     const handleRefresh = async () => {
         showTips("Get Server Data...");
-        const res = await getDict(current.value.word, true);
+        const res = await updateDict(curr.value.word);
         hideTips();
-        if (res.ok) dict.value = await res.json();
-        else showTips(`Not Found ${current.value.word}`);
+        if (!res.ok) return showTips(`Not Found ${curr.value.word}`);
+        signals.items.value[index.value] = await res.json() as IItem;
+        signals.items.value = [...signals.items.value];
     };
     const handleIKnown = (level?: number) => {
-        if (level !== undefined) current.value.level = level;
-        study(current.value);
+        if (level !== undefined) curr.value.level = level;
+        study(curr.value);
         signals.isPhaseAnswer.value = false;
-        dict.value = undefined;
-        if (++index.value >= signals.tasks.value.length) return finish();
-        current.value = signals.tasks.value[index.value];
-        getDiction();
+        if (++index.value >= signals.items.value.length) return finish();
     };
-    const handleSpeakIt = () => dict.value?.sound && player.current?.play();
+    const handleSpeakIt = () => curr.value?.sound && player.current?.play();
     const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
     const handleKeyPress = (event: KeyboardEvent ) => {
         if (signals.dialogs.value.slice(-1)[0]?.dial == 'study') switch (event.key) {
@@ -69,17 +59,9 @@ export default () => {
     };
     const handleReportIssue = async () => {
         showTips('Submiting...', false);
-        const resp = await submitIssue(current.value.word);
+        const resp = await submitIssue(curr.value.word);
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
-    };
-    const handleDeleteTask = () => {
-        deleteTask(current.value);
-        signals.tasks.value = [...signals.tasks.value.slice(0, index.value), ...signals.tasks.value.slice(index.value+1)];
-        current.value = signals.tasks.value[index.value];
-        signals.isPhaseAnswer.value = false;
-        dict.value = undefined;
-        getDiction();
     };
     const continueMove = async (y: number) => {
         endY.value += y;
@@ -118,12 +100,11 @@ export default () => {
     }
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress);
-        getDiction();
         return () => document.removeEventListener('keyup', handleKeyPress);
     }, []);
     return <Dialog title="学习" onCancel={finish}>
         <div class={`relative h-full [outline:none]`} tabIndex={-1} style={`top: ${endY.value - startY.value}px`}>
-            <div class="h-full bg-cover bg-center" style={(signals.isPhaseAnswer.value && dict.value?.pic) ? `background-image: url(${dict.value.pic});` : ''}>
+            <div class="h-full bg-cover bg-center" style={(signals.isPhaseAnswer.value && curr.value?.pic) ? `background-image: url(${curr.value.pic});` : ''}>
                 <div class="h-full study-translucent flex flex-col">
                     <div class="shrink-0 p-2 flex gap-2 text-lg">
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
@@ -135,12 +116,9 @@ export default () => {
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
                             <IconPlayerPlayFilled class="bg-round-6"/>
                         </SButton>
-                        <div class="grow text-center">{index.value+1}/{signals.tasks.value.length}</div>
+                        <div class="grow text-center">{index.value+1}/{signals.items.value.length}</div>
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(13)}>
                             <IconCircleLetterF class="bg-round-6"/>
-                        </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleDeleteTask}>
-                            <IconCut class="bg-round-6"/>
                         </SButton>
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>
                             <IconAlertCircleFilled class="bg-round-6"/>
@@ -148,22 +126,22 @@ export default () => {
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}>
                             <IconRefresh class="bg-round-6"/>
                         </SButton>
-                        <div>{current.value.level}</div>
+                        <div>{curr.value.level}</div>
                     </div>
                     <div class="grow px-2 h-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} onClick={handleClick}>
                         <div class="pb-2 flex gap-2 flex-wrap justify-between">
-                            {splite(current.value.word)}
-                            {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{dict.value?.phonetic}</div>}
+                            {splite(curr.value.word)}
+                            {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{curr.value.phonetic}</div>}
                         </div>
                         {signals.isPhaseAnswer.value && <div>
-                            {dict.value?.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
-                            {dict.value?.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="text-lg">&ensp;&bull;{t}</p>:<p class="text-xl font-bold">{t}</p>)}
+                            {curr.value.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
+                            {curr.value.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="text-lg">&ensp;&bull;{t}</p>:<p class="text-xl font-bold">{t}</p>)}
                         </div>}
                     </div>
                 </div>
             </div>
         </div>
-        <audio ref={player} src={audioUrl(dict.value?.sound)}/>
+        <audio ref={player} src={audioUrl(curr.value?.sound)}/>
     </Dialog>;
 }

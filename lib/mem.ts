@@ -39,25 +39,18 @@ export const getEpisode = (sprint: number, tag?: Tag, blevel?: BLevel) => {
     return fetch(url);
 };
 
-export const getDict = (word: string, reload?: true) => {
-    const url = new URL('/wkr/get-dict', location.href);
-    url.searchParams.append('word', word);
-    if (reload) url.searchParams.append('reload', '1');
-    return fetch(url);
-};
-
+export const updateDict = (word: string) => fetch(`/wkr/update-dict?word=${encodeURIComponent(word)}`);
 export const getWorkerVersion = () => fetch('/wkr/version');
 export const cacheDict = () => fetch('/wkr/cache-dict');
 export const syncSetting = (setting: ISetting) => fetch('/wkr/sync-setting', requestInit(setting));
 export const addTasks = (tag: Tag) => fetch(`/wkr/add-tasks?tag=${encodeURIComponent(tag)}`);
-export const deleteTask = (task: ITask) => fetch(`/wkr/delete-task?word=${task.word}`);
 export const syncTasks = () => fetch('/wkr/sync-tasks');
 export const study = (otask: ITask) => fetch(`/wkr/study?word=${otask.word}&level=${otask.level}`);
 export const submitIssue = (issue: string) => fetch(`/wkr/submit-issue`, requestInit({issue}));
 export const search = (text: string) => fetch(`/wkr/search?word=${encodeURIComponent(text)}`);
 export const totalStats = () => fetch('/wkr/get-stats');
 export const getVocabulary = () => fetch('/wkr/get-vocabulary');
-export const logout = (cleanCache: boolean) => (localStorage.clear(), Cookies.remove('auth'), fetch(`/wkr/logout${cleanCache?'?cleanCache=1':''}`));
+export const logout = () => (localStorage.clear(), Cookies.remove('auth'), fetch('/wkr/logout'));
 
 export const signup = (email: string) => fetch(`/signup?email=${encodeURIComponent(email)}`);
 export const login = (email: string, password: string) => fetch('/login', requestInit({ email, password }));
