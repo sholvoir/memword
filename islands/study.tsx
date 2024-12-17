@@ -80,8 +80,8 @@ export default () => {
             const diff = endY.value - startY.value;
             const max = globalThis.innerHeight;
             if (Math.abs(diff) >= max / 6) {
-                const [item] = diff > 0 ? await Promise.all([studyNext(), continueMove(60)])
-                    : await Promise.all([studyNext(0), continueMove(-60)]);
+                const [item] = diff > 0 ? await Promise.all([studyNext(0), continueMove(60)])
+                    : await Promise.all([studyNext(), continueMove(-60)]);
                 if (item) {
                     signals.item.value = item;
                     signals.isPhaseAnswer.value = false;
