@@ -7,7 +7,7 @@ import { ITask } from "./itask.ts";
 import { IItem, itemMergeDict, itemMergeTask, MAX_NEXT, neverItem, } from "./iitem.ts";
 import { now } from "./common.ts";
 
-type kvKey = '_vocabulary-url'|'_sync-time'|'_setting';
+type kvKey = '_vocabulary-url'|'_sync-time';
 let db: IDBDatabase;
 
 const run = (reject: (reason?: any) => void, func: (db: IDBDatabase) => void) => {

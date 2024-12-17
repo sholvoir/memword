@@ -2,9 +2,9 @@ import { useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { wait } from "@sholvoir/generic/wait";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
-import * as mem from '../lib/mem.ts';
 import { IItem } from "../lib/iitem.ts";
 import { DICT_API } from "../lib/common.ts";
+import * as mem from '../lib/mem.ts';
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
 import IconPlayerPlayFilled from "@preact-icons/tb/TbPlayerPlayFilled";
@@ -33,7 +33,7 @@ export default () => {
     const player = useRef<HTMLAudioElement>(null);
     const studyNext = async (level?: number): Promise<IItem|undefined> => {
         await mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
-        if (--signals.remain.value <= 0) return (finish(), undefined);
+        if (++signals.sprint.value <= 0) return undefined;
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
         if (!res.ok) return (showTips('Network Error!'), undefined);
         return await res.json();
@@ -45,12 +45,13 @@ export default () => {
         if (!res.ok) return showTips(`Not Found ${signals.item.value!.word}`);
         signals.item.value = await res.json() as IItem;
     };
-    const handleIKnown = async (level?: number) => {
-        const item = await studyNext(level);
-        if (item) {
-            signals.item.value = item;
-            signals.isPhaseAnswer.value = false;
-        }
+    const handleIKnown = async (animation: number, level?: number) => {
+        const [item] = animation < 0 ? await Promise.all([studyNext(), continueMove(-60)])
+            : animation > 0 ? await Promise.all([studyNext(0), continueMove(60)])
+            : [await studyNext(level)];
+        if (!item) return finish();
+        signals.item.value = item;
+        signals.isPhaseAnswer.value = false;
     };
     const handleSpeakIt = () => signals.item.value!.sound && player.current?.play();
     const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
@@ -80,12 +81,7 @@ export default () => {
             const diff = endY.value - startY.value;
             const max = globalThis.innerHeight;
             if (Math.abs(diff) >= max / 6) {
-                const [item] = diff > 0 ? await Promise.all([studyNext(0), continueMove(60)])
-                    : await Promise.all([studyNext(), continueMove(-60)]);
-                if (item) {
-                    signals.item.value = item;
-                    signals.isPhaseAnswer.value = false;
-                }
+                await handleIKnown(diff);
             } else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
@@ -105,17 +101,17 @@ export default () => {
             <div class="h-full bg-cover bg-center" style={(signals.isPhaseAnswer.value && signals.item.value?.pic) ? `background-image: url(${signals.item.value.pic});` : ''}>
                 <div class="h-full study-translucent flex flex-col">
                     <div class="shrink-0 p-2 flex gap-2 text-lg">
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown()} title="X/N">
+                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="X/N">
                             <IconCheck class="bg-round-6"/>
                         </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="Z/M">
+                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 0)} title="Z/M">
                             <IconX class="bg-round-6"/>
                         </SButton>
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
                             <IconPlayerPlayFilled class="bg-round-6"/>
                         </SButton>
-                        <div class="grow text-center">{signals.remain.value}</div>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(13)}>
+                        <div class="grow text-center">{signals.sprint.value > 0 ? signals.sprint.value : ''}</div>
+                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 13)}>
                             <IconCircleLetterF class="bg-round-6"/>
                         </SButton>
                         <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>

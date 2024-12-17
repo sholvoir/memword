@@ -14,7 +14,7 @@ export default () => {
         const item = await res.json();
         signals.item.value = item;
         signals.isPhaseAnswer.value = true;
-        signals.remain.value = 1;
+        signals.sprint.value = -1;
         showDialog('study');
     }
     return <Dialog title="词典">

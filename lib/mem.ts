@@ -40,7 +40,6 @@ export const getEpisode = (tag?: Tag, blevel?: BLevel) => {
 export const updateDict = (word: string) => fetch(`/wkr/update-dict?word=${encodeURIComponent(word)}`);
 export const getWorkerVersion = () => fetch('/wkr/version');
 export const cacheDict = () => fetch('/wkr/cache-dict');
-export const syncSetting = (setting: ISetting) => fetch('/wkr/sync-setting', requestInit(setting));
 export const addTasks = (tag: Tag) => fetch(`/wkr/add-tasks?tag=${encodeURIComponent(tag)}`);
 export const syncTasks = () => fetch('/wkr/sync-tasks');
 export const studied = (word: string, level: number) => fetch(`/wkr/studied?word=${word}&level=${level}`);
@@ -50,5 +49,6 @@ export const totalStats = () => fetch('/wkr/get-stats');
 export const getVocabulary = () => fetch('/wkr/get-vocabulary');
 export const logout = () => (localStorage.clear(), Cookies.remove('auth'), fetch('/wkr/logout'));
 
+export const syncSetting = (setting: ISetting) => fetch('/api/setting', requestInit(setting));
 export const signup = (email: string) => fetch(`/signup?email=${encodeURIComponent(email)}`);
 export const login = (email: string, password: string) => fetch('/login', requestInit({ email, password }));

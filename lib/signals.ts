@@ -21,7 +21,7 @@ export const signals = {} as {
     item: Signal<IItem|undefined>;
     tag: Signal<Tag|undefined>;
     blevel: Signal<BLevel|undefined>;
-    remain: Signal<number>;
+    sprint: Signal<number>;
 };
 export const closeDialog = () => signals.dialogs.value = signals.dialogs.value.slice(0, -1);
 export const showDialog = (d: Dial) => signals.dialogs.value = [...signals.dialogs.value, d];
@@ -43,7 +43,7 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
     if (item) {
         signals.item.value = item;
         signals.isPhaseAnswer.value = false;
-        signals.remain.value = signals.setting.value.sprint;
+        signals.sprint.value = 0;
         showDialog('study');
     } else {
         showTips('Congratulations! There are no more task need to do.');
@@ -53,19 +53,25 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
 
 export const init = async () => {
     if ("serviceWorker" in navigator) await navigator.serviceWorker.register('/service-worker.js');
+
     const res0 = await mem.getWorkerVersion();
     if (!res0.ok) return globalThis.location.reload();
     if (version != (await res0.json()).version) return globalThis.location.reload();
-    const res1 = await mem.syncSetting(signals.setting.value);
-    if (!res1.ok) return globalThis.location.reload();
-    const nsetting = await res1.json() as ISetting;
-    if (nsetting.version > signals.setting.value.version)
-        mem.setSetting(signals.setting.value = nsetting);
+
+    mem.syncSetting(signals.setting.value).then(res1 => {
+        if (res1.ok) return res1.json();
+    }).then((ssetting: ISetting) => {
+        if (ssetting && ssetting.version > signals.setting.value.version)
+            mem.setSetting(signals.setting.value = ssetting);
+    });
+
     const res2 = await mem.syncTasks();
     if (!res2.ok) return globalThis.location.reload();
+
     const res3 = await mem.totalStats();
     if (!res3.ok) return globalThis.location.reload();
     mem.setStats(signals.stats.value = await res3.json());
+
     const res4 = await mem.getVocabulary();
     if (!res4.ok) return globalThis.location.reload();
     signals.vocabulary.value = await res4.json();

@@ -7,6 +7,7 @@ import { IItem } from "../lib/iitem.ts";
 import { getUser, getSetting, getStats } from "../lib/mem.ts";
 import { signals, init, hideTips, Dial } from "../lib/signals.ts";
 import { type Tag } from "@sholvoir/vocabulary";
+import { type BLevel } from "../lib/istat.ts";
 import Home from "./home.tsx";
 import Add from './add.tsx';
 import About from './about.tsx';
@@ -19,7 +20,6 @@ import Issue from './issue.tsx';
 import Dict from './dict.tsx';
 import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
-import { BLevel } from "../lib/istat.ts";
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
@@ -35,7 +35,7 @@ export default () => {
     signals.item = useSignal<IItem>();
     signals.tag = useSignal<Tag>();
     signals.blevel = useSignal<BLevel>();
-    signals.remain = useSignal(0);
+    signals.sprint = useSignal(0);
 
     const dialog = (dial: Dial) => { switch (dial) {
         case 'home': return <Home/>

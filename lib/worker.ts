@@ -6,7 +6,6 @@ import { blobToBase64 } from "@sholvoir/generic/blob";
 import { VOCABULARY_URL, DICT_API, now } from "./common.ts";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
 import { IItem, item2task } from "./iitem.ts";
-import { ISetting, defaultSetting } from "./isetting.ts";
 import * as idb from "./indexdb.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
@@ -41,26 +40,26 @@ const handleFetch = async (request: Request) => {
     const pathname = new URL(request.url).pathname;
     if (pathname.startsWith('/wkr')) console.log(pathname);
     switch (pathname) {
-        case '/wkr/get-episode': return await handleFetchEpisode(request);
-        case '/wkr/update-dict': return await handleUpdateDict(request);
+        case '/wkr/get-episode': return handleFetchEpisode(request);
+        case '/wkr/update-dict': return handleUpdateDict(request);
         case '/wkr/cache-dict': cacheDict(); return ok;
         case '/wkr/version': return jsonResponse({version: workerVersion});
-        case '/wkr/sync-setting': return await handleSyncSetting(request);
         case '/wkr/add-tasks': return handleFetchAdd(request);
         case '/wkr/sync-tasks': syncTasks(); return ok;
-        case '/wkr/studied': return await handleFetchStudied(request);
+        case '/wkr/studied': return handleFetchStudied(request);
         case '/wkr/submit-issue': return handleIssue(request);
-        case '/wkr/search': return await handleFetchSearch(request);
+        case '/wkr/search': return handleFetchSearch(request);
         case '/wkr/get-stats': return jsonResponse(await idb.getStats());
         case '/wkr/get-vocabulary': return jsonResponse(await idb.getVocabulary());
         case '/wkr/logout': await idb.clear(); return ok;
+        case '/api/setting': return fetch(request);
         case '/signup': return fetch(request);
         case '/login': return fetch(request);
         default: {
             const responseFromCache = await caches.match(request);
             if (responseFromCache) return responseFromCache;
             const responseFromNetwork = await fetch(request);
-            if (responseFromNetwork.ok && !pathname.includes('_frsh'))
+            if (responseFromNetwork.ok)
                 putInCache(request, responseFromNetwork.clone());
             return responseFromNetwork;
         }
@@ -99,15 +98,6 @@ const syncTasks = async (lastTime?: number) => {
     const ntasks = await resp.json();
     await idb.mergeTasks(ntasks);
     await idb.setMeta('_sync-time', thisTime);
-};
-
-const syncSetting = async (setting?: ISetting) => {
-    if (!setting) setting = (await idb.getMeta('_setting')) ?? defaultSetting();
-    const res = await fetch('/api/setting', requestInit(setting));
-    if (res.ok) {
-        const nsetting: ISetting = await res.json();
-        if (nsetting.version > setting!.version) await idb.setMeta('_setting', nsetting);
-    }
 };
 
 const submitIssues = async () => {
@@ -151,15 +141,6 @@ const handleFetchEpisode = async (req: Request) => {
     const blevel = params.get('blevel') as BLevel;
     const item = await idb.getEpisode(tag, blevel);
     return jsonResponse(await itemUpdateDict(item));
-};
-
-const handleSyncSetting = async (req: Request) => {
-    const nsetting = await req.json() as ISetting;
-    const osetting = await idb.getMeta('_setting') as ISetting;
-    if (osetting && nsetting.version <= osetting.version) return jsonResponse(osetting);
-    idb.setMeta('_setting', nsetting);
-    syncSetting(nsetting);
-    return jsonResponse(nsetting);
 };
 
 const handleIssue = async (req: Request) => {
