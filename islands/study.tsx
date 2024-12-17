@@ -97,43 +97,39 @@ export default () => {
         return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
     }
     return <Dialog title="学习" onCancel={finish}>
-        <div class={`relative h-full [outline:none]`} tabIndex={-1} style={`top: ${endY.value - startY.value}px`}>
-            <div class="h-full bg-cover bg-center" style={(signals.isPhaseAnswer.value && signals.item.value?.pic) ? `background-image: url(${signals.item.value.pic});` : ''}>
-                <div class="h-full study-translucent flex flex-col">
-                    <div class="shrink-0 p-2 flex gap-2 text-lg">
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="X/N">
-                            <IconCheck class="bg-round-6"/>
-                        </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 0)} title="Z/M">
-                            <IconX class="bg-round-6"/>
-                        </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
-                            <IconPlayerPlayFilled class="bg-round-6"/>
-                        </SButton>
-                        <div class="grow text-center">{signals.sprint.value > 0 ? signals.sprint.value : ''}</div>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 13)}>
-                            <IconCircleLetterF class="bg-round-6"/>
-                        </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>
-                            <IconAlertCircleFilled class="bg-round-6"/>
-                        </SButton>
-                        <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}>
-                            <IconRefresh class="bg-round-6"/>
-                        </SButton>
-                        <div>{signals.item.value.level}</div>
-                    </div>
-                    <div class="grow px-2 h-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} onClick={handleClick}>
-                        <div class="pb-2 flex gap-2 flex-wrap justify-between">
-                            {splite(signals.item.value.word)}
-                            {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{signals.item.value.phonetic}</div>}
-                        </div>
-                        {signals.isPhaseAnswer.value && <div>
-                            {signals.item.value.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
-                            {signals.item.value.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="text-lg">&ensp;&bull;{t}</p>:<p class="text-xl font-bold">{t}</p>)}
-                        </div>}
-                    </div>
+        <div class={`relative h-full flex flex-col`} style={`top: ${endY.value - startY.value}px`}>
+            <div class="shrink-0 grow-0 p-2 flex gap-2 text-lg">
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="X/N">
+                    <IconCheck class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 0)} title="Z/M">
+                    <IconX class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
+                    <IconPlayerPlayFilled class="bg-round-6"/>
+                </SButton>
+                <div class="grow text-center">{signals.sprint.value > 0 ? signals.sprint.value : ''}</div>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 13)}>
+                    <IconCircleLetterF class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>
+                    <IconAlertCircleFilled class="bg-round-6"/>
+                </SButton>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleRefresh}>
+                    <IconRefresh class="bg-round-6"/>
+                </SButton>
+                <div>{signals.item.value.level}</div>
+            </div>
+            <div class="grow shrink px-2 h-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} onClick={handleClick}>
+                <div class="pb-2 flex gap-2 flex-wrap justify-between">
+                    {splite(signals.item.value.word)}
+                    {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{signals.item.value.phonetic}</div>}
                 </div>
+                {signals.isPhaseAnswer.value && <div>
+                    {signals.item.value.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
+                    {signals.item.value.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="text-lg">&ensp;&bull;{t}</p>:<p class="text-xl font-bold">{t}</p>)}
+                </div>}
             </div>
         </div>
         <audio ref={player} src={audioUrl(signals.item.value?.sound)}/>

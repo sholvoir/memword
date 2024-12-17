@@ -22,7 +22,6 @@ export const itemMergeTask = (item: IItem, task: ITask) => {
 
 export const itemMergeDict = (item: IItem, dict: IDict) => {
     item.def = dict.def;
-    item.pic = dict.pic;
     item.trans = dict.trans;
     item.sound = dict.sound;
     item.phonetic = dict.phonetic;
