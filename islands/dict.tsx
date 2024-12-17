@@ -12,9 +12,10 @@ export default () => {
         const res = await search(text);
         if (!res.ok) return showTips('Not Found!');
         const item = await res.json();
-        signals.items.value = [item];
+        signals.item.value = item;
         signals.isPhaseAnswer.value = true;
-        showDialog({ dial: 'study' });
+        signals.remain.value = 1;
+        showDialog('study');
     }
     return <Dialog title="词典">
         <TInput autoCapitalize="none" type="search" name="word" placeholder="word" class="m-2 w-[calc(100%-16px)]"

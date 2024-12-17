@@ -3,7 +3,6 @@ import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats, initStats, statsFormat } from './istat.ts';
 import { requestInit } from '@sholvoir/generic/http';
 import { JWT } from '@sholvoir/generic/jwt';
-import { ITask } from "./itask.ts";
 import { ISetting, defaultSetting, settingFormat } from "./isetting.ts";
 
 export const getUser = () => {
@@ -31,9 +30,8 @@ export const getStats = () => {
     return initStats();
 };
 
-export const getEpisode = (sprint: number, tag?: Tag, blevel?: BLevel) => {
+export const getEpisode = (tag?: Tag, blevel?: BLevel) => {
     const url = new URL('/wkr/get-episode', location.href);
-    url.searchParams.append('sprint', `${sprint}`);
     if (tag) url.searchParams.append('tag', tag);
     if (blevel) url.searchParams.append('blevel', blevel);
     return fetch(url);
@@ -45,7 +43,7 @@ export const cacheDict = () => fetch('/wkr/cache-dict');
 export const syncSetting = (setting: ISetting) => fetch('/wkr/sync-setting', requestInit(setting));
 export const addTasks = (tag: Tag) => fetch(`/wkr/add-tasks?tag=${encodeURIComponent(tag)}`);
 export const syncTasks = () => fetch('/wkr/sync-tasks');
-export const study = (otask: ITask) => fetch(`/wkr/study?word=${otask.word}&level=${otask.level}`);
+export const studied = (word: string, level: number) => fetch(`/wkr/studied?word=${word}&level=${level}`);
 export const submitIssue = (issue: string) => fetch(`/wkr/submit-issue`, requestInit({issue}));
 export const search = (text: string) => fetch(`/wkr/search?word=${encodeURIComponent(text)}`);
 export const totalStats = () => fetch('/wkr/get-stats');

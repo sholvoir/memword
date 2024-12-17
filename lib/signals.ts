@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats } from "./istat.ts";
 import { Signal } from "@preact/signals";
@@ -8,39 +7,47 @@ import * as mem from "./mem.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
 export const version = denoConfig.version;
-export type Dial = 'about'|'add'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'issue'|'study'|'setting'|'login'|'logout';
-export interface IDialog { dial: Dial, [key: string]: any }
+export type Dial = 'home'|'about'|'add'|'stats'|'dict'|'tasks'|'menu'|'help'|'wait'|'issue'|'study'|'setting'|'login'|'logout';
 export const signals = {} as {
     user: Signal<string>;
     setting: Signal<ISetting>;
-    dialogs: Signal<Array<IDialog>>;
+    dialogs: Signal<Array<Dial>>;
     stats: Signal<IStats>;
     tips: Signal<string>;
-    items: Signal<Array<IItem>>;
-    isPhaseAnswer: Signal<boolean>;
     vocabulary: Signal<Array<string>>;
+    waitPrompt: Signal<string>;
+    // study
+    isPhaseAnswer: Signal<boolean>;
+    item: Signal<IItem|undefined>;
+    tag: Signal<Tag|undefined>;
+    blevel: Signal<BLevel|undefined>;
+    remain: Signal<number>;
 };
 export const closeDialog = () => signals.dialogs.value = signals.dialogs.value.slice(0, -1);
-export const showDialog = (d: IDialog) => signals.dialogs.value = [...signals.dialogs.value, d];
+export const showDialog = (d: Dial) => signals.dialogs.value = [...signals.dialogs.value, d];
 export const hideTips = () => signals.tips.value = '';
 export const showTips = (content: string, autohide = true) => {
     signals.tips.value = content;
-    if (autohide) setTimeout(hideTips, 3000)
+    if (autohide) setTimeout(hideTips, 3000);
 };
 
 export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
-    showDialog({dial: 'wait', prompt: '请稍后...'});
-    const res = await mem.getEpisode(signals.setting.value.sprint, tag, blevel);
+    signals.waitPrompt.value = '请稍后...';
+    showDialog('wait');
+    signals.tag.value = tag;
+    signals.blevel.value = blevel;
+    const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
     if (!res.ok) return showTips('Network Error!');
-    const tasks = await res.json() as Array<IItem>
     closeDialog();
-    if (!tasks.length) {
-        showTips('Congratulations! There are no more task need to do.');
-        if (!tag && !blevel) showDialog({ dial: 'add' });
-    } else {
-        signals.items.value = tasks;
+    const item = await res.json();
+    if (item) {
+        signals.item.value = item;
         signals.isPhaseAnswer.value = false;
-        showDialog({ dial: 'study' });
+        signals.remain.value = signals.setting.value.sprint;
+        showDialog('study');
+    } else {
+        showTips('Congratulations! There are no more task need to do.');
+        if (!tag && !blevel) showDialog('add');
     }
 };
 

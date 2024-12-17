@@ -3,7 +3,7 @@
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats, addTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
-import { isNever, ITask } from "./itask.ts";
+import { ITask } from "./itask.ts";
 import { IItem, itemMergeDict, itemMergeTask, MAX_NEXT, neverItem, } from "./iitem.ts";
 import { now } from "./common.ts";
 
@@ -166,18 +166,18 @@ export const updateDict = (word: string, dict: IDict) => new Promise<IItem|undef
     }
 }));
 
-export const getEpisode = (sprint: number, tag?: Tag, blevel?: BLevel) => new Promise<Array<IItem>>((resolve, reject) => run(reject, db => {
-    const items: Array<IItem> = [];
+export const getEpisode = (tag?: Tag, blevel?: BLevel) => new Promise<IItem|undefined>((resolve, reject) => run(reject, db => {
+    let result: IItem;
     const transaction = db.transaction('item', 'readonly');
     transaction.onerror = reject;
-    transaction.oncomplete = () => resolve(items);
+    transaction.oncomplete = () => resolve(result);
     transaction.objectStore('item').index('next').openCursor(IDBKeyRange.upperBound(now()), "prev").onsuccess = (e) => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return;
         const item = cursor.value as IItem;
         if ((!tag || item.tags.includes(tag)) && (!blevel || bLevelIncludes(blevel, item.level)))
-            items.push(item);
-        if (items.length < sprint) cursor.continue();
+            return result = item;;
+        cursor.continue();
     }
 }));
 

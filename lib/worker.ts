@@ -48,7 +48,7 @@ const handleFetch = async (request: Request) => {
         case '/wkr/sync-setting': return await handleSyncSetting(request);
         case '/wkr/add-tasks': return handleFetchAdd(request);
         case '/wkr/sync-tasks': syncTasks(); return ok;
-        case '/wkr/study': return await handleFetchStudy(request);
+        case '/wkr/studied': return await handleFetchStudied(request);
         case '/wkr/submit-issue': return handleIssue(request);
         case '/wkr/search': return await handleFetchSearch(request);
         case '/wkr/get-stats': return jsonResponse(await idb.getStats());
@@ -78,16 +78,16 @@ const updateDict = async (word: string): Promise<IItem|undefined> => {
     return await idb.updateDict(word, dict);
 }
 
-const itemsUpdateDicts = async (items: Array<IItem>) => {
-    const time = now();
-    for (const [i, item] of items.entries()) {
-        if (item.dversion === 0) {
-            const nitem = await updateDict(items[i].word);
-            if (nitem) items[i] = nitem;
-        } else if (item.dversion + dictExpire < time) {
-            updateDict(item.word);
-        }
+const itemUpdateDict = async (item?: IItem) => {
+    if (!item) return undefined;
+    if (item.dversion === 0) {
+        const nitem = await updateDict(item.word);
+        return nitem ?? item;
     }
+    if (item.dversion + dictExpire < now()) {
+        updateDict(item.word);
+    }
+    return item;
 }
 
 const syncTasks = async (lastTime?: number) => {
@@ -136,7 +136,7 @@ const handleFetchAdd = async (req: Request) => {
     return ok;
 };
 
-const handleFetchStudy = async (req: Request) => {
+const handleFetchStudied = async (req: Request) => {
     const params = new URL(req.url).searchParams;
     const word = params.get('word');
     const level = +(params.get('level')??0);
@@ -147,13 +147,10 @@ const handleFetchStudy = async (req: Request) => {
 
 const handleFetchEpisode = async (req: Request) => {
     const params = new URL(req.url).searchParams;
-    const sprint = parseInt(params.get('sprint')!);
     const tag = params.get('tag') as Tag;
     const blevel = params.get('blevel') as BLevel;
-    if (isNaN(sprint)) return badRequest;
-    const items = await idb.getEpisode(sprint, tag, blevel);
-    await itemsUpdateDicts(items);
-    return jsonResponse(items);
+    const item = await idb.getEpisode(tag, blevel);
+    return jsonResponse(await itemUpdateDict(item));
 };
 
 const handleSyncSetting = async (req: Request) => {
@@ -178,7 +175,6 @@ const handleIssue = async (req: Request) => {
 const handleFetchSearch = async (req: Request) => {
     const word = new URL(req.url).searchParams.get('word');
     if (!word) return badRequest;
-    const items = [await idb.getItem(word)];
-    await itemsUpdateDicts(items)
-    return jsonResponse(items[0]);
+    const item = await idb.getItem(word);
+    return jsonResponse(await itemUpdateDict(item));
 };

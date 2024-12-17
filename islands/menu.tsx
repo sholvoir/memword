@@ -3,11 +3,8 @@ import { cacheDict } from "../lib/mem.ts";
 import Dialog from './dialog.tsx';
 
 export default () => {
-    const open = (e: Event) => showDialog({dial: (e.target as HTMLMenuElement).title as Dial});
-    const cache = () => {
-        showTips('后台开始缓存……');
-        cacheDict();
-    };
+    const open = (e: Event) => showDialog((e.target as HTMLMenuElement).title as Dial);
+    const cache = () => (cacheDict(), showTips('后台开始缓存……'));
     return <Dialog title="菜单">
         <div class="p-2 [&>menu]:p-2 [&>menu]:cursor-pointer [&>div]:h-px [&>div]:bg-slate-500">
             <menu title="issue" onClick={open}>报告问题</menu>

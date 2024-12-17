@@ -11,7 +11,8 @@ export default () => {
     const sTag = useSignal<Tag>('OG');
     const handleOkClick = async () => {
         closeDialog();
-        showDialog({dial: 'wait', prompt: '请稍候...' });
+        signals.waitPrompt.value = '请稍候...';
+        showDialog('wait');
         await addTasks(sTag.value);
         const res = await totalStats()
         if (res.ok) setStats(signals.stats.value = await res.json());
@@ -19,7 +20,8 @@ export default () => {
     }
     return <Dialog title="添加任务">
         <div class="p-2 h-full flex flex-col gap-2">
-            <Select class="shrink select" binding={sTag} options={Tags.map(tag=>({value: tag, label: TagName[tag]}))} title="让我们选择一本词书开始学习吧"/>
+            <Select class="shrink select" title="让我们选择一本词书开始学习吧"
+                binding={sTag} options={Tags.map(tag=>({value: tag, label: TagName[tag]}))}/>
             <div class="flex gap-2 pb-2 justify-end">
                 <Button class="button btn-normal w-32" onClick={closeDialog}>取消</Button>
                 <Button class="button btn-prime w-32" onClick={handleOkClick}>确定</Button>
