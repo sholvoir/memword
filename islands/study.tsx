@@ -37,7 +37,15 @@ export default () => {
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
         if (!res.ok) return (showTips('Network Error!'), undefined);
         return await res.json();
-    }
+    };
+    const continueMove = async (y: number) => {
+        endY.value += y;
+        const diff = Math.abs(endY.value - startY.value);
+        if (diff < globalThis.innerHeight) {
+            await wait(30);
+            await continueMove(y);
+        };
+    };
     const handleRefresh = async () => {
         showTips("Get Server Data...");
         const res = await mem.updateDict(signals.item.value!.word);
@@ -52,6 +60,7 @@ export default () => {
         if (!item) return finish();
         signals.item.value = item;
         signals.isPhaseAnswer.value = false;
+        endY.value = startY.value = 0;
     };
     const handleSpeakIt = () => signals.item.value!.sound && player.current?.play();
     const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
@@ -60,17 +69,6 @@ export default () => {
         const resp = await mem.submitIssue(signals.item.value!.word);
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
-    };
-    const continueMove = async (y: number) => {
-        endY.value += y;
-        const diff = Math.abs(endY.value - startY.value);
-        if (diff > globalThis.innerHeight) {
-            await wait(10);
-            endY.value = startY.value = 0;
-        } else {
-            await wait(30);
-            await continueMove(y);
-        };
     };
     const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = e.touches[0].clientY);
     const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), endY.value = e.touches[0].clientY);
