@@ -70,11 +70,19 @@ export default () => {
         if (!resp.ok) showTips(await resp.text());
         else showTips('Submit Success!');
     };
-    const handleTouchStart = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = e.touches[0].clientY);
-    const handleTouchMove = (e: TouchEvent) => (e.preventDefault(), endY.value = e.touches[0].clientY);
-    const handleTouchCancel = (e: TouchEvent) => (e.preventDefault(), endY.value = startY.value = 0);
-    const handleTouchEnd = async (e: TouchEvent) => {
-        e.preventDefault();
+    const handleKeyPress = (event: KeyboardEvent) => {
+        if (event.ctrlKey || event.altKey) return;
+        if (signals.dialogs.value.slice(-1)[0] == 'study') switch (event.key) {
+            case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
+            case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
+            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(0); break;
+            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0, 0); break;
+        }
+    };
+    const handleTouchStart = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = startY.value = e.touches[0].clientY);
+    const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = e.touches[0].clientY);
+    const handleTouchCancel = () => signals.isPhaseAnswer.value && (endY.value = startY.value = 0);
+    const handleTouchEnd = async () => {
         if (signals.isPhaseAnswer.value) {
             const diff = endY.value - startY.value;
             const max = globalThis.innerHeight;
@@ -95,7 +103,8 @@ export default () => {
         return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
     }
     return <Dialog title="学习" onCancel={finish}>
-        <div class={`relative h-full flex flex-col`} style={`top: ${endY.value - startY.value}px`}>
+        <div class={`relative h-full flex flex-col [outline:none]`} tabIndex={-1} onKeyUp={handleKeyPress}
+            style={`top: ${endY.value - startY.value}px`}>
             <div class="shrink-0 grow-0 p-2 flex gap-2 text-lg">
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="X/N">
                     <IconCheck class="bg-round-6"/>

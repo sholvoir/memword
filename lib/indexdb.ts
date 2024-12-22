@@ -176,7 +176,7 @@ export const getEpisode = (tag?: Tag, blevel?: BLevel) => new Promise<IItem|unde
         if (!cursor) return;
         const item = cursor.value as IItem;
         if ((!tag || item.tags.includes(tag)) && (!blevel || bLevelIncludes(blevel, item.level)))
-            return result = item;;
+            return result = item;
         cursor.continue();
     }
 }));

@@ -3,6 +3,7 @@ import { type BLevel, IStats } from "./istat.ts";
 import { Signal } from "@preact/signals";
 import { ISetting } from "./isetting.ts";
 import { IItem } from "./iitem.ts";
+import { wait } from "@sholvoir/generic/wait";
 import * as mem from "./mem.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
@@ -51,19 +52,26 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
     }
 };
 
-export const init = async () => {
-    if ("serviceWorker" in navigator) await navigator.serviceWorker.register('/service-worker.js');
-
+const versionCompare = async () => {
+    await wait(1000);
     const res0 = await mem.getWorkerVersion();
     if (!res0.ok) return globalThis.location.reload();
     if (version != (await res0.json()).version) return globalThis.location.reload();
+};
 
-    mem.syncSetting(signals.setting.value).then(res1 => {
-        if (res1.ok) return res1.json();
-    }).then((ssetting: ISetting) => {
-        if (ssetting && ssetting.version > signals.setting.value.version)
-            mem.setSetting(signals.setting.value = ssetting);
-    });
+const syncSetting = async () => {
+    const res1 = await mem.syncSetting(signals.setting.value);
+    if (!res1.ok) return
+    const ssetting: ISetting = await res1.json();
+    if (ssetting && ssetting.version > signals.setting.value.version)
+        mem.setSetting(signals.setting.value = ssetting);
+}
+
+export const init = async () => {
+    if ("serviceWorker" in navigator) await navigator.serviceWorker.register('/service-worker.js');
+
+    versionCompare();
+    syncSetting();
 
     const res2 = await mem.syncTasks();
     if (!res2.ok) return globalThis.location.reload();
