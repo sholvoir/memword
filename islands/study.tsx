@@ -3,7 +3,6 @@ import { useSignal } from "@preact/signals";
 import { wait } from "@sholvoir/generic/wait";
 import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
 import { IItem } from "../lib/iitem.ts";
-import { DICT_API } from "../lib/common.ts";
 import * as mem from '../lib/mem.ts';
 import SButton from '@sholvoir/components/islands/button-base.tsx';
 import IconAlertCircleFilled from "@preact-icons/tb/TbAlertCircleFilled";
@@ -13,12 +12,6 @@ import IconRefresh from "@preact-icons/tb/TbRefresh";
 import IconCheck from "@preact-icons/tb/TbCheck";
 import IconX from "@preact-icons/tb/TbX";
 import Dialog from './dialog.tsx';
-
-const audioUrl = (sound?: string) => {
-    if (!sound) return undefined;
-    if (sound.startsWith("data")) return sound;
-    if (sound.startsWith("http")) return `${DICT_API}/pub/sound?q=${encodeURIComponent(sound)}`;
-}
 
 export default () => {
     const finish = async () => {
@@ -38,12 +31,12 @@ export default () => {
         if (!res.ok) return (showTips('Network Error!'), undefined);
         return await res.json();
     };
-    const continueMove = async (y: number) => {
+    const continueMove = async (y: number, max: number) => {
         endY.value += y;
         const diff = Math.abs(endY.value - startY.value);
-        if (diff < globalThis.innerHeight) {
+        if (diff < max) {
             await wait(30);
-            await continueMove(y);
+            await continueMove(y, max);
         };
     };
     const handleRefresh = async () => {
@@ -54,8 +47,8 @@ export default () => {
         signals.item.value = await res.json() as IItem;
     };
     const handleIKnown = async (animation: number, level?: number) => {
-        const [item] = animation < 0 ? await Promise.all([studyNext(), continueMove(-60)])
-            : animation > 0 ? await Promise.all([studyNext(0), continueMove(60)])
+        const [item] = animation < 0 ? await Promise.all([studyNext(), continueMove(-60, -animation)])
+            : animation > 0 ? await Promise.all([studyNext(0), continueMove(60, animation)])
             : [await studyNext(level)];
         if (!item) return finish();
         signals.item.value = item;
@@ -82,12 +75,13 @@ export default () => {
     const handleTouchStart = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = startY.value = e.touches[0].clientY);
     const handleTouchMove = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = e.touches[0].clientY);
     const handleTouchCancel = () => signals.isPhaseAnswer.value && (endY.value = startY.value = 0);
-    const handleTouchEnd = async () => {
+    const handleTouchEnd = async (e: TouchEvent) => {
         if (signals.isPhaseAnswer.value) {
+            const h = (e.currentTarget as HTMLDivElement).clientHeight + 60 + 38;
             const diff = endY.value - startY.value;
-            const max = globalThis.innerHeight;
-            if (Math.abs(diff) >= max / 6) {
-                await handleIKnown(diff);
+            const max = Math.max(globalThis.innerHeight, h);
+            if (Math.abs(diff) >= globalThis.innerHeight / 6) {
+                await handleIKnown(diff > 0 ? max : -max);
             } else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
@@ -139,6 +133,6 @@ export default () => {
                 </div>}
             </div>
         </div>
-        <audio ref={player} src={audioUrl(signals.item.value?.sound)}/>
+        <audio ref={player} src={signals.item.value?.sound}/>
     </Dialog>;
 }
