@@ -1,8 +1,8 @@
 import { useSignal } from "@preact/signals";
 import { Tag, Tags } from "@sholvoir/vocabulary";
 import { TagName } from "../lib/tag.ts";
-import { setStats, addTasks, totalStats } from "../lib/mem.ts";
-import { closeDialog, showDialog, signals } from "../lib/signals.ts";
+import { addTasks } from "../lib/mem.ts";
+import { closeDialog, showDialog, totalStats } from "../lib/signals.ts";
 import Dialog from './dialog.tsx';
 import Select from '@sholvoir/components/islands/select-single.tsx';
 import Button from '@sholvoir/components/islands/button-ripple.tsx';
@@ -11,11 +11,9 @@ export default () => {
     const sTag = useSignal<Tag>('OG');
     const handleOkClick = async () => {
         closeDialog();
-        signals.waitPrompt.value = '请稍候...';
         showDialog('wait');
         await addTasks(sTag.value);
-        const res = await totalStats()
-        if (res.ok) setStats(signals.stats.value = await res.json());
+        await totalStats();
         closeDialog();
     }
     return <Dialog title="添加任务">

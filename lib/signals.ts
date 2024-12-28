@@ -16,7 +16,6 @@ export const signals = {} as {
     stats: Signal<IStats>;
     tips: Signal<string>;
     vocabulary: Signal<Array<string>>;
-    waitPrompt: Signal<string>;
     // study
     isPhaseAnswer: Signal<boolean>;
     item: Signal<IItem|undefined>;
@@ -33,14 +32,13 @@ export const showTips = (content: string, autohide = true) => {
 };
 
 export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
-    signals.waitPrompt.value = '请稍后...';
     showDialog('wait');
     signals.tag.value = tag;
     signals.blevel.value = blevel;
     const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
     if (!res.ok) return showTips('Network Error!');
     closeDialog();
-    const item = await res.json();
+    const item: IItem = (await res.json()).item;
     if (item) {
         signals.item.value = item;
         signals.isPhaseAnswer.value = false;
@@ -53,18 +51,23 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
 };
 
 const versionCompare = async () => {
-    await wait(1000);
+    await wait(2000);
     const res0 = await mem.getWorkerVersion();
     if (!res0.ok) return globalThis.location.reload();
     if (version != (await res0.json()).version) return globalThis.location.reload();
 };
 
-const syncSetting = async () => {
+export const syncSetting = async () => {
     const res1 = await mem.syncSetting(signals.setting.value);
-    if (!res1.ok) return
+    if (!res1.ok) return;
     const ssetting: ISetting = await res1.json();
     if (ssetting && ssetting.version > signals.setting.value.version)
         mem.setSetting(signals.setting.value = ssetting);
+}
+
+export const totalStats = async () => {
+    const res = await mem.totalStats();
+    if (res.ok) mem.setStats(signals.stats.value = await res.json());
 }
 
 export const init = async () => {

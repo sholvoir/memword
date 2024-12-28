@@ -1,7 +1,7 @@
 import { useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { wait } from "@sholvoir/generic/wait";
-import { closeDialog, hideTips, showTips, signals } from "../lib/signals.ts";
+import { closeDialog, hideTips, showTips, signals, totalStats } from "../lib/signals.ts";
 import { IItem } from "../lib/iitem.ts";
 import * as mem from '../lib/mem.ts';
 import SButton from '@sholvoir/components/islands/button-base.tsx';
@@ -14,11 +14,10 @@ import IconX from "@preact-icons/tb/TbX";
 import Dialog from './dialog.tsx';
 
 export default () => {
-    const finish = async () => {
+    const finish = () => {
         closeDialog();
         mem.syncTasks();
-        const res = await mem.totalStats();
-        if (res.ok) mem.setStats(signals.stats.value = await res.json());
+        totalStats();
     }
     if (!signals.item.value) return (finish(), <div/>);
     const startY = useSignal(0);
@@ -29,7 +28,7 @@ export default () => {
         if (++signals.sprint.value <= 0) return undefined;
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
         if (!res.ok) return (showTips('Network Error!'), undefined);
-        return await res.json();
+        return (await res.json()).item;
     };
     const continueMove = async (y: number, max: number) => {
         endY.value += y;

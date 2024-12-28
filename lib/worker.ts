@@ -140,7 +140,7 @@ const handleFetchEpisode = async (req: Request) => {
     const tag = params.get('tag') as Tag;
     const blevel = params.get('blevel') as BLevel;
     const item = await idb.getEpisode(tag, blevel);
-    return jsonResponse(await itemUpdateDict(item));
+    return jsonResponse({item: await itemUpdateDict(item)});
 };
 
 const handleIssue = async (req: Request) => {

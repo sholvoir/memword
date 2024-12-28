@@ -29,7 +29,6 @@ export default () => {
     signals.dialogs = useSignal<Array<Dial>>([signals.user?'home':'about']);
     signals.tips = useSignal('');
     signals.vocabulary = useSignal([]);
-    signals.waitPrompt = useSignal('');
     //
     signals.isPhaseAnswer = useSignal(false);
     signals.item = useSignal<IItem>();
