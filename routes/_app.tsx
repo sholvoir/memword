@@ -13,10 +13,6 @@ export default ({ Component }: PageProps) => <html lang="en">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="theme-color" content="#CBD5E1" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
-        <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/button-ripple.css" crossOrigin="" />
-        <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/input-text.css" crossOrigin="" />
-        <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/checkbox.css" crossOrigin="" />
-        <link rel="stylesheet" href="https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/select.css" crossOrigin="" />
         <link rel="stylesheet" href="/styles.css" />
     </head>
     <body class="bg-slate-300 text-slate-800 dark:bg-slate-900 dark:text-slate-300">

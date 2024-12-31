@@ -43,7 +43,7 @@ export default () => {
             <div class="flex flex-col">
                 <TInput name="email" placeholder="Email" autoCapitalize="none" binding={email} />
                 <AButton class="btn-anchor block text-right" onClick={handleSend} disabled={!canSendEmail.value}>
-                    Send temporary password {counter.value > 0 ? `(${counter.value})` : ''}
+                    Send One-Time Passcode {counter.value > 0 ? `(${counter.value})` : ''}
                 </AButton>
             </div>
             <TInput name="password" placeholder="Password" autoCapitalize="none" binding={password} />

@@ -54,7 +54,9 @@ const versionCompare = async () => {
     await wait(2000);
     const res0 = await mem.getWorkerVersion();
     if (!res0.ok) return globalThis.location.reload();
-    if (version != (await res0.json()).version) return globalThis.location.reload();
+    const workerVersion = (await res0.json()).version;
+    console.log(`Page Version: ${version}, Worker Version: ${workerVersion}.`);
+    if (version != workerVersion) return globalThis.location.reload();
 };
 
 export const syncSetting = async () => {

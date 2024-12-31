@@ -1,3 +1,7 @@
+@import url(https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/button-ripple.css);
+@import url(https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/input-text.css);
+@import url(https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/checkbox.css);
+@import url(https://raw.esm.sh/gh/sholvoir/preact-components@0.0.7/static/select.css);
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
