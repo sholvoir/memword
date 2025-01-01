@@ -19,16 +19,22 @@ export default () => {
         mem.syncTasks();
         totalStats();
     }
-    if (!signals.item.value) return (finish(), <div/>);
+    if (!signals.item.value) return (closeDialog(), <div/>);
+    const next = useSignal<IItem>();
     const startY = useSignal(0);
     const endY = useSignal(0);
     const player = useRef<HTMLAudioElement>(null);
-    const studyNext = async (level?: number): Promise<IItem|undefined> => {
-        await mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
-        if (++signals.sprint.value <= 0) return undefined;
+    const fetchNext = async () => {
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
         if (!res.ok) return (showTips('Network Error!'), undefined);
-        return (await res.json()).item;
+        next.value = (await res.json()).item;
+    }
+    const studyNext = () => {
+        if (++signals.sprint.value <= 0 || !next.value) finish();
+        signals.item.value = next.value;
+        signals.isPhaseAnswer.value = false;
+        next.value = undefined;
+        fetchNext();
     };
     const continueMove = async (y: number, max: number) => {
         endY.value += y;
@@ -45,15 +51,7 @@ export default () => {
         if (!res.ok) return showTips(`Not Found ${signals.item.value!.word}`);
         signals.item.value = await res.json() as IItem;
     };
-    const handleIKnown = async (animation: number, level?: number) => {
-        const [item] = animation < 0 ? await Promise.all([studyNext(), continueMove(-60, -animation)])
-            : animation > 0 ? await Promise.all([studyNext(0), continueMove(60, animation)])
-            : [await studyNext(level)];
-        if (!item) return finish();
-        signals.item.value = item;
-        signals.isPhaseAnswer.value = false;
-        endY.value = startY.value = 0;
-    };
+    const handleIKnown = async (level?: number) => await mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
     const handleSpeakIt = () => signals.item.value!.sound && player.current?.play();
     const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
     const handleReportIssue = async () => {
@@ -67,8 +65,8 @@ export default () => {
         if (signals.dialogs.value.slice(-1)[0] == 'study') switch (event.key) {
             case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
             case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
-            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(0); break;
-            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0, 0); break;
+            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(); break;
+            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0); break;
         }
     };
     const handleTouchStart = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = startY.value = e.touches[0].clientY);
@@ -80,7 +78,15 @@ export default () => {
             const diff = endY.value - startY.value;
             const max = Math.max(globalThis.innerHeight, h);
             if (Math.abs(diff) >= globalThis.innerHeight / 6) {
-                await handleIKnown(diff > 0 ? max : -max);
+                if (diff > 0) {
+                    await handleIKnown(0);
+                    await continueMove(60, max);
+                } else {
+                    await handleIKnown();
+                    await continueMove(-60, max)
+                }
+                endY.value = startY.value = 0;
+                studyNext();
             } else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
@@ -99,17 +105,17 @@ export default () => {
         <div class={`relative h-full flex flex-col [outline:none]`} tabIndex={-1} onKeyUp={handleKeyPress}
             style={`top: ${endY.value - startY.value}px`}>
             <div class="shrink-0 grow-0 p-2 flex gap-2 text-lg">
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0)} title="X/N">
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown().then(studyNext)} title="X/N">
                     <IconCheck class="bg-round-6"/>
                 </SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 0)} title="Z/M">
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0).then(studyNext)} title="Z/M">
                     <IconX class="bg-round-6"/>
                 </SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
                     <IconPlayerPlayFilled class="bg-round-6"/>
                 </SButton>
                 <div class="grow text-center">{signals.sprint.value > 0 ? signals.sprint.value : ''}</div>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0, 13)}>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(13).then(studyNext)}>
                     <IconCircleLetterF class="bg-round-6"/>
                 </SButton>
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleReportIssue}>
