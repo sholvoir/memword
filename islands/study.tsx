@@ -101,7 +101,7 @@ export default () => {
         const [word, n] = w.split('_');
         return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
     }
-    if (signals.sprint.value) fetchNext();
+    if (signals.sprint.value >= 0) fetchNext();
     return <Dialog title="学习" onCancel={finish}>
         <div class={`relative h-full flex flex-col [outline:none]`} tabIndex={-1} onKeyUp={handleKeyPress}
             style={`top: ${endY.value - startY.value}px`}>
