@@ -20,21 +20,15 @@ export default () => {
         totalStats();
     }
     if (!signals.item.value) return (closeDialog(), <div/>);
-    const next = useSignal<IItem>();
     const startY = useSignal(0);
     const endY = useSignal(0);
     const player = useRef<HTMLAudioElement>(null);
-    const fetchNext = async () => {
+    const studyNext = async () => {
+        if (++signals.sprint.value <= 0) finish();
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
-        if (!res.ok) return (showTips('Network Error!'), undefined);
-        next.value = (await res.json()).item;
-    }
-    const studyNext = () => {
-        if (++signals.sprint.value <= 0 || !next.value) finish();
-        signals.item.value = next.value;
+        if (!res.ok) return (showTips('Network Error!'));
+        signals.item.value = (await res.json()).item;
         signals.isPhaseAnswer.value = false;
-        next.value = undefined;
-        fetchNext();
     };
     const continueMove = async (y: number, max: number) => {
         endY.value += y;
@@ -85,8 +79,8 @@ export default () => {
                     await handleIKnown();
                     await continueMove(-60, max)
                 }
+                await studyNext();
                 endY.value = startY.value = 0;
-                studyNext();
             } else {
                 endY.value = startY.value = 0;
                 if (Math.abs(diff) < 5) handleSpeakIt();
@@ -101,7 +95,6 @@ export default () => {
         const [word, n] = w.split('_');
         return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
     }
-    if (signals.sprint.value >= 0) fetchNext();
     return <Dialog title="学习" onCancel={finish}>
         <div class={`relative h-full flex flex-col [outline:none]`} tabIndex={-1} onKeyUp={handleKeyPress}
             style={`top: ${endY.value - startY.value}px`}>
