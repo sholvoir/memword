@@ -68,7 +68,7 @@ export default () => {
     const handleTouchCancel = () => signals.isPhaseAnswer.value && (endY.value = startY.value = 0);
     const handleTouchEnd = async (e: TouchEvent) => {
         if (signals.isPhaseAnswer.value) {
-            const h = (e.currentTarget as HTMLDivElement).clientHeight + 60 + 38;
+            const h = (e.currentTarget as HTMLDivElement).scrollHeight + 60;
             const diff = endY.value - startY.value;
             const max = Math.max(globalThis.innerHeight, h);
             if (Math.abs(diff) >= globalThis.innerHeight / 6) {
