@@ -24,10 +24,12 @@ export default () => {
     const endY = useSignal(0);
     const player = useRef<HTMLAudioElement>(null);
     const studyNext = async () => {
-        if (++signals.sprint.value <= 0) finish();
+        if (++signals.sprint.value <= 0) return finish();
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
-        if (!res.ok) return (showTips('Network Error!'));
-        signals.item.value = (await res.json()).item;
+        if (!res.ok) return (showTips('Network Error!'), finish());
+        const item = (await res.json()).item;
+        if (!item) return finish();
+        signals.item.value = item;
         signals.isPhaseAnswer.value = false;
     };
     const continueMove = async (y: number, max: number) => {
