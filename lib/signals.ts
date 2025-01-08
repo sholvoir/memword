@@ -46,6 +46,7 @@ export const startStudy = async (tag?: Tag, blevel?: BLevel) => {
         showDialog('study');
     } else {
         showTips('Congratulations! There are no more task need to do.');
+        totalStats();
         if (!tag && !blevel) showDialog('add');
     }
 };
