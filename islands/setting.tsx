@@ -18,7 +18,7 @@ export default () => {
     }
     const options = Tags.map(tag => ({value: `${tag}`, label: `${TagName[tag]}`}));
     return <Dialog title="设置">
-        <div class="p-2 h-full flex flex-col">
+        <div class="p-2 h-full flex flex-col gap-2">
             <MSelect class="shrink grow select" binding={books} options={options} title="选择您关注的词书"/>
             <div class="flex justify-end gap-2 pb-2">
                 <Button class="w-32 button btn-normal" onClick={closeDialog}>取消</Button>
