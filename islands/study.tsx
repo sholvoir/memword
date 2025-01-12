@@ -61,8 +61,8 @@ export default () => {
         if (signals.dialogs.value.slice(-1)[0] == 'study') switch (event.key) {
             case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
             case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
-            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown(); break;
-            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0); break;
+            case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown().then(studyNext); break;
+            case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0).then(studyNext); break;
         }
     };
     const handleTouchStart = (e: TouchEvent) => signals.isPhaseAnswer.value && (endY.value = startY.value = e.touches[0].clientY);
