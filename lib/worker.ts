@@ -46,6 +46,7 @@ const handleFetch = async (request: Request) => {
         case '/wkr/version': return jsonResponse({version: workerVersion});
         case '/wkr/add-tasks': return handleFetchAdd(request);
         case '/wkr/sync-tasks': syncTasks(); return ok;
+        case '/wkr/down-tasks': await downTasks(); return ok;
         case '/wkr/studied': return handleFetchStudied(request);
         case '/wkr/submit-issue': return handleIssue(request);
         case '/wkr/search': return handleFetchSearch(request);
@@ -89,16 +90,23 @@ const itemUpdateDict = async (item?: IItem) => {
     return item;
 }
 
-const syncTasks = async (lastTime?: number) => {
+const syncTasks = async () => {
     const thisTime = now();
-    if (!lastTime) lastTime = (await idb.getMeta('_sync-time')) ?? 1;
-    const tasks = (await idb.getItems(lastTime!)).map(item2task);
+    const lastTime: number = (await idb.getMeta('_sync-time')) ?? 1;
+    const tasks = (await idb.getItems(lastTime)).map(item2task);
     const resp = await fetch(`/api/task?lastgt=${lastTime}`, requestInit(tasks));
     if (!resp.ok) return console.error('Network Error: get sync task data error.');
     const ntasks = await resp.json();
     await idb.mergeTasks(ntasks);
     await idb.setMeta('_sync-time', thisTime);
 };
+
+const downTasks = async () => {
+    const resp = await fetch(`/api/task?lastgt=0`, requestInit([]));
+    if (!resp.ok) return console.error('Network Error: download task data error.');
+    const ntasks = await resp.json();
+    await idb.mergeTasks(ntasks);
+}
 
 const submitIssues = async () => {
     const issues = await idb.getIssues();

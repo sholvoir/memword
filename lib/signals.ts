@@ -82,6 +82,8 @@ export const init = async () => {
     const res2 = await mem.syncTasks();
     if (!res2.ok) return globalThis.location.reload();
 
+    await mem.downTasks();
+
     const res3 = await mem.totalStats();
     if (!res3.ok) return globalThis.location.reload();
     mem.setStats(signals.stats.value = await res3.json());

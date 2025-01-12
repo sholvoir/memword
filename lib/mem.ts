@@ -42,6 +42,7 @@ export const getWorkerVersion = () => fetch('/wkr/version');
 export const cacheDict = () => fetch('/wkr/cache-dict');
 export const addTasks = (tag: Tag) => fetch(`/wkr/add-tasks?tag=${encodeURIComponent(tag)}`);
 export const syncTasks = () => fetch('/wkr/sync-tasks');
+export const downTasks = () => fetch('/wkr/down-tasks');
 export const studied = (word: string, level: number) => fetch(`/wkr/studied?word=${word}&level=${level}`);
 export const submitIssue = (issue: string) => fetch(`/wkr/submit-issue`, requestInit({issue}));
 export const search = (text: string) => fetch(`/wkr/search?word=${encodeURIComponent(text)}`);

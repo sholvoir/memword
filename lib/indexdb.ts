@@ -92,7 +92,13 @@ export const updateVocabulary = (lines: Array<string>) => new Promise<void>((res
             return;
         }
         const item = cursor.value as IItem;
-        if (vocabulary.has(item.word)) vocabulary.delete(item.word);
+        if (vocabulary.has(item.word)) {
+            if (!item.tags.length) {
+                item.tags = vocabulary.get(item.word)!
+                cursor.update(item);
+            }
+            vocabulary.delete(item.word);
+        }
         else cursor.delete();
         cursor.continue();
     }
@@ -142,10 +148,8 @@ export const mergeTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, r
     for (const task of tasks) {
         iStore.get(task.word).onsuccess = (e) => {
             const item = (e.target as IDBRequest<IItem>).result;
-            if (item && task.last > item.last) {
-                itemMergeTask(item, task);
-                iStore.put(item);
-            }
+            if (!item) iStore.add(itemMergeTask(neverItem(task.word, []), task));
+            else if (task.last > item.last) iStore.put(itemMergeTask(item, task));
         };
     }
 }));

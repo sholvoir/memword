@@ -1,6 +1,6 @@
 {
   "lock": false,
-  "version": "0.3.26",
+  "version": "0.3.27",
   "unstable": ["kv"],
   "tasks": {
     "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
@@ -30,7 +30,7 @@
     "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.9/",
     "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.9",
     "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.4.0/",
-    "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.14",
+    "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.15",
     "@sholvoir/vocabulary": "jsr:@sholvoir/vocabulary@^0.0.30",
     "@std/http": "jsr:@std/http@^1.0.12",
     "esbuild": "npm:esbuild@^0.24.2",
@@ -43,7 +43,7 @@
     "tailwindcss": "npm:tailwindcss@^3.4.17",
     "tailwindcss/": "npm:/tailwindcss@^3.4.17/",
     "tailwindcss/plugin": "npm:/tailwindcss@^3.4.17/plugin.js",
-    "twilio": "npm:twilio@^5.4.0"
+    "twilio": "npm:twilio@^5.4.1"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

@@ -6,7 +6,7 @@ export const MAX_NEXT = 2000000000;
 
 export interface IItem extends IDict, ITask {
     dversion: number;
-    tags: Array<Tag>
+    tags: Array<Tag>;
 }
 
 export const neverItem = (word: string, tags: Array<Tag>): IItem =>
@@ -17,7 +17,8 @@ export const item2task = ({word, last, next, level}: IItem): ITask => ({word, la
 export const itemMergeTask = (item: IItem, task: ITask) => {
     item.last = task.last;
     item.next = task.next;
-    item.level = task.level
+    item.level = task.level;
+    return item;
 };
 
 export const itemMergeDict = (item: IItem, dict: IDict) => {
@@ -25,4 +26,5 @@ export const itemMergeDict = (item: IItem, dict: IDict) => {
     item.trans = dict.trans;
     item.sound = dict.sound;
     item.phonetic = dict.phonetic;
+    return item;
 }
