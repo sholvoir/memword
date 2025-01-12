@@ -59,8 +59,7 @@ export default () => {
     const handleKeyPress = (event: KeyboardEvent) => {
         if (event.ctrlKey || event.altKey) return;
         if (signals.dialogs.value.slice(-1)[0] == 'study') switch (event.key) {
-            case 'B': case 'C': case 'b': case 'c': handleSpeakIt(); break;
-            case ' ': if (!signals.isPhaseAnswer.value) handleShowAnswer(); break;
+            case ' ': handleClick(); break;
             case 'N': case 'X': case 'n': case 'x': if (signals.isPhaseAnswer.value) handleIKnown().then(studyNext); break;
             case 'M': case 'Z': case 'm': case 'z': if (signals.isPhaseAnswer.value) handleIKnown(0).then(studyNext); break;
         }
@@ -100,7 +99,7 @@ export default () => {
     return <Dialog title="学习" onCancel={finish}>
         <div class={`relative h-full flex flex-col [outline:none]`} tabIndex={-1} onKeyUp={handleKeyPress}
             style={`top: ${endY.value - startY.value}px`}>
-            <div class="shrink-0 grow-0 p-2 flex gap-2 text-lg">
+            <div class="p-2 flex gap-2 text-lg">
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown().then(studyNext)} title="X/N">
                     <IconCheck class="bg-round-6"/>
                 </SButton>
@@ -122,13 +121,13 @@ export default () => {
                 </SButton>
                 <div>{signals.item.value.level}</div>
             </div>
-            <div class="grow shrink px-2 h-full" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
+            <div class="grow px-2 flex flex-col" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel} onClick={handleClick}>
                 <div class="pb-2 flex gap-2 flex-wrap justify-between">
                     {splite(signals.item.value.word)}
                     {signals.isPhaseAnswer.value && <div class="text-2xl flex items-center">{signals.item.value.phonetic}</div>}
                 </div>
-                {signals.isPhaseAnswer.value && <div>
+                {signals.isPhaseAnswer.value && <div class="grow h-0 overflow-y-auto [scrollbar-width:none]">
                     {signals.item.value.trans?.split('\n').map((t: string) => <p class="text-2xl">{t}</p>)}
                     {signals.item.value.def?.split('\n').map((t: string) => t.startsWith(' ')?<p class="text-lg">&ensp;&bull;{t}</p>:<p class="text-xl font-bold">{t}</p>)}
                 </div>}
