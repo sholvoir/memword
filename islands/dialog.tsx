@@ -9,8 +9,8 @@ interface IDialogProps {
     onCancel?: () => void;
     onMenuClick?: () => void;
 }
-export default ({title, children, onCancel, noback, onMenuClick }: IDialogProps & JSX.HTMLAttributes<HTMLDivElement>) => {
-    return <div class="fixed inset-0 flex flex-col">
+export default ({title, children, onCancel, noback, onMenuClick, class: className, ...rest }: IDialogProps & JSX.HTMLAttributes<HTMLDivElement>) => {
+    return <div class={`fixed inset-0 flex flex-col ${className}`} {...rest}>
         <div class="title shrink-0 px-2 flex justify-between items-center">
             <div class="w-6">
                 {!noback && <SButton class="[app-region:no-drag]" onClick={onCancel ?? closeDialog}><IconChevronLeft class="w-6 h-6"/></SButton>}

@@ -23,6 +23,7 @@ export default () => {
     const startY = useSignal(0);
     const endY = useSignal(0);
     const player = useRef<HTMLAudioElement>(null);
+    const handleIKnown = (level?: number) => mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
     const studyNext = async () => {
         if (++signals.sprint.value <= 0) return finish();
         const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
@@ -47,9 +48,6 @@ export default () => {
         if (!res.ok) return showTips(`Not Found ${signals.item.value!.word}`);
         signals.item.value = await res.json() as IItem;
     };
-    const handleIKnown = async (level?: number) => await mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
-    const handleSpeakIt = () => signals.item.value!.sound && player.current?.play();
-    const handleShowAnswer = () => (signals.isPhaseAnswer.value = true) && handleSpeakIt();
     const handleReportIssue = async () => {
         showTips('Submiting...', false);
         const resp = await mem.submitIssue(signals.item.value!.word);
@@ -84,14 +82,18 @@ export default () => {
                 endY.value = startY.value = 0;
             } else {
                 endY.value = startY.value = 0;
-                if (Math.abs(diff) < 5) handleSpeakIt();
+                if (Math.abs(diff) < 5) player.current?.play();
             }
         } else {
             endY.value = startY.value = 0;
-            handleShowAnswer();
+            signals.isPhaseAnswer.value = true;
+            player.current?.play();
         }
     };
-    const handleClick = () => signals.isPhaseAnswer.value ? handleSpeakIt() : handleShowAnswer();
+    const handleClick = () => {
+        if (!signals.isPhaseAnswer.value) signals.isPhaseAnswer.value = true;
+        player.current?.play();
+    }
     const splite = (w: string) => {
         const [word, n] = w.split('_');
         return <div class="text-4xl font-bold">{word}<sup class="text-lg">{n}</sup></div>;
@@ -106,7 +108,7 @@ export default () => {
                 <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>handleIKnown(0).then(studyNext)} title="Z/M">
                     <IconX class="bg-round-6"/>
                 </SButton>
-                <SButton disabled={!signals.isPhaseAnswer.value} onClick={handleSpeakIt}>
+                <SButton disabled={!signals.isPhaseAnswer.value} onClick={()=>player.current?.play()}>
                     <IconPlayerPlayFilled class="bg-round-6"/>
                 </SButton>
                 <div class="grow text-center">{signals.sprint.value > 0 ? signals.sprint.value : ''}</div>
