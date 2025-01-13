@@ -1,15 +1,14 @@
-// deno-lint-ignore-file no-explicit-any
 import { MongoClient, ServerApi, ServerApiVersion } from 'mongodb';
 
 const uri = Deno.env.get('MONGO_URI')!;
 const serverApi: ServerApi = { version: ServerApiVersion.v1, strict: true, deprecationErrors: true };
 
-type RunType = (client: MongoClient) => Promise<any>
-async function mongorun (func: RunType) {
+async function mongorun<T>(func: (client: MongoClient) => Promise<T>) {
     const client = new MongoClient(uri, { serverApi });
     await client.connect();
-    await func(client);
+    const result = await func(client);
     await client.close();
+    return result;
 }
 
 export default mongorun;

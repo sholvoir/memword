@@ -25,7 +25,8 @@ const handleActivate = async () => {
     if (VOCABULARY_URL !== _vocabulary_url) {
         const res = await fetch(VOCABULARY_URL, { cache: 'force-cache' });
         if (res.ok) {
-            await idb.updateVocabulary((await res.text()).split('\n'));
+            const needDelete = await idb.updateVocabulary((await res.text()).split('\n'));
+            await fetch('/api/task', requestInit(needDelete, 'DELETE'));
             await idb.setMeta('_vocabulary-url', VOCABULARY_URL);
         }
     }

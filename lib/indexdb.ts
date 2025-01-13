@@ -74,7 +74,8 @@ export const getVocabulary = () => new Promise<Array<string>>((resolve, reject) 
     }
 }));
 
-export const updateVocabulary = (lines: Array<string>) => new Promise<void>((resolve, reject) => run(reject, db => {
+export const updateVocabulary = (lines: Array<string>) => new Promise<Array<string>>((resolve, reject) => run(reject, db => {
+    const needDelete: Array<string> = [];
     const delimiter = /[,:] */;
     const vocabulary = new Map<string, Array<Tag>>();
     for (let line of lines) if (line = line.trim()) {
@@ -83,7 +84,7 @@ export const updateVocabulary = (lines: Array<string>) => new Promise<void>((res
     }
     const transaction = db.transaction('item', 'readwrite');
     transaction.onerror = reject;
-    transaction.oncomplete = () => resolve();
+    transaction.oncomplete = () => resolve(needDelete);
     const iStore = transaction.objectStore('item');
     iStore.openCursor().onsuccess = (e) => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
@@ -99,7 +100,10 @@ export const updateVocabulary = (lines: Array<string>) => new Promise<void>((res
             }
             vocabulary.delete(item.word);
         }
-        else cursor.delete();
+        else {
+            needDelete.push(item.word);
+            cursor.delete();
+        }
         cursor.continue();
     }
 }));

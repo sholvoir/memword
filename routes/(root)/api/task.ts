@@ -22,11 +22,21 @@ export const handler: Handlers<any, MemState> = {
                     await collection.insertOne(ctask);
                 } else if (ctask.last > otask.last) {
                     const $set = { last: new Int32(ctask.last), next: new Int32(ctask.next), level: new Int32(ctask.level) };
-                    await collection.updateOne(filter, { $set })
+                    await collection.updateOne(filter, { $set });
                 } 
             }
-        })} catch (e) { console.error(e); return internalServerError }
+        })} catch (e) { console.error(e); return internalServerError; }
         console.log(`API '/task' POST ${ctx.state.user} ${lastgt} with tasks ${clientTasks.length}, return ${serverTasks.length}.`);
         return jsonResponse(serverTasks);
+    },
+    async DELETE(req, ctx) {
+        const words: Array<string> = await req.json();
+        let deleteResult;
+        try { await mongorun(async client => {
+            const collection = client.db('task').collection(ctx.state.user);
+            deleteResult = await collection.deleteMany({ word: {$in: words} });
+        })} catch (e) { console.error(e); return internalServerError; }
+        console.log(`API '/task' DELETE ${ctx.state.user} with tasks ${words.length}.`);
+        return jsonResponse(deleteResult);
     }
 };
