@@ -79,12 +79,16 @@ export const init = async () => {
     versionCompare();
     syncSetting();
 
+    const res3 = await mem.updateVocabulary();
+    if (res3.ok) {
+        signals.vocabulary.value = await res3.json();
+    } else {
+        const res4 = await mem.getVocabulary();
+        if (res4.ok) signals.vocabulary.value = await res4.json();
+        else globalThis.location.reload();
+    }
     const res2 = await mem.syncTasks();
     if (!res2.ok) return globalThis.location.reload();
 
     await totalStats();
-
-    const res4 = await mem.getVocabulary();
-    if (!res4.ok) return globalThis.location.reload();
-    signals.vocabulary.value = await res4.json();
 };

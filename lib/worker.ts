@@ -1,15 +1,20 @@
+// deno-lint-ignore-file no-cond-assign
 /// <reference lib="webworker" />
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel } from "./istat.ts";
 import { badRequest, jsonResponse, notFound, ok, requestInit } from "@sholvoir/generic/http";
 import { blobToBase64 } from "@sholvoir/generic/blob";
-import { VOCABULARY_URL, DICT_API, now } from "./common.ts";
+import { vocabularyUrl, DICT_API, now } from "./common.ts";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
 import { IItem, item2task } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import denoConfig from "../deno.json" with { type: "json" };
 
 declare const self: ServiceWorkerGlobalScope;
+const handleActivate = async () => {
+    for (const cacheKey of await caches.keys()) if (cacheKey !== cacheName) await caches.delete(cacheKey)    
+    await self.clients.claim();
+};
 self.oninstall = (e) => e.waitUntil(self.skipWaiting());
 self.onactivate = (e) => e.waitUntil(handleActivate());
 self.onfetch = (e) => e.respondWith(handleFetch(e.request));
@@ -17,21 +22,6 @@ self.onfetch = (e) => e.respondWith(handleFetch(e.request));
 const dictExpire = 7 * 24 * 60 * 60;
 const workerVersion = denoConfig.version;
 const cacheName = `MemWord-V${workerVersion}`;
-
-const handleActivate = async () => {
-    await self.registration?.navigationPreload.disable();
-    for (const cacheKey of await caches.keys()) if (cacheKey !== cacheName) await caches.delete(cacheKey)
-    const _vocabulary_url: string = await idb.getMeta('_vocabulary-url');
-    if (VOCABULARY_URL !== _vocabulary_url) {
-        const res = await fetch(VOCABULARY_URL, { cache: 'force-cache' });
-        if (res.ok) {
-            const needDelete = await idb.updateVocabulary((await res.text()).split('\n'));
-            await fetch('/api/task', requestInit(needDelete, 'DELETE'));
-            await idb.setMeta('_vocabulary-url', VOCABULARY_URL);
-        }
-    }
-    await self.clients.claim();
-};
 
 const putInCache = async (request: Request, response: Response) => {
     await (await caches.open(cacheName)).put(request, response);
@@ -53,6 +43,7 @@ const handleFetch = async (request: Request) => {
         case '/wkr/search': return handleFetchSearch(request);
         case '/wkr/get-stats': return jsonResponse(await idb.getStats());
         case '/wkr/get-vocabulary': return jsonResponse(await idb.getVocabulary());
+        case '/wkr/update-vocabulary': return handleUpdateVocabulary();
         case '/wkr/logout': await idb.clear(); return ok;
         case '/api/setting': return fetch(request);
         case '/signup': return fetch(request);
@@ -168,3 +159,25 @@ const handleFetchSearch = async (req: Request) => {
     const item = await idb.getItem(word);
     return jsonResponse(await itemUpdateDict(item));
 };
+
+const handleUpdateVocabulary = async () => {
+    const resp1 = await fetch('/api/vocabulary-version');
+    if (!resp1.ok) return notFound; // Network Error
+    const serverVocabularyVersion: string = (await resp1.json()).vocabularyVersion;
+    const clientVocabularyVersion: string = await idb.getMeta('_vocabulary-version');
+    if (serverVocabularyVersion === clientVocabularyVersion) return notFound; // Not Need Update
+    const resp2 = await fetch(vocabularyUrl(serverVocabularyVersion), { cache: 'force-cache' });
+    if (!resp2.ok) return notFound; // Network Error
+    const delimiter = /[,:] */;
+    const vocabulary = new Map<string, Array<Tag>>();
+    const words: Array<string> = [];
+    for (let line of (await resp2.text()).split('\n')) if (line = line.trim()) {
+        const [word, ...tags] = line.split(delimiter).map(w => w.trim());
+        vocabulary.set(word, tags as Array<Tag>);
+        words.push(word);
+    }
+    const needDelete = await idb.updateVocabulary(vocabulary);
+    if (needDelete.length) await fetch('/api/task', requestInit(needDelete, 'DELETE'));
+    await idb.setMeta('_vocabulary-version', serverVocabularyVersion);
+    return jsonResponse(words);
+}

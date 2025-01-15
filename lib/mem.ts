@@ -48,6 +48,7 @@ export const submitIssue = (issue: string) => fetch(`/wkr/submit-issue`, request
 export const search = (text: string) => fetch(`/wkr/search?word=${encodeURIComponent(text)}`);
 export const totalStats = () => fetch('/wkr/get-stats');
 export const getVocabulary = () => fetch('/wkr/get-vocabulary');
+export const updateVocabulary = () => fetch('/wkr/update-vocabulary');
 export const logout = () => (localStorage.clear(), Cookies.remove('auth'), fetch('/wkr/logout'));
 
 export const syncSetting = (setting: ISetting) => fetch('/api/setting', requestInit(setting));

@@ -1,5 +1,4 @@
-// deno-lint-ignore-file no-explicit-any no-cond-assign
-
+// deno-lint-ignore-file no-explicit-any
 import { type Tag } from "@sholvoir/vocabulary";
 import { type BLevel, IStats, addTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
@@ -7,7 +6,7 @@ import { ITask } from "./itask.ts";
 import { IItem, itemMergeDict, itemMergeTask, MAX_NEXT, neverItem, } from "./iitem.ts";
 import { now } from "./common.ts";
 
-type kvKey = '_vocabulary-url'|'_sync-time';
+type kvKey = '_vocabulary-version'|'_sync-time';
 let db: IDBDatabase;
 
 const run = (reject: (reason?: any) => void, func: (db: IDBDatabase) => void) => {
@@ -74,14 +73,8 @@ export const getVocabulary = () => new Promise<Array<string>>((resolve, reject) 
     }
 }));
 
-export const updateVocabulary = (lines: Array<string>) => new Promise<Array<string>>((resolve, reject) => run(reject, db => {
+export const updateVocabulary = (vocabulary: Map<string, Array<Tag>>) => new Promise<Array<string>>((resolve, reject) => run(reject, db => {
     const needDelete: Array<string> = [];
-    const delimiter = /[,:] */;
-    const vocabulary = new Map<string, Array<Tag>>();
-    for (let line of lines) if (line = line.trim()) {
-        const [word, ...tags] = line.split(delimiter).map(w => w.trim());
-        vocabulary.set(word, tags as Array<Tag>);
-    }
     const transaction = db.transaction('item', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve(needDelete);
@@ -94,8 +87,9 @@ export const updateVocabulary = (lines: Array<string>) => new Promise<Array<stri
         }
         const item = cursor.value as IItem;
         if (vocabulary.has(item.word)) {
-            if (!item.tags.length) {
-                item.tags = vocabulary.get(item.word)!
+            const newTags = vocabulary.get(item.word)!;
+            if (item.tags.join() != newTags.join()) {
+                item.tags = newTags;
                 cursor.update(item);
             }
             vocabulary.delete(item.word);

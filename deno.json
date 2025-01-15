@@ -1,52 +1,57 @@
 {
-  "lock": false,
-  "version": "0.3.33",
-  "unstable": ["kv"],
-  "tasks": {
-    "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
-    "cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
-    "manifest": "deno task cli manifest $(pwd)",
-    "start": "deno run -A --env --watch=static/,routes/ dev.ts",
-    "build": "deno run -A bundling.ts && deno run -A dev.ts build",
-    "preview": "deno run -A --env main.ts",
-    "update": "deno run -A -r https://fresh.deno.dev/update .",
-    "server": "deno run -A --env server.ts"
-  },
-  "lint": {
-    "rules": {
-      "tags": [
-        "fresh",
-        "recommended"
-      ]
+    "lock": false,
+    "version": "0.3.34",
+    "unstable": [
+        "kv"
+    ],
+    "vocabulary": "0.1.12",
+    "tasks": {
+        "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
+        "cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
+        "manifest": "deno task cli manifest $(pwd)",
+        "start": "deno run -A --env --watch=static/,routes/ dev.ts",
+        "build": "deno run -A bundling.ts && deno run -A dev.ts build",
+        "preview": "deno run -A --env main.ts",
+        "update": "deno run -A -r https://fresh.deno.dev/update .",
+        "server": "deno run -A --env server.ts",
+        "vocabulary-update": "deno run -A --env update-vocabulary-version.ts"
+    },
+    "lint": {
+        "rules": {
+            "tags": [
+                "fresh",
+                "recommended"
+            ]
+        }
+    },
+    "exclude": [
+        "**/_fresh/*",
+        "static/service-worker.js"
+    ],
+    "imports": {
+        "$fresh/": "https://deno.land/x/fresh@1.7.3/",
+        "@preact-icons/tb": "jsr:@preact-icons/tb@^1.0.12",
+        "@preact/signals": "npm:@preact/signals@^2.0.0",
+        "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.9/",
+        "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.9",
+        "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.4.0/",
+        "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.15",
+        "@sholvoir/vocabulary": "jsr:@sholvoir/vocabulary@^0.0.30",
+        "@std/http": "jsr:@std/http@^1.0.12",
+        "esbuild": "npm:esbuild@^0.24.2",
+        "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
+        "js-cookie": "https://esm.sh/js-cookie@3.0.5",
+        "mongodb": "npm:mongodb@^6.12.0",
+        "preact": "npm:preact@^10.25.4",
+        "preact/hooks": "npm:preact@^10.25.4/hooks",
+        "preact/jsx-runtime": "npm:preact@^10.25.4/jsx-runtime",
+        "tailwindcss": "npm:tailwindcss@^3.4.17",
+        "tailwindcss/": "npm:/tailwindcss@^3.4.17/",
+        "tailwindcss/plugin": "npm:/tailwindcss@^3.4.17/plugin.js",
+        "twilio": "npm:twilio@^5.4.1"
+    },
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact"
     }
-  },
-  "exclude": [
-    "**/_fresh/*", "static/service-worker.js"
-  ],
-  "imports": {
-    "$fresh/": "https://deno.land/x/fresh@1.7.3/",
-    "@preact-icons/tb": "jsr:@preact-icons/tb@^1.0.12",
-    "@preact/signals": "npm:@preact/signals@^2.0.0",
-    "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.9/",
-    "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.9",
-    "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.4.0/",
-    "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.15",
-    "@sholvoir/vocabulary": "jsr:@sholvoir/vocabulary@^0.0.30",
-    "@std/http": "jsr:@std/http@^1.0.12",
-    "esbuild": "npm:esbuild@^0.24.2",
-    "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
-    "js-cookie": "https://esm.sh/js-cookie@3.0.5",
-    "mongodb": "npm:mongodb@^6.12.0",
-    "preact": "npm:preact@^10.25.4",
-    "preact/hooks": "npm:preact@^10.25.4/hooks",
-    "preact/jsx-runtime": "npm:preact@^10.25.4/jsx-runtime",
-    "tailwindcss": "npm:tailwindcss@^3.4.17",
-    "tailwindcss/": "npm:/tailwindcss@^3.4.17/",
-    "tailwindcss/plugin": "npm:/tailwindcss@^3.4.17/plugin.js",
-    "twilio": "npm:twilio@^5.4.1"
-  },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  }
 }
