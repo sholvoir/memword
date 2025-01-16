@@ -161,7 +161,7 @@ const handleFetchSearch = async (req: Request) => {
 };
 
 const handleUpdateVocabulary = async () => {
-    const resp1 = await fetch('/api/vocabulary-version');
+    const resp1 = await fetch(`${DICT_API}/pub/vocabulary-version`, { cache: 'no-cache' });
     if (!resp1.ok) return notFound; // Network Error
     const serverVocabularyVersion: string = (await resp1.json()).vocabularyVersion;
     const clientVocabularyVersion: string = await idb.getMeta('_vocabulary-version');

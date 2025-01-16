@@ -1,10 +1,9 @@
 {
     "lock": false,
-    "version": "0.3.34",
+    "version": "0.3.35",
     "unstable": [
         "kv"
     ],
-    "vocabulary": "0.1.12",
     "tasks": {
         "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
         "cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
@@ -13,8 +12,7 @@
         "build": "deno run -A bundling.ts && deno run -A dev.ts build",
         "preview": "deno run -A --env main.ts",
         "update": "deno run -A -r https://fresh.deno.dev/update .",
-        "server": "deno run -A --env server.ts",
-        "vocabulary-update": "deno run -A --env update-vocabulary-version.ts"
+        "server": "deno run -A --env server.ts"
     },
     "lint": {
         "rules": {
