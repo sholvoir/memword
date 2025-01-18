@@ -1,8 +1,12 @@
 import { Tag } from "@sholvoir/vocabulary";
 
 export const TagName: Record<Tag, string> = {
-    OG: '奥格登基础英语850词',
+    OG: '奥格登基本英语850词',
+    DS: 'Dolch视觉单词',
     FS: 'Fry1000视觉单词',
+    WS: 'Top150写作视觉单词',
+    WK: '维基词典1000基础词汇',
+    VA: 'VOA慢速英语1500基础词汇',
     MC: '麦克米伦词典2500释义词汇',
     LD: '朗文词典2500释义词汇',
     S1: '朗文通讯3000词口语1级',
@@ -11,8 +15,6 @@ export const TagName: Record<Tag, string> = {
     W1: '朗文通讯3000词写作1级',
     W2: '朗文通讯3000词写作2级',
     W3: '朗文通讯3000词写作3级',
-    VA: 'VOA慢速英语1500基础词汇',
-    WK: '维基词典1000基础词汇',
     A1: '牛津5000词汇A1',
     A2: '牛津5000词汇A2',
     B1: '牛津5000词汇B1',
@@ -33,8 +35,6 @@ export const TagName: Record<Tag, string> = {
     CA: '当代美国英语语料库Top5000',
     WB: 'iWeb语料库Top5000',
     BN: '英国国家语料库Top5000',
-    BS: '英国国家语料库Top5000口语',
-    BW: '英国国家语料库Top5000写作',
     ZK: '中考英语考试大纲',
     GK: '高考英语考试大纲',
     KY: '研究生入学考试英语考试大纲',
