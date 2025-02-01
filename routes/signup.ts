@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { badRequest, internalServerError } from '@sholvoir/generic/http';
+import { emptyResponse, STATUS_CODE } from '@sholvoir/generic/http';
 import { sendEmail } from "../lib/email.ts";
 import { IPass } from "../lib/ipass.ts";
 import { now } from "../lib/common.ts";
@@ -12,13 +12,13 @@ export const handler: Handlers = {
     async GET(req) {
         try {
             const rawEmail = new URL(req.url).searchParams.get('email');
-            if (!rawEmail) return badRequest;
+            if (!rawEmail) return emptyResponse(STATUS_CODE.BadRequest);
             const email = decodeURIComponent(rawEmail).toLowerCase();
-            if (!emailPattern.test(email)) return badRequest;
+            if (!emailPattern.test(email)) return emptyResponse(STATUS_CODE.BadRequest);
             const password = Math.random().toString(36).slice(7);
             const pass: IPass = { password, expire: now() + 5 * 60 };
             const kv = await Deno.openKv(kvPath);
-            await kv.set([catalog, btoa(email).replaceAll('=', '')], pass);
+            await kv.set([catalog, email], pass);
             kv.close();
             const mail = {
                 from: 'MEMWORD <memword.micit@gmail.com>',
@@ -34,6 +34,6 @@ export const handler: Handlers = {
             };
             console.log(`API '/signup' POST ${email}`);
             return await sendEmail(mail);
-        } catch { return internalServerError; }
+        } catch { return emptyResponse(STATUS_CODE.InternalServerError); }
     }
 };

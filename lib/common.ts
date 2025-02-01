@@ -1,3 +1,3 @@
-export const vocabularyUrl = (version: string) => `https://www.micit.co/vocabulary/vocabulary-${version}.txt`;
+export const B2_BASE_URL = 'https://f005.backblazeb2.com/file/vocabulary'
 export const DICT_API = 'https://dict.micit.co';
 export const now = () => Math.floor(Date.now() / 1000);

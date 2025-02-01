@@ -8,7 +8,7 @@ import Dialog from './dialog.tsx';
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 export default () => {
-    const email = useSignal(signals.user.value ? atob(signals.user.value) : '');
+    const email = useSignal(signals.user.value ?? '');
     const password = useSignal('');
     const counter = useSignal(0);
     const canSendEmail = useSignal(true);

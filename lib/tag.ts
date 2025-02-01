@@ -1,6 +1,5 @@
-import { Tag } from "@sholvoir/vocabulary";
 
-export const TagName: Record<Tag, string> = {
+export const TT: Record<string, string> = {
     OG: '奥格登基本英语850词',
     DS: 'Dolch视觉单词',
     FS: 'Fry1000视觉单词',

@@ -1,27 +1,24 @@
-// deno-lint-ignore-file no-explicit-any
 import { JSX } from "preact";
-import { Tag } from "@sholvoir/vocabulary";
-import { TagName } from '../lib/tag.ts';
-import { iStatToIBStat } from "../lib/istat.ts";
+import { aggrToBAggr } from "../lib/istat.ts";
 import { signals, startStudy } from "../lib/signals.ts";
 import Stat from './stat.tsx';
 
 const sum = (s: number, b: number) => s + b;
+const max = (a: number, b: number) => a > b ? a : b
 
 export default (props: JSX.HTMLAttributes<HTMLDivElement>) => {
     const getResult = () => {
-        const result = [] as Array<any>;
-        const stats = signals.stats.value;
-        const push = (tag: Tag) => {
-            const width = stats.all[tag].reduce(sum);
-            const task = stats.task[tag].reduce(sum);
-            result.push(<Stat onTitleClick={() => startStudy(tag)}
-                onItemClick={(blevel) => startStudy(tag, blevel)}
-                title={`${TagName[tag]} - ${task}|${width}`} width={width}
-                statAll={iStatToIBStat(stats.all[tag])}
-                statTask={iStatToIBStat(stats.task[tag])} />)
-        };
-        for (const ttag of signals.setting.value.books) push(ttag);
+        const result = [] as Array<JSX.Element>;
+        for (const stat of signals.stats.value) {
+            const width = stat.total.reduce(max) * 1.2;
+            const totalSum = stat.total.reduce(sum);
+            const taskSum = stat.task.reduce(sum);
+            result.push(<Stat onTitleClick={() => startStudy(stat.wlid)}
+                onItemClick={(blevel) => startStudy(stat.wlid, blevel)}
+                title={`${stat.disc} - ${taskSum}|${totalSum}`} width={width}
+                total={aggrToBAggr(stat.total)}
+                task={aggrToBAggr(stat.task)} />)
+        }
         return result;
     }
     return <div {...props}><div class="p-2 flex flex-wrap justify-between gap-4">{getResult()}</div></div>;

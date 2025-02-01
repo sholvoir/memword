@@ -2,12 +2,9 @@
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { ISetting } from "../lib/isetting.ts";
 import { IItem } from "../lib/iitem.ts";
-import { getUser, getSetting, getStats } from "../lib/mem.ts";
-import { signals, init, hideTips, Dial } from "../lib/signals.ts";
-import { type Tag } from "@sholvoir/vocabulary";
-import { type BLevel } from "../lib/istat.ts";
+import { getUser } from "../lib/mem.ts";
+import { signals, init, hideTips, TDial } from "../lib/signals.ts";
 import Home from "./home.tsx";
 import Add from './add.tsx';
 import About from './about.tsx';
@@ -17,26 +14,25 @@ import Signout from './signout.tsx';
 import Study from './study.tsx';
 import Setting from './setting.tsx';
 import Issue from './issue.tsx';
-import Dict from './dict.tsx';
+import Dict from '.tsx';
 import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 
 export default () => {
     if (!IS_BROWSER) return <div/>;
     signals.user = useSignal(getUser());
-    signals.setting = useSignal<ISetting>(getSetting());
-    signals.stats  = useSignal(getStats());
-    signals.dialogs = useSignal<Array<Dial>>([signals.user?'home':'about']);
+    signals.stats  = useSignal([]);
+    signals.dialogs = useSignal<Array<TDial>>([signals.user?'home':'about']);
     signals.tips = useSignal('');
     signals.vocabulary = useSignal([]);
     //
     signals.isPhaseAnswer = useSignal(false);
     signals.item = useSignal<IItem>();
-    signals.tag = useSignal<Tag>();
-    signals.blevel = useSignal<BLevel>();
+    signals.wlid = useSignal('');
+    signals.blevel = useSignal(5);
     signals.sprint = useSignal(0);
 
-    const dialog = (dial: Dial) => { switch (dial) {
+    const dialog = (dial: TDial) => { switch (dial) {
         case 'home': return <Home/>
         case "wait": return <Waiting/>;
         case 'add': return <Add/>;

@@ -1,16 +1,14 @@
-import { type Tag } from "@sholvoir/vocabulary";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
-import { ITask } from './itask.ts'
+import { ITask } from './itask.ts';
 
 export const MAX_NEXT = 2000000000;
 
 export interface IItem extends IDict, ITask {
-    dversion: number;
-    tags: Array<Tag>;
+    dversion?: number;
 }
 
-export const neverItem = (word: string, tags: Array<Tag>): IItem =>
-    ({ word, last: 0, next: MAX_NEXT, level: 0, dversion: 0, tags });
+export const neverItem = (word: string, time: number): IItem =>
+    ({ word, last: time, next: time, level: 0 });
 
 export const item2task = ({word, last, next, level}: IItem): ITask => ({word, last, next, level});
 

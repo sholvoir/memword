@@ -26,7 +26,7 @@ export default () => {
     const handleIKnown = (level?: number) => mem.studied(signals.item.value!.word, level ?? signals.item.value!.level);
     const studyNext = async () => {
         if (++signals.sprint.value <= 0) return finish();
-        const res = await mem.getEpisode(signals.tag.value, signals.blevel.value);
+        const res = await mem.getEpisode(signals.wlid.value, signals.blevel.value);
         if (!res.ok) return (showTips('Network Error!'), finish());
         const item = (await res.json()).item;
         if (!item) return finish();

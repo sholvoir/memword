@@ -7,6 +7,7 @@ import * as $_root_api_middleware from "./routes/(root)/api/_middleware.ts";
 import * as $_root_api_issue from "./routes/(root)/api/issue.ts";
 import * as $_root_api_setting from "./routes/(root)/api/setting.ts";
 import * as $_root_api_task from "./routes/(root)/api/task.ts";
+import * as $_root_api_wordlist from "./routes/(root)/api/wordlist.ts";
 import * as $_root_index from "./routes/(root)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
@@ -41,6 +42,7 @@ const manifest = {
     "./routes/(root)/api/issue.ts": $_root_api_issue,
     "./routes/(root)/api/setting.ts": $_root_api_setting,
     "./routes/(root)/api/task.ts": $_root_api_task,
+    "./routes/(root)/api/wordlist.ts": $_root_api_wordlist,
     "./routes/(root)/index.tsx": $_root_index,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,

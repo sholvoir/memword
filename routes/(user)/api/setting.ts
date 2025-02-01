@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
-import { responseInit, ok, internalServerError } from "@sholvoir/generic/http";
+import { emptyResponse, jsonResponse, STATUS_CODE } from "@sholvoir/generic/http";
 import { MemState } from '../../../lib/fresh.ts';
 import { ISetting } from "../../../lib/isetting.ts";
 
@@ -20,8 +20,8 @@ export const handler: Handlers<any, MemState> = {
             kv.close();
             const setting = newSetting.version > oldSetting.version ? newSetting : oldSetting;
             console.log(`API '/setting' POST ${ctx.state.user}`);
-            return new Response(JSON.stringify(setting), responseInit);
-        } catch { return internalServerError; }
+            return jsonResponse(setting);
+        } catch { return emptyResponse(STATUS_CODE.InternalServerError); }
     },
     async DELETE(_req, ctx) {
         try {
@@ -29,7 +29,7 @@ export const handler: Handlers<any, MemState> = {
             await kv.delete([catalog, ctx.state.user]);
             kv.close();
             console.log(`API '/setting' DELETE ${ctx.state.user}`);
-            return ok;
-        } catch { return internalServerError; }
+            return emptyResponse();
+        } catch { return emptyResponse(STATUS_CODE.InternalServerError); }
     }
 };

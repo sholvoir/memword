@@ -1,9 +1,9 @@
-import { type Dial, showDialog, closeDialog, showTips, totalStats } from '../lib/signals.ts';
+import { type TDial, showDialog, closeDialog, showTips, totalStats } from '../lib/signals.ts';
 import * as mem from "../lib/mem.ts";
 import Dialog from './dialog.tsx';
 
 export default () => {
-    const open = (e: Event) => showDialog((e.target as HTMLMenuElement).title as Dial);
+    const open = (e: Event) => showDialog((e.target as HTMLMenuElement).title as TDial);
     const cache = () => (mem.cacheDict(), showTips('后台开始缓存……'));
     const down = async () => {
         await mem.downTasks();

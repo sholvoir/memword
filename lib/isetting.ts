@@ -1,15 +1,13 @@
-import { Tag } from "@sholvoir/vocabulary";
-
-export const settingFormat = '0.1.1';
+export const settingFormat = '0.2.0';
 
 export interface ISetting {
     format: string;
     version: number;
-    books: Array<Tag>;
+    books: Array<string>;
 };
 
 export const defaultSetting = () => ({
     format: settingFormat,
     version: 0,
-    books: ['__']
+    books: []
 }) as ISetting;

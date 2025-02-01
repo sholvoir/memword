@@ -1,9 +1,7 @@
 {
     "lock": false,
-    "version": "0.3.39",
-    "unstable": [
-        "kv"
-    ],
+    "version": "0.4.13",
+    "unstable": ["kv"],
     "tasks": {
         "check": "deno fmt --check && deno lint && deno check **/*.ts && deno check **/*.tsx",
         "cli": "echo \"import '\\$fresh/src/dev/cli.ts'\" | deno run --unstable -A -",
@@ -16,36 +14,30 @@
     },
     "lint": {
         "rules": {
-            "tags": [
-                "fresh",
-                "recommended"
-            ]
+            "tags": ["fresh", "recommended"]
         }
     },
-    "exclude": [
-        "**/_fresh/*",
-        "static/service-worker.js"
-    ],
+    "exclude": ["**/_fresh/*", "static/service-worker.js"],
     "imports": {
         "$fresh/": "https://deno.land/x/fresh@1.7.3/",
+        "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.48",
         "@preact-icons/tb": "jsr:@preact-icons/tb@^1.0.12",
         "@preact/signals": "npm:@preact/signals@^2.0.1",
         "@sholvoir/components/": "https://raw.esm.sh/gh/sholvoir/preact-components@0.0.9/",
         "@sholvoir/deno-smtp": "jsr:@sholvoir/deno-smtp@^0.9.9",
-        "@sholvoir/dict/": "https://raw.esm.sh/gh/sholvoir/dict@0.4.0/",
-        "@sholvoir/generic": "jsr:@sholvoir/generic@^0.0.15",
-        "@sholvoir/vocabulary": "jsr:@sholvoir/vocabulary@^0.2.19",
+        "@sholvoir/generic": "jsr:@sholvoir/generic@^0.1.1",
         "@std/http": "jsr:@std/http@^1.0.12",
         "esbuild": "npm:esbuild@^0.24.2",
         "esbuild-deno-loader": "jsr:@luca/esbuild-deno-loader@^0.11.1",
         "js-cookie": "https://esm.sh/js-cookie@3.0.5",
+        "minio": "npm:minio@^8.0.4",
         "mongodb": "npm:mongodb@^6.12.0",
         "preact": "npm:preact@^10.25.4",
         "preact/hooks": "npm:preact@^10.25.4/hooks",
         "preact/jsx-runtime": "npm:preact@^10.25.4/jsx-runtime",
         "tailwindcss": "npm:tailwindcss@^3.4.17",
-        "tailwindcss/": "npm:/tailwindcss@^3.4.17/",
-        "tailwindcss/plugin": "npm:/tailwindcss@^3.4.17/plugin.js",
+        "tailwindcss/": "npm:tailwindcss@^3.4.17/",
+        "tailwindcss/plugin": "npm:tailwindcss@^3.4.17/plugin.js",
         "twilio": "npm:twilio@^5.4.2"
     },
     "compilerOptions": {

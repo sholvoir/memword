@@ -5,7 +5,7 @@ import { Handlers } from "$fresh/server.ts";
 
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {
-        const email = atob(ctx.state.user);
+        const email = ctx.state.user;
         console.log(`API '/issue' POST ${ctx.state.user}`);
         const issue = (await req.json()).issue;
         return await sendEmail({

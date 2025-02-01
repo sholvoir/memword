@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
-import { type Tag } from "@sholvoir/vocabulary";
-import { type BLevel, IStats, addTaskToStats, bLevelIncludes, initStats } from "./istat.ts";
+import { IStat, addTaskToStat, isBLevelIncludesLevel, initStat } from "./istat.ts";
 import { IDict } from "@sholvoir/dict/lib/idict.ts";
 import { ITask } from "./itask.ts";
 import { IItem, itemMergeDict, itemMergeTask, MAX_NEXT, neverItem, } from "./iitem.ts";
 import { now } from "./common.ts";
+import { IWordList } from "./wordlist.ts";
 
-type kvKey = '_vocabulary-version'|'_sync-time';
+type kvKey = '_vocabulary-version'|'_sync-time'|'_setting';
 let db: IDBDatabase;
 
 const run = (reject: (reason?: any) => void, func: (db: IDBDatabase) => void) => {
@@ -18,6 +18,7 @@ const run = (reject: (reason?: any) => void, func: (db: IDBDatabase) => void) =>
         const d = request.result;
         d.createObjectStore('mata', { keyPath: 'key' });
         d.createObjectStore('issue', { keyPath: 'id', autoIncrement: true });
+        d.createObjectStore('wordlist', { keyPath: ['user', 'name']})
         const iStore = d.createObjectStore('item', { keyPath: 'word' });
         iStore.createIndex('last', 'last');
         iStore.createIndex('next', 'next');
@@ -61,46 +62,20 @@ export const deleteIssue = (id: number) => new Promise<void>((resolve, reject) =
     request.onsuccess = () => resolve();
 }));
 
-export const getVocabulary = () => new Promise<Array<string>>((resolve, reject) => run(reject, db => {
-    const vocabulary: Array<string> = [];
-    const request = db.transaction('item', 'readonly').objectStore('item').openCursor();
+export const getWordlistVersion = (user: string, name: string) => new Promise<string|undefined>((resolve, reject) => run(reject, db => {
+    const request = db.transaction('wordlist', 'readonly').objectStore('wordlist').get([user, name]);
     request.onerror = reject;
-    request.onsuccess = e => {
-        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-        if (!cursor) return resolve(vocabulary);
-        vocabulary.push((cursor.value as IItem).word);
-        cursor.continue();
+    request.onsuccess = (e) => {
+        const wordlist = (e.target as IDBRequest<IWordList>).result;
+        resolve(wordlist && wordlist.version);
     }
 }));
 
-export const updateVocabulary = (vocabulary: Map<string, Array<Tag>>) => new Promise<Array<string>>((resolve, reject) => run(reject, db => {
-    const needDelete: Array<string> = [];
-    const transaction = db.transaction('item', 'readwrite');
-    transaction.onerror = reject;
-    transaction.oncomplete = () => resolve(needDelete);
-    const iStore = transaction.objectStore('item');
-    iStore.openCursor().onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-        if (!cursor) {
-            for (const [word, tags] of vocabulary) iStore.add(neverItem(word, tags));
-            return;
-        }
-        const item = cursor.value as IItem;
-        if (vocabulary.has(item.word)) {
-            const newTags = vocabulary.get(item.word)!;
-            if (item.tags.join() != newTags.join()) {
-                item.tags = newTags;
-                cursor.update(item);
-            }
-            vocabulary.delete(item.word);
-        }
-        else {
-            needDelete.push(item.word);
-            cursor.delete();
-        }
-        cursor.continue();
-    }
-}));
+export const setWordlistVersion = (wordlist: IWordList) => new Promise<void>((resolve, reject) => run(reject, db => {
+    const request = db.transaction('wordlist', 'readwrite').objectStore('wordlist').put(wordlist);
+    request.onerror = reject;
+    request.onsuccess = () => resolve();
+}))
 
 export const getItem = (word: string) => new Promise<IItem>((resolve, reject) => run(reject, db => {
     const request = db.transaction('item', 'readonly').objectStore('item').get(word);
@@ -120,21 +95,15 @@ export const getItems = (last: number) => new Promise<Array<IItem>>((resolve, re
     request.onsuccess = () => resolve(request.result);
 }));
 
-export const addTasks = (tag: Tag) => new Promise<void>((resolve, reject) => run(reject, db => {
+export const addTasks = (words: Iterable<string>) => new Promise<void>((resolve, reject) => run(reject, db => {
     const time = now();
     const transaction = db.transaction('item', 'readwrite');
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const iStore = transaction.objectStore('item');
-    iStore.openCursor().onsuccess = (e2) => {
-        const cursor = (e2.target as IDBRequest<IDBCursorWithValue>).result;
-        if (!cursor) return;
-        const item = cursor.value as IItem;
-        if (item.tags.includes(tag) && item.level == 0) {
-            item.last = item.next = time;
-            cursor.update(item);
-        }
-        cursor.continue();
+    for (const word of words) iStore.get(word).onsuccess = (e) => {
+        const item = (e.target as IDBRequest<IItem>).result;
+        if (!item) iStore.add(neverItem(word, time));
     }
 }));
 
@@ -143,13 +112,11 @@ export const mergeTasks = (tasks: Array<ITask>) => new Promise<void>((resolve, r
     transaction.onerror = reject;
     transaction.oncomplete = () => resolve();
     const iStore = transaction.objectStore('item');
-    for (const task of tasks) {
-        iStore.get(task.word).onsuccess = (e) => {
-            const item = (e.target as IDBRequest<IItem>).result;
-            if (!item) iStore.add(itemMergeTask(neverItem(task.word, []), task));
-            else if (task.last > item.last) iStore.put(itemMergeTask(item, task));
-        };
-    }
+    for (const task of tasks) iStore.get(task.word).onsuccess = (e) => {
+        const item = (e.target as IDBRequest<IItem>).result;
+        if (!item) iStore.add(task);
+        else if (task.last > item.last) iStore.put(itemMergeTask(item, task));
+    };
 }));
 
 export const updateDict = (word: string, dict: IDict) => new Promise<IItem|undefined>((resolve, reject) => run(reject, db => {
@@ -168,7 +135,7 @@ export const updateDict = (word: string, dict: IDict) => new Promise<IItem|undef
     }
 }));
 
-export const getEpisode = (tag?: Tag, blevel?: BLevel) => new Promise<IItem|undefined>((resolve, reject) => run(reject, db => {
+export const getEpisode = (wordList?: Set<string>, blevel?: number) => new Promise<IItem|undefined>((resolve, reject) => run(reject, db => {
     let result: IItem;
     const transaction = db.transaction('item', 'readonly');
     transaction.onerror = reject;
@@ -177,21 +144,24 @@ export const getEpisode = (tag?: Tag, blevel?: BLevel) => new Promise<IItem|unde
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return;
         const item = cursor.value as IItem;
-        if ((!tag || item.tags.includes(tag)) && (!blevel || bLevelIncludes(blevel, item.level)))
+        if ((!wordList || wordList.has(item.word)) && (!blevel || isBLevelIncludesLevel(blevel, item.level)))
             return result = item;
         cursor.continue();
     }
 }));
 
-export const getStats = () => new Promise<IStats>((resolve, reject) => run(reject, db => {
-    const stats = initStats(now());
+export const getStats = (words?: Iterable<string>) => new Promise<IStat>((resolve, reject) => run(reject, db => {
+    const stat: IStat = initStat();
     const transaction = db.transaction('item', 'readonly');
     transaction.onerror = reject;
-    transaction.oncomplete = () => resolve(stats);
-    transaction.objectStore('item').openCursor().onsuccess = e => {
+    transaction.oncomplete = () => resolve(stat);
+    const iStore = transaction.objectStore('item');
+    if (words) for (const word of words) iStore.get(word).onsuccess = (e) =>
+        addTaskToStat(stat, (e.target as IDBRequest<IItem>).result);
+    else iStore.openCursor().onsuccess = e => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (!cursor) return;
-        addTaskToStats(cursor.value, stats);
+        addTaskToStat(stat, cursor.value);
         cursor.continue();
     }
 }));
