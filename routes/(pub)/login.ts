@@ -1,10 +1,10 @@
 import { Handlers } from "$fresh/server.ts";
-import { setAuth } from "../lib/jwt.ts";
+import { setAuth } from "../../lib/jwt.ts";
 import { emptyResponse, STATUS_CODE } from "@sholvoir/generic/http";
 import { mongoRun } from '@sholvoir/generic/mongo';
-import { IPass } from "../lib/ipass.ts";
-import { now } from "../lib/common.ts";
-import { MONGO_URI } from "../lib/fresh.ts";
+import { MONGO_URI } from "../../lib/fresh.ts";
+import { IPass } from "../../lib/ipass.ts";
+import { now } from "../../lib/common.ts";
 
 const catalog = 'password';
 const kvPath = Deno.env.get('DENO_KV_PATH');

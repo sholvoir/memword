@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-cond-assign
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import { vocabularyUrl } from "../lib/common.ts";
 import { IDict } from "../lib/idict.ts";
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
@@ -44,7 +43,7 @@ export default function Lookup() {
         player.current?.play();
     }
     const handleUpdateClick = async () => {
-        const dict: IDict = {};
+        const dict: IDict = {word: word.value};
         if (def.value) dict.def = def.value;
         if (trans.value) dict.trans = trans.value;
         if (phonetic.value) dict.phonetic = phonetic.value;
@@ -59,10 +58,7 @@ export default function Lookup() {
         else showTips(`Error: ${res.status}`);
     };
     const init = async () => {
-        const res0 = await fetch('/pub/vocabulary-version', { cache: 'no-cache' });
-        if (!res0.ok) return console.error(res0.status);
-        const vocabularyVersion: string = (await res0.json()).vocabularyVersion;
-        const res1 = await fetch(vocabularyUrl(vocabularyVersion), { cache: 'force-cache' });
+        const res1 = await fetch('/wrk/get-vocabulary', { cache: 'force-cache' });
         if (!res1.ok) return console.error(res1.status);
         const delimitor = /[,:] */;
         for (const line of (await res1.text()).split('\n')) {

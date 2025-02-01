@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
-import { MemState, MONGO_URI } from "../../../lib/fresh.ts";
+import { MemState, MONGO_URI } from "../../../../lib/fresh.ts";
 import { emptyResponse, jsonResponse, STATUS_CODE } from '@sholvoir/generic/http';
 import { mongoRun } from '@sholvoir/generic/mongo';
 import { Int32 } from "mongodb";
-import { ITask } from "../../../lib/itask.ts";
+import { ITask } from "../../../../lib/itask.ts";
 
 export const handler: Handlers<any, MemState> = {
     async POST(req, ctx) {

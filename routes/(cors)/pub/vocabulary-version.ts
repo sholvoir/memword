@@ -1,5 +1,5 @@
 import { Handlers } from "$fresh/server.ts";
-import { internalServerError, jsonResponse } from "@sholvoir/generic/http";
+import {  emptyResponse, jsonResponse, STATUS_CODE } from "@sholvoir/generic/http";
 
 const catalog = 'system';
 const kvPath = Deno.env.get('DENO_KV_PATH');
@@ -11,6 +11,6 @@ export const handler: Handlers = {
             const res = await kv.get<string>([catalog, 'vocabulary-version']);
             const vocabularyVersion = res.value;
             return jsonResponse({vocabularyVersion});
-        } catch { return internalServerError; }
+        } catch { return emptyResponse(STATUS_CODE.InternalServerError); }
     }
 };

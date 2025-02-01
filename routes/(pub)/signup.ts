@@ -1,8 +1,8 @@
 import { Handlers } from "$fresh/server.ts";
 import { emptyResponse, STATUS_CODE } from '@sholvoir/generic/http';
-import { sendEmail } from "../lib/email.ts";
-import { IPass } from "../lib/ipass.ts";
-import { now } from "../lib/common.ts";
+import { sendEmail } from "../../lib/email.ts";
+import { IPass } from "../../lib/ipass.ts";
+import { now } from "../../lib/common.ts";
 
 const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
 const catalog = 'password';

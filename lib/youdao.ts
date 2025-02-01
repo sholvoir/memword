@@ -1,4 +1,4 @@
-import { IDictP } from "./common.ts";
+import { IDict } from "./idict.ts";
 
 const baseUrl = 'https://dict.youdao.com/jsonapi';
 const youdaoAudio = 'https://dict.youdao.com/dictvoice?audio='//complete&type=2
@@ -19,8 +19,9 @@ const abbr = (partofspeech?: string) => {
     return p;
 }
 
-const fillDict = async (dict: IDictP, en: string): Promise<void> => {
-    const resp = await fetch(`${baseUrl}?q=${en}`);
+const fillDict = async (dict: IDict): Promise<void> => {
+    const en = dict.word;
+    const resp = await fetch(`${baseUrl}?q=${encodeURIComponent(en)}`);
     if (!resp.ok) return;
     const root = await resp.json();
     const nameRegex = new RegExp(`【名】|（人名）|（${en}）人名`, 'i');
@@ -84,8 +85,8 @@ const fillDict = async (dict: IDictP, en: string): Promise<void> => {
 
 export default fillDict;
 
-if (import.meta.main) for (const en of Deno.args) {
-    const dict = {};
-    await fillDict(dict, en)
+if (import.meta.main) for (const word of Deno.args) {
+    const dict = {word};
+    await fillDict(dict);
     console.log(dict);
 }

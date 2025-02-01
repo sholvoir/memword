@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { MemState } from '../../../lib/fresh.ts';
-import { sendEmail } from "../../../lib/email.ts";
+import { MemState } from '../../../../lib/fresh.ts';
+import { sendEmail } from "../../../../lib/email.ts";
 import { Handlers } from "$fresh/server.ts";
 
 export const handler: Handlers<any, MemState> = {

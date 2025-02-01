@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-explicit-any no-cond-assign
-import { B2_BASE_URL } from "../../../lib/common.ts";
+import { B2_BASE_URL } from "../../../../lib/common.ts";
 import { Handlers } from "$fresh/server.ts";
 import { emptyResponse, jsonResponse, STATUS_CODE } from "@sholvoir/generic/http";
 import { mongoRun } from '@sholvoir/generic/mongo';
 import { versionpp } from "@sholvoir/generic/versionpp";
-import { MemState, MONGO_URI } from '../../../lib/fresh.ts';
-import { IWordList } from "../../../lib/wordlist.ts";
+import { MemState, MONGO_URI } from '../../../../lib/fresh.ts';
+import { IWordList } from "../../../../lib/wordlist.ts";
 import { Client as MinioClient } from 'minio';
 
 const b2bucket = 'vocabulary';

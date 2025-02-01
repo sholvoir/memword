@@ -14,7 +14,7 @@ import Signout from './signout.tsx';
 import Study from './study.tsx';
 import Setting from './setting.tsx';
 import Issue from './issue.tsx';
-import Dict from '.tsx';
+import Dict from './dict.tsx';
 import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 

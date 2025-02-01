@@ -2,17 +2,23 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_root_middleware from "./routes/(root)/_middleware.ts";
-import * as $_root_api_middleware from "./routes/(root)/api/_middleware.ts";
-import * as $_root_api_issue from "./routes/(root)/api/issue.ts";
-import * as $_root_api_setting from "./routes/(root)/api/setting.ts";
-import * as $_root_api_task from "./routes/(root)/api/task.ts";
-import * as $_root_api_wordlist from "./routes/(root)/api/wordlist.ts";
-import * as $_root_index from "./routes/(root)/index.tsx";
+import * as $_cors_middleware from "./routes/(cors)/_middleware.ts";
+import * as $_cors_pub_sound from "./routes/(cors)/pub/sound.ts";
+import * as $_cors_pub_vocabulary_version from "./routes/(cors)/pub/vocabulary-version.ts";
+import * as $_cors_pub_word from "./routes/(cors)/pub/word.ts";
+import * as $_pub_login from "./routes/(pub)/login.ts";
+import * as $_pub_signup from "./routes/(pub)/signup.ts";
+import * as $_user_auth_admin_middleware from "./routes/(user)/(auth)/(admin)/_middleware.ts";
+import * as $_user_auth_admin_api_word from "./routes/(user)/(auth)/(admin)/api/word.ts";
+import * as $_user_auth_middleware from "./routes/(user)/(auth)/_middleware.ts";
+import * as $_user_auth_api_issue from "./routes/(user)/(auth)/api/issue.ts";
+import * as $_user_auth_api_setting from "./routes/(user)/(auth)/api/setting.ts";
+import * as $_user_auth_api_task from "./routes/(user)/(auth)/api/task.ts";
+import * as $_user_auth_api_wordlist from "./routes/(user)/(auth)/api/wordlist.ts";
+import * as $_user_middleware from "./routes/(user)/_middleware.ts";
+import * as $_user_index from "./routes/(user)/index.tsx";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
-import * as $login from "./routes/login.ts";
-import * as $signup from "./routes/signup.ts";
 import * as $about from "./islands/about.tsx";
 import * as $add from "./islands/add.tsx";
 import * as $dialog from "./islands/dialog.tsx";
@@ -24,6 +30,7 @@ import * as $icon_me from "./islands/icon-me.tsx";
 import * as $icon_stats from "./islands/icon-stats.tsx";
 import * as $icon_study from "./islands/icon-study.tsx";
 import * as $issue from "./islands/issue.tsx";
+import * as $lookup from "./islands/lookup.tsx";
 import * as $menu from "./islands/menu.tsx";
 import * as $root from "./islands/root.tsx";
 import * as $setting from "./islands/setting.tsx";
@@ -37,17 +44,24 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/(root)/_middleware.ts": $_root_middleware,
-    "./routes/(root)/api/_middleware.ts": $_root_api_middleware,
-    "./routes/(root)/api/issue.ts": $_root_api_issue,
-    "./routes/(root)/api/setting.ts": $_root_api_setting,
-    "./routes/(root)/api/task.ts": $_root_api_task,
-    "./routes/(root)/api/wordlist.ts": $_root_api_wordlist,
-    "./routes/(root)/index.tsx": $_root_index,
+    "./routes/(cors)/_middleware.ts": $_cors_middleware,
+    "./routes/(cors)/pub/sound.ts": $_cors_pub_sound,
+    "./routes/(cors)/pub/vocabulary-version.ts": $_cors_pub_vocabulary_version,
+    "./routes/(cors)/pub/word.ts": $_cors_pub_word,
+    "./routes/(pub)/login.ts": $_pub_login,
+    "./routes/(pub)/signup.ts": $_pub_signup,
+    "./routes/(user)/(auth)/(admin)/_middleware.ts":
+      $_user_auth_admin_middleware,
+    "./routes/(user)/(auth)/(admin)/api/word.ts": $_user_auth_admin_api_word,
+    "./routes/(user)/(auth)/_middleware.ts": $_user_auth_middleware,
+    "./routes/(user)/(auth)/api/issue.ts": $_user_auth_api_issue,
+    "./routes/(user)/(auth)/api/setting.ts": $_user_auth_api_setting,
+    "./routes/(user)/(auth)/api/task.ts": $_user_auth_api_task,
+    "./routes/(user)/(auth)/api/wordlist.ts": $_user_auth_api_wordlist,
+    "./routes/(user)/_middleware.ts": $_user_middleware,
+    "./routes/(user)/index.tsx": $_user_index,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
-    "./routes/login.ts": $login,
-    "./routes/signup.ts": $signup,
   },
   islands: {
     "./islands/about.tsx": $about,
@@ -61,6 +75,7 @@ const manifest = {
     "./islands/icon-stats.tsx": $icon_stats,
     "./islands/icon-study.tsx": $icon_study,
     "./islands/issue.tsx": $issue,
+    "./islands/lookup.tsx": $lookup,
     "./islands/menu.tsx": $menu,
     "./islands/root.tsx": $root,
     "./islands/setting.tsx": $setting,

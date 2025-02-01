@@ -1,4 +1,4 @@
-import { IDict } from "@sholvoir/dict/lib/idict.ts";
+import { IDict } from "./idict.ts";
 import { ITask } from './itask.ts';
 
 export const MAX_NEXT = 2000000000;

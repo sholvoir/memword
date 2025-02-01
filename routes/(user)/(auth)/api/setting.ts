@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
 import { emptyResponse, jsonResponse, STATUS_CODE } from "@sholvoir/generic/http";
-import { MemState } from '../../../lib/fresh.ts';
-import { ISetting } from "../../../lib/isetting.ts";
+import { MemState } from '../../../../lib/fresh.ts';
+import { ISetting } from "../../../../lib/isetting.ts";
 
 const catalog = 'setting';
 const kvPath = Deno.env.get('DENO_KV_PATH');

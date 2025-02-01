@@ -1,11 +1,11 @@
 import { DOMParser } from '@b-fuze/deno-dom';
-import { IDictP } from "./common.ts";
+import { IDict } from "./idict.ts";
 
 const baseUrl = 'https://www.oxfordlearnersdictionaries.com/us/definition/english/';
 
-async function fillDict(dict: IDictP, word: string): Promise<void> {
+async function fillDict(dict: IDict): Promise<void> {
     const reqInit = { headers: { 'User-Agent': 'Thunder Client (https://www.thunderclient.com)'} }
-    const res = await fetch(`${baseUrl}/${encodeURIComponent(word)}_1?q=${word}`, reqInit);
+    const res = await fetch(`${baseUrl}/${encodeURIComponent(dict.word)}_1?q=${dict.word}`, reqInit);
     if (!res.ok) return;
     const text = await res.text();
     const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -23,8 +23,8 @@ async function fillDict(dict: IDictP, word: string): Promise<void> {
 
 export default fillDict;
 
-if (import.meta.main) for (const en of Deno.args) {
-    const dict = {};
-    await fillDict(dict, en);
+if (import.meta.main) for (const word of Deno.args) {
+    const dict = {word};
+    await fillDict(dict);
     console.log(dict);
 }
