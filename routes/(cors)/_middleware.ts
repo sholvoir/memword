@@ -1,9 +1,9 @@
 import { FreshContext } from '$fresh/server.ts';
-import { noContent } from "@sholvoir/generic/http";
+import { emptyResponse, STATUS_CODE } from "@sholvoir/generic/http";
 
 export async function handler(req: Request, ctx: FreshContext) {
         const origin  = '*';
-        const res = req.method == 'OPTIONS' ? noContent.clone() : await ctx.next();
+        const res = req.method == 'OPTIONS' ? emptyResponse(STATUS_CODE.NoContent) : await ctx.next();
         const h = res.headers;
         h.set("Access-Control-Allow-Origin", origin);
         h.set("Access-Control-Allow-Credentials", "true");
