@@ -10,6 +10,7 @@ import * as $_pub_login from "./routes/(pub)/login.ts";
 import * as $_pub_signup from "./routes/(pub)/signup.ts";
 import * as $_user_auth_admin_middleware from "./routes/(user)/(auth)/(admin)/_middleware.ts";
 import * as $_user_auth_admin_api_word from "./routes/(user)/(auth)/(admin)/api/word.ts";
+import * as $_user_auth_admin_dict from "./routes/(user)/(auth)/(admin)/dict.tsx";
 import * as $_user_auth_middleware from "./routes/(user)/(auth)/_middleware.ts";
 import * as $_user_auth_api_issue from "./routes/(user)/(auth)/api/issue.ts";
 import * as $_user_auth_api_setting from "./routes/(user)/(auth)/api/setting.ts";
@@ -40,6 +41,8 @@ import * as $stat from "./islands/stat.tsx";
 import * as $stats from "./islands/stats.tsx";
 import * as $study from "./islands/study.tsx";
 import * as $waiting from "./islands/waiting.tsx";
+import * as $wordlist from "./islands/wordlist.tsx";
+import * as $wordlists from "./islands/wordlists.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -53,6 +56,7 @@ const manifest = {
     "./routes/(user)/(auth)/(admin)/_middleware.ts":
       $_user_auth_admin_middleware,
     "./routes/(user)/(auth)/(admin)/api/word.ts": $_user_auth_admin_api_word,
+    "./routes/(user)/(auth)/(admin)/dict.tsx": $_user_auth_admin_dict,
     "./routes/(user)/(auth)/_middleware.ts": $_user_auth_middleware,
     "./routes/(user)/(auth)/api/issue.ts": $_user_auth_api_issue,
     "./routes/(user)/(auth)/api/setting.ts": $_user_auth_api_setting,
@@ -85,6 +89,8 @@ const manifest = {
     "./islands/stats.tsx": $stats,
     "./islands/study.tsx": $study,
     "./islands/waiting.tsx": $waiting,
+    "./islands/wordlist.tsx": $wordlist,
+    "./islands/wordlists.tsx": $wordlists,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

@@ -2,8 +2,8 @@
 /// <reference lib="webworker" />
 import { emptyResponse, HTTPMethod, jsonResponse, requestInit, STATUS_CODE } from "@sholvoir/generic/http";
 import { blobToBase64 } from "@sholvoir/generic/blob";
-import { B2_BASE_URL, DICT_API, now } from "./common.ts";
-import { IDict } from "@sholvoir/dict/lib/idict.ts";
+import { B2_BASE_URL, now } from "./common.ts";
+import { IDict } from "./idict.ts";
 import { IItem, item2task } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import denoConfig from "../deno.json" with { type: "json" };
@@ -62,11 +62,11 @@ const handleFetch = async (req: Request) => {
 };
 
 const updateDict = async (word: string): Promise<IItem|undefined> => {
-    const resp = await fetch(`${DICT_API}/pub/word?q=${encodeURIComponent(word)}`, { cache: 'reload' });
+    const resp = await fetch(`/pub/word?q=${encodeURIComponent(word)}`, { cache: 'reload' });
     if (!resp.ok) return undefined;
     const dict: IDict = await resp.json();
     if (dict.sound) {
-        const resp = await fetch(`${DICT_API}/pub/sound?q=${encodeURIComponent(dict.sound)}`, { cache: 'force-cache' });
+        const resp = await fetch(`/pub/sound?q=${encodeURIComponent(dict.sound)}`, { cache: 'force-cache' });
         if (resp.ok) dict.sound = await blobToBase64(await resp.blob());
     }
     return await idb.updateDict(word, dict);

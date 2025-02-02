@@ -19,9 +19,8 @@ import Waiting from './waiting.tsx';
 import Menu from './menu.tsx';
 
 export default () => {
-    if (!IS_BROWSER) return <div/>;
-    signals.user = useSignal(getUser());
     signals.stats  = useSignal([]);
+    signals.user = useSignal(getUser());
     signals.dialogs = useSignal<Array<TDial>>([signals.user?'home':'about']);
     signals.tips = useSignal('');
     signals.vocabulary = useSignal([]);
@@ -31,6 +30,7 @@ export default () => {
     signals.wlid = useSignal('');
     signals.blevel = useSignal(5);
     signals.sprint = useSignal(0);
+    if (!IS_BROWSER) return <div/>;
 
     const dialog = (dial: TDial) => { switch (dial) {
         case 'home': return <Home/>

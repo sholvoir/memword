@@ -1,10 +1,10 @@
-import { IDictP } from "./common.ts";
+import { IDict } from "./idict.ts";
 
 const baseUrl = 'https://pixabay.com/api/';
 const key = Deno.env.get('PIXABAY_KEY');
 
-const fillPic = async (dict: IDictP, word: string): Promise<void> => {
-    const resp = await fetch(`${baseUrl}?key=${key}&q=${encodeURIComponent(word)}&orientation=vertical&safesearch=1`);
+const fillPic = async (dict: IDict): Promise<void> => {
+    const resp = await fetch(`${baseUrl}?key=${key}&q=${encodeURIComponent(dict.word)}&orientation=vertical&safesearch=1`);
     if (!resp.ok) return;
     const content = await resp.json();
     if (!content.hits?.length) return;
@@ -15,7 +15,7 @@ const fillPic = async (dict: IDictP, word: string): Promise<void> => {
 export default fillPic;
 
 if (import.meta.main) {
-    const dict = {};
-    await fillPic(dict, Deno.args[0])
+    const dict = {word: Deno.args[0]};
+    await fillPic(dict)
     console.log(dict);
 }

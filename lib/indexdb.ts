@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { IStat, addTaskToStat, isBLevelIncludesLevel, initStat } from "./istat.ts";
-import { IDict } from "@sholvoir/dict/lib/idict.ts";
+import { IDict } from "./idict.ts";
 import { ITask } from "./itask.ts";
 import { IItem, itemMergeDict, itemMergeTask, MAX_NEXT, neverItem, } from "./iitem.ts";
 import { now } from "./common.ts";

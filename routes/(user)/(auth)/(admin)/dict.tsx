@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { Handlers } from "$fresh/server.ts";
-import { MemState } from '../../lib/fresh.ts';
-import { setAuth } from "../../lib/jwt.ts";
-import Root from '../../islands/root.tsx';
+import { MemState } from '../../../../lib/fresh.ts';
+import { setAuth } from "../../../../lib/jwt.ts";
+import Lookup from "../../../../islands/lookup.tsx";
 
 export const handler: Handlers<any, MemState> = {
     async GET(_req, ctx) {
@@ -10,4 +10,4 @@ export const handler: Handlers<any, MemState> = {
     }
 }
 
-export default () => <Root/>;
+export default () => <Lookup />;
