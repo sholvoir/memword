@@ -128,7 +128,7 @@ export const putBook = (name: string, words: string, disc?: string) =>
    });
 
 export const deleteBook = (name: string) =>
-   fetch(url(`${API_URL}/wordlist`, { name }), {
+   fetch(url(`${API_URL}/book`, { name }), {
       headers: authHeader,
       method: "DELETE",
    });
