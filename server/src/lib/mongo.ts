@@ -1,9 +1,9 @@
-import type { IBook } from "@sholvoir/memword-common/ibook";
-import type { IDict } from "@sholvoir/memword-common/idict";
-import type { IIssue } from "@sholvoir/memword-common/iissue";
-import type { ITask } from "@sholvoir/memword-common/itask";
-import type { IUser } from "@sholvoir/memword-common/iuser";
 import { MongoClient, ServerApiVersion } from "mongodb";
+import type { IBook } from "./ibook.ts";
+import type { IDict } from "./idict.ts";
+import type { IIssue } from "./iissue.ts";
+import type { ITask } from "./itask.ts";
+import type { IUser } from "./iuser.ts";
 
 type kv = { key: string; value: string };
 

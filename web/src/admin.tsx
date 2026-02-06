@@ -1,12 +1,12 @@
 // deno-lint-ignore-file
 /** biome-ignore-all lint/suspicious/noExplicitAny: No */
 
-import type { IDict, IEntry } from "@sholvoir/memword-common/idict";
-import type { IIssue } from "@sholvoir/memword-common/iissue";
 import Button from "@sholvoir/solid-components/button-ripple";
 import TextInput from "@sholvoir/solid-components/input-text";
 import List from "@sholvoir/solid-components/list";
 import { createResource, createSignal, For, Show, type Signal } from "solid-js";
+import type { IDict, IEntry } from "../../server/src/lib/idict.ts";
+import type { IIssue } from "../../server/src/lib/iissue.ts";
 import { version } from "../lib/common.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";

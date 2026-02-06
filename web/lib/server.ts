@@ -1,8 +1,8 @@
-import { type IBook, splitID } from "@sholvoir/memword-common/ibook";
-import type { IDict, IEntry } from "@sholvoir/memword-common/idict";
-import type { IIssue } from "@sholvoir/memword-common/iissue";
-import type { ISetting } from "@sholvoir/memword-common/isetting";
-import type { ITask } from "@sholvoir/memword-common/itask";
+import { type IBook, splitID } from "../../server/src/lib/ibook.ts";
+import type { IDict, IEntry } from "../../server/src/lib/idict.ts";
+import type { IIssue } from "../../server/src/lib/iissue.ts";
+import type { ISetting } from "../../server/src/lib/isetting.ts";
+import type { ITask } from "../../server/src/lib/itask.ts";
 import { API_URL, COMMON_BOOK_BASE_URL } from "./common.ts";
 import * as idb from "./indexdb.ts";
 

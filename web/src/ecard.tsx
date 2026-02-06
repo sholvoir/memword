@@ -1,8 +1,8 @@
-import type { IEntry, IMean } from "@sholvoir/memword-common/idict";
 import Button from "@sholvoir/solid-components/button-ripple";
 import type { TextAreaTargeted } from "@sholvoir/solid-components/targeted";
 import { createSignal, type JSX, type Signal } from "solid-js";
 import { parse, stringify } from "yaml";
+import type { IEntry, IMean } from "../../server/src/lib/idict.ts";
 import * as app from "./app.tsx";
 
 export default (

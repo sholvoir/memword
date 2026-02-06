@@ -1,8 +1,8 @@
-import { now } from "@sholvoir/memword-common/common";
-import type { IBook } from "@sholvoir/memword-common/ibook";
-import type { IDict } from "@sholvoir/memword-common/idict";
-import type { IIssue } from "@sholvoir/memword-common/iissue";
-import { type ITask, studyTask } from "@sholvoir/memword-common/itask";
+import { now } from "../../server/src/lib/common.ts";
+import type { IBook } from "../../server/src/lib/ibook.ts";
+import type { IDict } from "../../server/src/lib/idict.ts";
+import type { IIssue } from "../../server/src/lib/iissue.ts";
+import { type ITask, studyTask } from "../../server/src/lib/itask.ts";
 import {
    type IItem,
    itemMergeDict,

@@ -3,10 +3,10 @@ import {
    jsonResponse,
    STATUS_CODE,
 } from "@sholvoir/generic/http";
-import type { ITask } from "@sholvoir/memword-common/itask";
 import { Hono } from "hono";
 import { Int32 } from "mongodb";
 import type { jwtEnv } from "../lib/env.ts";
+import type { ITask } from "../lib/itask.ts";
 import { getCollectionTask } from "../lib/mongo.ts";
 import auth from "../mid/auth.ts";
 

@@ -1,6 +1,6 @@
-import type { IEntry } from "@sholvoir/memword-common/idict";
 import { marked } from "marked";
 import { For, Show } from "solid-js";
+import type { IEntry } from "../../server/src/lib/idict.ts";
 
 const pReges = /<\/?p>/g;
 

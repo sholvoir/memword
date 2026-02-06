@@ -3,12 +3,12 @@
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import { JWT } from "@sholvoir/generic/jwt";
-import { now } from "@sholvoir/memword-common/common";
-import { type IBook, splitID } from "@sholvoir/memword-common/ibook";
+import { now } from "../../server/src/lib/common.ts";
+import { type IBook, splitID } from "../../server/src/lib/ibook.ts";
 import {
    defaultSetting,
    type ISetting,
-} from "@sholvoir/memword-common/isetting";
+} from "../../server/src/lib/isetting.ts";
 import { dictExpire } from "./common.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";

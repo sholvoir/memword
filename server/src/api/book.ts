@@ -1,8 +1,8 @@
 import { getHash } from "@sholvoir/generic/hash";
 import { emptyResponse, STATUS_CODE } from "@sholvoir/generic/http";
-import type { IBook } from "@sholvoir/memword-common/ibook";
 import { Hono } from "hono";
 import type { jwtEnv } from "../lib/env.ts";
+import type { IBook } from "../lib/ibook.ts";
 import { collectionBook } from "../lib/mongo.ts";
 import { deleteObject, getObject, putObject } from "../lib/s3.ts";
 import * as spellCheck from "../lib/spell-check.ts";

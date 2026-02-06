@@ -1,5 +1,5 @@
-import type { IBook } from "@sholvoir/memword-common/ibook";
 import { createSignal } from "solid-js";
+import type { IBook } from "../../server/src/lib/ibook.ts";
 import type { IItem } from "../lib/iitem.ts";
 import { type IStats, initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";

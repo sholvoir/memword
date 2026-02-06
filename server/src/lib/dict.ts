@@ -1,5 +1,5 @@
-import { now } from "@sholvoir/memword-common/common";
-import type { IDict, IEntry, IMean } from "@sholvoir/memword-common/idict";
+import { now } from "./common.ts";
+import type { IDict, IEntry, IMean } from "./idict.ts";
 
 const baseUrl = Deno.env.get("DEBUG")
    ? "http://localhost:8080/api/v2/origin?q="

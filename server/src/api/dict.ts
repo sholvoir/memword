@@ -1,9 +1,9 @@
 import { emptyResponse, STATUS_CODE } from "@sholvoir/generic/http";
-import { now } from "@sholvoir/memword-common/common";
-import type { IDict } from "@sholvoir/memword-common/idict";
 import { Hono } from "hono";
+import { now } from "../lib/common.ts";
 import { getDict } from "../lib/dict.ts";
 import type { jwtEnv } from "../lib/env.ts";
+import type { IDict } from "../lib/idict.ts";
 import { collectionDict } from "../lib/mongo.ts";
 import { getVocabulary } from "../lib/spell-check.ts";
 import admin from "../mid/admin.ts";

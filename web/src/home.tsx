@@ -1,6 +1,6 @@
-import { splitID } from "@sholvoir/memword-common/ibook";
 import Button from "@sholvoir/solid-components/button-ripple";
 import { For } from "solid-js";
+import { splitID } from "../../server/src/lib/ibook.ts";
 import { aggrToBAggr, type IStat } from "../lib/istat.ts";
 import * as app from "./app.tsx";
 import Dialog from "./dialog.tsx";

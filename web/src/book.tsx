@@ -1,10 +1,10 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
-import { splitID } from "@sholvoir/memword-common/ibook";
 import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
 import { createEffect, createSignal } from "solid-js";
+import { splitID } from "../../server/src/lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import * as app from "./app.tsx";
 import Dialog from "./dialog.tsx";

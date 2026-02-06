@@ -1,6 +1,6 @@
 import { emptyResponse } from "@sholvoir/generic/http";
-import type { IIssue } from "@sholvoir/memword-common/iissue";
 import { Hono } from "hono";
+import type { IIssue } from "../lib/iissue.ts";
 import { collectionDict, collectionIssue } from "../lib/mongo.ts";
 import admin from "../mid/admin.ts";
 import auth from "../mid/auth.ts";
