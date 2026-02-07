@@ -1,10 +1,10 @@
 import type { IDict, IEntry } from "@sholvoir/dict/server/src/lib/imic.ts";
-import { type IBook, splitID } from "../../server/src/lib/ibook.ts";
-import type { IIssue } from "../../server/src/lib/iissue.ts";
-import type { ISetting } from "../../server/src/lib/isetting.ts";
-import type { ITask } from "../../server/src/lib/itask.ts";
+import { type IBook, splitID } from "#srv/lib/ibook.ts";
+import type { IIssue } from "#srv/lib/iissue.ts";
+import type { ISetting } from "#srv/lib/isetting.ts";
+import type { ITask } from "#srv/lib/itask.ts";
 import { COMMON_BOOK_BASE_URL } from "./common.ts";
-import { API_BASE, DICT_API_BASE } from "../../server/src/lib/common.ts";
+import { API_BASE, DICT_API_BASE } from "#srv/lib/common.ts";
 import * as idb from "./indexdb.ts";
 
 const token = await idb.getMeta("_auth");

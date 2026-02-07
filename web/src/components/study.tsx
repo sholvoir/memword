@@ -5,7 +5,7 @@ import BButton from "@sholvoir/solid-components/button-base";
 import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
 import { createResource, createSignal, For, Show } from "solid-js";
-import { type IBook, splitID } from "../../server/src/lib/ibook.ts";
+import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { item2task } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";

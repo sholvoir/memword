@@ -1,6 +1,6 @@
-import { now } from "../../server/src/lib/common.ts";
-import type { IDict } from "../../server/src/lib/idict.ts";
-import type { ITask } from "../../server/src/lib/itask.ts";
+import { now } from "#srv/lib/common.ts";
+import type { IDict } from "@sholvoir/dict/server/src/lib/imic.ts";
+import type { ITask } from "#srv/lib/itask.ts";
 
 export interface IItem extends IDict, ITask {
    dictSync?: number;

@@ -1,8 +1,8 @@
-import { now } from "../../server/src/lib/common.ts";
-import type { IBook } from "../../server/src/lib/ibook.ts";
-import type { IDict } from "../../server/src/lib/idict.ts";
-import type { IIssue } from "../../server/src/lib/iissue.ts";
-import { type ITask, studyTask } from "../../server/src/lib/itask.ts";
+import { now } from "#srv/lib/common.ts";
+import type { IBook } from "#srv/lib/ibook.ts";
+import type { IDict } from "@sholvoir/dict/server/src/lib/imic.ts";
+import type { IIssue } from "#srv/lib/iissue.ts";
+import { type ITask, studyTask } from "#srv/lib/itask.ts";
 import {
    type IItem,
    itemMergeDict,

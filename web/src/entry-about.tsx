@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 import { Dynamic, render } from "solid-js/web";
-import "./index.css";
-import "./icons.css";
+import "./components/index.css";
+import "./components/icons.css";
 import About from "./components/about.tsx";
 import * as app from "./components/app.tsx";
 import Signin from "./components/signin.tsx";
