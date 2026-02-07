@@ -1,6 +1,6 @@
 import { render } from "solid-js/web";
-import "./index.css";
-import "./icons.css";
-import Root from "./root.tsx";
+import "./components/index.css";
+import "./components/icons.css";
+import Root from "./components/root.tsx";
 
 render(() => <Root />, document.getElementById("root")!);

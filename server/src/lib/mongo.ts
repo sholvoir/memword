@@ -1,6 +1,5 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import type { IBook } from "./ibook.ts";
-import type { IDict } from "./idict.ts";
 import type { IIssue } from "./iissue.ts";
 import type { ITask } from "./itask.ts";
 import type { IUser } from "./iuser.ts";
@@ -21,7 +20,6 @@ export const close = () => client.close();
 const memwordDB = client.db("memword");
 
 export const collectionSys = memwordDB.collection<kv>("sys");
-export const collectionDict = memwordDB.collection<IDict>("dict");
 export const collectionUser = memwordDB.collection<IUser>("user");
 export const collectionIssue = memwordDB.collection<IIssue>("issue");
 export const collectionBook = memwordDB.collection<IBook>("book");

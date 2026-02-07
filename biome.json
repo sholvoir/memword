@@ -6,7 +6,11 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": [
+			"server/src/**/*.ts",
+			"!server/public"
+		]
 	},
 	"formatter": {
 		"enabled": true,

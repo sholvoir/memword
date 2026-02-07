@@ -11,9 +11,13 @@
       "worker": "vite build --config vite.worker.config.ts",
       "preview": "vite preview"
    },
+   "imports": {
+      "#srv/*": "../server/src/*"
+   },
    "dependencies": {
       "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.1",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
+      "@sholvoir/dict": "github:sholvoir/dict",
       "js-cookie": "^3.0.5",
       "marked": "^17.0.1",
       "solid-js": "^1.9.11",
