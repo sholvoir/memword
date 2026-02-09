@@ -1,6 +1,7 @@
 {
    "lock": false,
    "imports": {
+      "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.56",
       "@sholvoir/generic": "jsr:@sholvoir/generic@^0.4.1",
       "@std/http": "jsr:@std/http@^1.0.24",
       "hono": "jsr:@hono/hono@^4.11.8",
@@ -8,6 +9,6 @@
    },
    "exclude": ["public/"],
    "tasks": {
-      "server": "deno run -A --env --watch=src/ main.ts"
+      "server": "deno run -A --env --watch=src/ src/main.ts"
    }
 }

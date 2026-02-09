@@ -1,10 +1,10 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.21.2",
+   "version": "0.21.3",
    "type": "module",
    "scripts": {
-      "icon": "bun icons.js",
+      "icon": "icons",
       "dev": "vite",
       "force": "vite --force",
       "build": "vite build",
@@ -15,7 +15,7 @@
       "#srv/*": "../server/src/*"
    },
    "dependencies": {
-      "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.1",
+      "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.2",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
       "@sholvoir/dict": "github:sholvoir/dict",
       "js-cookie": "^3.0.5",

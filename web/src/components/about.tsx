@@ -1,23 +1,28 @@
-import { createSignal, Show } from "solid-js";
-import * as app from "./app.tsx";
+import { type Accessor, createSignal, Show } from "solid-js";
 import "./about.css";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import Input from "@sholvoir/solid-components/input-simple";
-import { version } from "../lib/common.ts";
-import * as idb from "../lib/indexdb.ts";
+import { version } from "../../package.json" with { type: "json" };
+import type { TDial } from "../lib/idial.ts";
 import Dialog from "./dialog.tsx";
 
-export default () => {
+export default ({
+   user,
+   go,
+}: {
+   user?: Accessor<string>;
+   go: (d?: TDial) => void;
+}) => {
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
    return (
       <Dialog
          left={
-            <Show when={app.user()}>
+            <Show when={user?.()}>
                <BButton
                   class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-                  onClick={() => app.go("#home")}
+                  onClick={() => go("#home")}
                />
             </Show>
          }
@@ -29,10 +34,7 @@ export default () => {
                <Input binding={[auth, setAuth]} />
                <BButton
                   class="button bg-slate-300 text-slate-800"
-                  onClick={async () => {
-                     await idb.setMeta("_auth", auth());
-                     location.replace(".");
-                  }}
+                  onClick={() => location.replace(`.?auth=${auth()}`)}
                >
                   Login
                </BButton>
@@ -75,7 +77,7 @@ export default () => {
                ，是成功的关键。
             </p>
          </div>
-         <Show when={!app.user()}>
+         <Show when={!user?.()}>
             <div>
                <h1>开始学习</h1>
                <p>
@@ -83,7 +85,7 @@ export default () => {
                   <RButton
                      class="button bg-orange-300 text-slate-800"
                      title="login"
-                     onClick={() => app.go("#signup")}
+                     onClick={() => go("#signup")}
                   >
                      登录
                   </RButton>

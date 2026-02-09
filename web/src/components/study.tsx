@@ -4,22 +4,60 @@ import SButton from "@sholvoir/solid-components/button-base";
 import BButton from "@sholvoir/solid-components/button-base";
 import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
-import { createResource, createSignal, For, Show } from "solid-js";
+import {
+   type Accessor,
+   createResource,
+   createSignal,
+   For,
+   type Setter,
+   Show,
+} from "solid-js";
+import type { TDial } from "src/lib/idial.ts";
+import type { IStats } from "src/lib/istat.ts";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
-import { item2task } from "../lib/iitem.ts";
+import { type IItem, item2task } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
-import * as app from "./app.tsx";
 import Dialog from "./dialog.tsx";
 import Scard from "./scard.tsx";
 
-export default () => {
+export default ({
+   bid,
+   citem,
+   go,
+   hideTips,
+   isPhaseAnswer,
+   setCItem,
+   setPhaseAnswer,
+   setSprint,
+   showTips,
+   sprint,
+   tips,
+   totalStats,
+   user,
+   vocabulary,
+}: {
+   bid: Accessor<string | undefined>;
+   citem: Accessor<IItem | undefined>;
+   go: (d?: TDial) => void;
+   hideTips: () => void;
+   isPhaseAnswer: Accessor<boolean>;
+   setCItem: Setter<IItem | undefined>;
+   setPhaseAnswer: Setter<boolean>;
+   setSprint: Setter<number>;
+   showTips: (content: string, autohide?: boolean) => void;
+   sprint: Accessor<number>;
+   tips: Accessor<string>;
+   totalStats: () => Promise<IStats>;
+   user: Accessor<string>;
+   vocabulary: Accessor<Set<string>>;
+}) => {
    const finish = async () => {
-      app.go(app.sprint() < 0 ? "#search" : undefined);
-      await app.totalStats();
+      go(sprint() < 0 ? "#search" : undefined);
+      await totalStats();
       //await mem.syncTasks();
-      app.totalStats();
+      totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
@@ -35,35 +73,33 @@ export default () => {
    const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    let player!: HTMLAudioElement;
    const handleIKnown = async (level?: number) => {
-      if (app.citem())
-         srv.putTask(item2task(await idb.studied(app.citem()!.word, level)));
+      if (citem())
+         srv.putTask(item2task(await idb.studied(citem()!.word, level)));
    };
    const studyNext = async () => {
-      if (app.sprint() < 0) return finish();
-      app.setSprint((s) => s + 1);
-      app.setCItem(undefined);
-      app.setPhaseAnswer(false);
+      if (sprint() < 0) return finish();
+      setSprint((s) => s + 1);
+      setCItem(undefined);
+      setPhaseAnswer(false);
       setShowTrans(false);
-      const item = await mem.getEpisode(app.bid());
+      const item = await mem.getEpisode(bid());
       if (!item) return finish();
-      app.setCItem(item);
+      setCItem(item);
       setCIndex(0);
    };
    const handleRefresh = async () => {
-      app.showTips("Get Server Data...", false);
-      const item = await mem.updateDict(app.citem()!);
-      app.hideTips();
-      app.setCItem({ ...item });
+      showTips("Get Server Data...", false);
+      const item = await mem.updateDict(citem()!);
+      hideTips();
+      setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      app.showTips("Submiting...", false);
-      await mem.submitIssue(app.citem()!.word);
-      app.showTips("Submit Success!");
+      showTips("Submiting...", false);
+      await mem.submitIssue(citem()!.word);
+      hideTips();
    };
    const handleDelete = async () => {
-      app.showTips(
-         (await mem.deleteItem(app.citem()!.word)) ? "删除成功" : "删除失败",
-      );
+      showTips((await mem.deleteItem(citem()!.word)) ? "删除成功" : "删除失败");
       await studyNext();
    };
    const handleKeyPress = (e: KeyboardEvent & DivTargeted) => {
@@ -77,13 +113,13 @@ export default () => {
          case "X":
          case "n":
          case "x":
-            if (app.isPhaseAnswer()) handleIKnown().then(studyNext);
+            if (isPhaseAnswer()) handleIKnown().then(studyNext);
             break;
          case "M":
          case "Z":
          case "m":
          case "z":
-            if (app.isPhaseAnswer()) handleIKnown(0).then(studyNext);
+            if (isPhaseAnswer()) handleIKnown(0).then(studyNext);
             break;
       }
    };
@@ -95,7 +131,7 @@ export default () => {
       }
    };
    const handleTouchStart = (e: TouchEvent & DivTargeted) => {
-      if (!app.isPhaseAnswer()) return;
+      if (!isPhaseAnswer()) return;
       const div = e.currentTarget;
       touchPos.endY = touchPos.startY = e.touches[0].clientY;
       touchPos.offset = 0;
@@ -103,7 +139,7 @@ export default () => {
       touchPos.canUp = div.scrollHeight - div.clientHeight - div.scrollTop <= 3;
    };
    const handleTouchMove = (e: TouchEvent & DivTargeted) => {
-      if (!app.isPhaseAnswer()) return;
+      if (!isPhaseAnswer()) return;
       touchPos.endY = e.touches[0].clientY;
       const diff = touchPos.endY - touchPos.startY;
       if ((diff < 0 && touchPos.canUp) || (diff > 0 && touchPos.canDown)) {
@@ -113,7 +149,7 @@ export default () => {
       }
    };
    const handleTouchCancel = (e: TouchEvent & DivTargeted) => {
-      if (!app.isPhaseAnswer()) return;
+      if (!isPhaseAnswer()) return;
       e.currentTarget.style.top = `${(touchPos.offset = 0)}`;
    };
    const handleTouchEnd = async (e: TouchEvent & DivTargeted) => {
@@ -129,10 +165,10 @@ export default () => {
    const handleClick = (e?: MouseEvent & DivTargeted) => {
       e?.stopPropagation();
       if (isShowAddToBookMenu()) return setShowAddToBookMenu(false);
-      const cardsN = app.citem()?.entries?.length ?? 0;
+      const cardsN = citem()?.entries?.length ?? 0;
       //if (cardsN === 0) return;
-      if (!app.isPhaseAnswer()) {
-         app.setPhaseAnswer(true);
+      if (!isPhaseAnswer()) {
+         setPhaseAnswer(true);
          player.play();
       } else if (cardsN === 1) player.play();
       else if (cindex() < cardsN - 1) setCIndex((c) => c + 1);
@@ -140,22 +176,21 @@ export default () => {
    };
    const handleAddToBook = async (book: IBook) => {
       setShowAddToBookMenu(false);
-      const word = app.citem()!.word;
+      const word = citem()!.word;
       const wordSet = (await mem.getBook(book.bid))?.content as Set<string>;
-      if (wordSet?.has(word)) return app.showTips("已包含");
+      if (wordSet?.has(word)) return showTips("已包含");
       const [_, bookName] = splitID(book.bid);
       const [status] = await mem.uploadBook(bookName, word);
-      app.showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
+      showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
-      app.vocabulary().add(word);
+      vocabulary().add(word);
    };
    createResource(async () => {
-      setMyBooks(
-         await idb.getBooks((book) => splitID(book.bid)[0] === app.user()),
-      );
+      setMyBooks(await idb.getBooks((book) => splitID(book.bid)[0] === user()));
    });
    return (
       <Dialog
+         class="flex flex-col p-2 outline-none"
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
@@ -164,32 +199,32 @@ export default () => {
          }
          onKeyUp={handleKeyPress}
          tabIndex={-1}
-         class="flex flex-col p-2 outline-none"
-         title={`学习${app.sprint() > 0 ? `(${app.sprint()})` : ""}`}
+         tips={tips}
+         title={`学习${sprint() > 0 ? `(${sprint()})` : ""}`}
       >
-         <Show when={app.citem()}>
+         <Show when={citem()}>
             <div class="relative flex gap-4 text-[150%] justify-between items-end">
                <SButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"
                   class="icon--material-symbols icon--material-symbols--check-circle text-green-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <SButton
                   onClick={() => handleIKnown(0).then(studyNext)}
                   title="Z/M"
                   class="icon--mdi icon--mdi--cross-circle text-fuchsia-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <SButton
                   onClick={() => handleIKnown(13).then(studyNext)}
                   class="icon--material-symbols icon--material-symbols--family-star text-yellow-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <SButton
                   onClick={handleDelete}
                   class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <SButton
                   onClick={() => player.play()}
@@ -198,26 +233,26 @@ export default () => {
                <SButton
                   onClick={handleReportIssue}
                   class="icon--material-symbols icon--material-symbols--error text-red-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <SButton
                   onClick={handleRefresh}
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <Show when={!mem.setting.trans}>
                   <SButton
                      onClick={() => setShowTrans((s) => !s)}
                      class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
-                     disabled={!app.isPhaseAnswer()}
+                     disabled={!isPhaseAnswer()}
                   ></SButton>
                </Show>
                <SButton
                   onClick={() => setShowAddToBookMenu((s) => !s)}
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
-                  disabled={!app.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                ></SButton>
-               <div class="text-lg">{app.citem()?.level}</div>
+               <div class="text-lg">{citem()?.level}</div>
                <Show when={isShowAddToBookMenu()}>
                   <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
                      <For each={myBooks()}>
@@ -243,23 +278,23 @@ export default () => {
                on:touchcancel={handleTouchCancel}
             >
                <div class="py-2 flex gap-2 flex-wrap justify-between">
-                  <div class="text-4xl font-bold">{app.citem()?.word}</div>
-                  {app.isPhaseAnswer() && (
+                  <div class="text-4xl font-bold">{citem()?.word}</div>
+                  {isPhaseAnswer() && (
                      <div class="text-2xl flex items-center">
-                        {app.citem()?.entries?.[cindex()].phonetic}
+                        {citem()?.entries?.[cindex()].phonetic}
                      </div>
                   )}
                </div>
-               <Show when={app.isPhaseAnswer()}>
+               <Show when={isPhaseAnswer()}>
                   <Show
-                     when={(app.citem()?.entries?.length ?? 0) > 1}
+                     when={(citem()?.entries?.length ?? 0) > 1}
                      fallback={
                         <div class="grow">
                            <Scard
-                              entry={app.citem()?.entries?.[0]!}
+                              entry={citem()?.entries?.[0]!}
                               trans={
                                  isShowTrans() ||
-                                 app.sprint() < 0 ||
+                                 sprint() < 0 ||
                                  mem.setting.trans
                               }
                            />
@@ -267,14 +302,14 @@ export default () => {
                      }
                   >
                      <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
-                        <For each={app.citem()?.entries}>
+                        <For each={citem()?.entries}>
                            {(card) => (
                               <div class="grow">
                                  <Scard
                                     entry={card}
                                     trans={
                                        isShowTrans() ||
-                                       app.sprint() < 0 ||
+                                       sprint() < 0 ||
                                        mem.setting.trans
                                     }
                                  />
@@ -287,7 +322,7 @@ export default () => {
                <audio
                   ref={player}
                   autoplay
-                  src={app.citem()?.entries?.at(cindex())?.sound ?? ""}
+                  src={citem()?.entries?.at(cindex())?.sound ?? ""}
                />
             </div>
          </Show>

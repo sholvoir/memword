@@ -3,20 +3,31 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
-import { createEffect, createSignal } from "solid-js";
-import { splitID } from "#srv/lib/ibook.ts";
+import { type Accessor, createEffect, createSignal } from "solid-js";
+import type { TDial } from "src/lib/idial.ts";
+import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
-import * as app from "./app.tsx";
 import Dialog from "./dialog.tsx";
 
-export default () => {
+export default ({
+   book,
+   go,
+   showTips,
+   user,
+}: {
+   book: Accessor<IBook | undefined>;
+   go: (d?: TDial) => void;
+   showTips: (content: string, autohide?: boolean) => void;
+   user: Accessor<string>;
+}) => {
    const [bname, setBName] = createSignal("");
    const [disc, setDisc] = createSignal("");
    const [words, setWords] = createSignal("");
    const [replace, setReplace] = createSignal(false);
+   const [isPublic, setPublic] = createSignal(false);
    const [revision, setRevision] = createSignal("");
    const handleDownloadClick = async () => {
-      const bid = `${app.user()}/${bname()}`;
+      const bid = `${user()}/${bname()}`;
       const book = await mem.getBook(bid);
       if (!book?.content) return;
       setWords(Array.from(book.content).sort().join("\n"));
@@ -28,31 +39,32 @@ export default () => {
             bname(),
             words(),
             disc(),
+            isPublic(),
             replace(),
          );
          switch (status) {
             case STATUS_CODE.BadRequest:
-               return app.showTips("Error: 无名称或无内容");
+               return showTips("Error: 无名称或无内容");
             case STATUS_CODE.NotAcceptable:
                setRevision(
                   Object.entries(result as Record<string, string[]>)
                      .map(([key, value]) => `${key}: ${value.join(",")}`)
                      .join("\n"),
                );
-               return app.showTips("未通过拼写检查");
+               return showTips("未通过拼写检查");
             case STATUS_CODE.OK: {
-               app.showTips("词书上传成功");
-               app.go("#setting");
+               showTips("词书上传成功");
+               go("#setting");
             }
          }
       } catch {
-         app.showTips("网络错误");
+         showTips("网络错误");
       }
    };
    createEffect(() => {
-      if (app.book()) {
-         setBName(splitID(app.book()!.bid)[1]);
-         if (app.book()!.disc) setDisc(app.book()!.disc!);
+      if (book()) {
+         setBName(splitID(book()!.bid)[1]);
+         if (book()!.disc) setDisc(book()!.disc!);
       }
    }, []);
    return (
@@ -82,10 +94,11 @@ export default () => {
          ) : undefined}
          <div class="flex gap-2 my-2">
             <Checkbox binding={[replace, setReplace]} label="Replace" />
+            <Checkbox binding={[isPublic, setPublic]} label="Public" />
             <div class="grow"></div>
             <Button
                class="w-24 button btn-normal"
-               onClick={() => app.go("#setting")}
+               onClick={() => go("#setting")}
             >
                取消
             </Button>

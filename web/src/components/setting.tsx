@@ -2,16 +2,38 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import Input from "@sholvoir/solid-components/input-simple";
 import List from "@sholvoir/solid-components/list";
-import { createResource, createSignal } from "solid-js";
+import {
+   type Accessor,
+   createResource,
+   createSignal,
+   type Setter,
+} from "solid-js";
+import type { TDial } from "src/lib/idial.ts";
 import { now } from "#srv/lib/common.ts";
 import { compareWL, type IBook } from "#srv/lib/ibook.ts";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
-import * as app from "./app.tsx";
+import { totalStats } from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default () => {
+export default ({
+   go,
+   setBook,
+   setShowLoading,
+   showLoading,
+   showTips,
+   tips,
+   user,
+}: {
+   go: (d?: TDial) => void;
+   setBook: Setter<IBook | undefined>;
+   setShowLoading: Setter<boolean>;
+   showLoading: Accessor<boolean>;
+   showTips: (content: string, autohide?: boolean) => void;
+   tips: Accessor<string>;
+   user: Accessor<string>;
+}) => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
    const [myIndex, setMyIndex] = createSignal(0);
@@ -22,16 +44,16 @@ export default () => {
    const [bookFilter, setBookFilter] = createSignal("^common");
 
    const handleNewBookClick = () => {
-      app.setBook(undefined);
-      app.go("#book");
+      setBook(undefined);
+      go("#book");
    };
    const handleUpdateBookClick = () => {
-      app.setBook(myBooks()[myIndex()]);
-      app.go("#book");
+      setBook(myBooks()[myIndex()]);
+      go("#book");
    };
    const handleDeleteBookClick = async () => {
       const success = await mem.deleteBook(myBooks()[myIndex()].bid);
-      app.showTips(success ? "删除成功" : "删除失败");
+      showTips(success ? "删除成功" : "删除失败");
       if (success) setMyBooks(myBooks().filter((_, i) => i !== myIndex()));
    };
    const handleAddSubClick = () => {
@@ -44,10 +66,10 @@ export default () => {
       ]);
    };
    const handleAddTaskClick = async () => {
-      app.setShowLoading(true);
+      setShowLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
-      await app.totalStats();
-      app.setShowLoading(false);
+      await totalStats();
+      setShowLoading(false);
    };
    const handleOKClick = async () => {
       await mem.syncSetting({
@@ -56,13 +78,12 @@ export default () => {
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
-      await app.totalStats();
-      app.go();
+      await totalStats();
+      go();
    };
    const handleSignoutClick = () => {
-      app.setUser("");
-      app.go("#about");
       idb.clear();
+      location.replace("about");
    };
    const toggleShrink = (
       e: MouseEvent & {
@@ -93,10 +114,15 @@ export default () => {
       setSubBooks(
          await idb.getBooks((wl) => mem.setting.books.includes(wl.bid)),
       );
-      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(app.user())));
+      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(user())));
    });
    return (
-      <Dialog class="p-2 gap-2 flex flex-col" title="设置">
+      <Dialog
+         class="p-2 gap-2 flex flex-col"
+         title="设置"
+         tips={tips}
+         showLoading={showLoading}
+      >
          <Checkbox
             binding={[showTrans, setShowTrans]}
             label="Always Show Trans"
@@ -185,7 +211,7 @@ export default () => {
             <Button class="button btn-prime grow" onClick={handleOKClick}>
                保存
             </Button>
-            <Button class="button btn-normal grow" onClick={() => app.go()}>
+            <Button class="button btn-normal grow" onClick={() => go()}>
                取消
             </Button>
          </div>

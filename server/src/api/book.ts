@@ -2,7 +2,6 @@ import { getHash } from "@sholvoir/generic/hash";
 import { emptyResponse, STATUS_CODE } from "@sholvoir/generic/http";
 import { S3 } from "@sholvoir/generic/s3";
 import { Hono } from "hono";
-import { DICT_API_BASE } from "../lib/common.ts";
 import type { jwtEnv } from "../lib/env.ts";
 import type { IBook } from "../lib/ibook.ts";
 import { collectionBook } from "../lib/mongo.ts";
@@ -16,18 +15,23 @@ const s3 = new S3(
    "vocabulary",
 );
 
+const DICT_API_BASE = Deno.env.get("DEBUG")
+   ? "http://localhost:8080/api/v2"
+   : "https://dict.micinfotech.com/api/v2";
+
 const app = new Hono<jwtEnv>();
 app.get(auth, async (c) => {
    console.log(`API book GET`);
    const books: Array<IBook> = [];
    const username = c.get("username");
    if (!username) return c.json(books);
-   for await (const book of collectionBook.find({
-      $or: [{ bid: { $regex: `^${username}/` } }, { public: true }],
-   })) {
-      delete (book as IBook)._id;
+   for await (const book of collectionBook.find(
+      {
+         $or: [{ bid: { $regex: `^${username}/` } }, { public: true }],
+      },
+      { projection: { _id: 0 } },
+   ))
       books.push(book);
-   }
    return c.json(books);
 })
    .delete(auth, async (c) => {
@@ -47,6 +51,7 @@ app.get(auth, async (c) => {
       const username = c.get("username");
       const bname = c.req.query("name");
       let disc = c.req.query("disc");
+      const isPublic = c.req.query("public");
       if (!bname) return emptyResponse(STATUS_CODE.BadRequest);
       const bid = `${username}/${bname}`;
       const text = await c.req.text();
@@ -71,6 +76,7 @@ app.get(auth, async (c) => {
          const book = await collectionBook.findOne({ bid });
          if (book) {
             if (!disc) disc = book.disc;
+            book.public = !!isPublic;
             const text = await s3.getTextObject(`${bid}.txt`);
             for (let line of text.split("\n"))
                if ((line = line.trim())) words.add(line);
@@ -81,11 +87,11 @@ app.get(auth, async (c) => {
       await s3.putTextObject(`${bid}.txt`, data);
       await collectionBook.updateOne(
          { bid },
-         { $set: { checksum, disc } },
+         { $set: { checksum, disc, public: !!isPublic } },
          { upsert: true },
       );
       console.log(`API book POST ${bid}, successed.`);
-      return c.json({ bid, checksum, disc });
+      return c.json({ bid, checksum, disc, public: !!isPublic });
    })
    .get(":u/:b", auth, async (c) => {
       const username = c.get("username");

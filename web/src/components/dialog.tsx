@@ -1,46 +1,49 @@
-import { type JSX, Show, splitProps } from "solid-js";
-import * as app from "./app.tsx";
+import { type Accessor, type JSX, Show, splitProps } from "solid-js";
 import Loading from "./icon-loading.tsx";
 
 export default (
-	props: {
-		left?: JSX.Element;
-		title: JSX.Element;
-		right?: JSX.Element;
-	} & Omit<JSX.HTMLAttributes<HTMLDivElement>, 'title'>,
+   props: {
+      left?: JSX.Element;
+      title: JSX.Element;
+      right?: JSX.Element;
+      tips?: Accessor<string>;
+      showLoading?: Accessor<boolean>;
+   } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">,
 ) => {
-	const [local, others] = splitProps(props, [
-		"left",
-		"title",
-		"right",
-		"class",
-		"children",
-	]);
-	return (
-		<>
-			<div
-				class={`title shrink-0 px-2 flex justify-between items-center font-bold ${
-					app.tips() ? "bg-(--bg-accent)" : "bg-(--bg-title)"
-				} text-center`}
-			>
-				<div class="min-w-7 [app-region:no-drag]">
-					<Show when={local.left}>{local.left}</Show>
-				</div>
-				<div class="grow font-bold [app-region:drag]">
-					{app.tips() || local.title}
-				</div>
-				<div class="min-w-7 [app-region:no-drag]">
-					<Show when={local.right}>{local.right}</Show>
-				</div>
-			</div>
-			<div class={`body relative grow h-0 ${local.class ?? ""}`} {...others}>
-				{local.children}
-				<Show when={app.showLoading()}>
-					<div class="absolute inset-0 bg-(--bg-half) flex justify-center content-center flex-wrap">
-						<Loading class="w-16 h-16" />
-					</div>
-				</Show>
-			</div>
-		</>
-	);
+   const [local, others] = splitProps(props, [
+      "left",
+      "title",
+      "right",
+      "class",
+      "children",
+      "tips",
+      "showLoading",
+   ]);
+   return (
+      <>
+         <div
+            class={`title shrink-0 px-2 flex justify-between items-center font-bold ${
+               local.tips?.() ? "bg-(--bg-accent)" : "bg-(--bg-title)"
+            } text-center`}
+         >
+            <div class="min-w-7 [app-region:no-drag]">
+               <Show when={local.left}>{local.left}</Show>
+            </div>
+            <div class="grow font-bold [app-region:drag]">
+               {local.tips?.() || local.title}
+            </div>
+            <div class="min-w-7 [app-region:no-drag]">
+               <Show when={local.right}>{local.right}</Show>
+            </div>
+         </div>
+         <div class={`body relative grow h-0 ${local.class ?? ""}`} {...others}>
+            {local.children}
+            <Show when={local.showLoading?.()}>
+               <div class="absolute inset-0 bg-(--bg-half) flex justify-center content-center flex-wrap">
+                  <Loading class="w-16 h-16" />
+               </div>
+            </Show>
+         </div>
+      </>
+   );
 };

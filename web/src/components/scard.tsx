@@ -1,8 +1,5 @@
-import { marked } from "marked";
+import type { IEntry } from "@sholvoir/dict/server/src/lib/imic.ts";
 import { For, Show } from "solid-js";
-import type { IEntry } from "../../server/src/lib/idict.ts";
-
-const pReges = /<\/?p>/g;
 
 export default (props: { entry: IEntry; trans?: boolean }) => (
    <For each={Object.entries(props.entry.meanings!)}>
@@ -12,24 +9,11 @@ export default (props: { entry: IEntry; trans?: boolean }) => (
                <p class="text-xl font-bold text-[var(--accent-color)]">{pos}</p>
             </Show>
             <For each={means}>
-               {(item) => (
-                  <p>
-                     <span>&ensp;-&ensp;</span>
-                     <Show when={item.def}>
-                        <span
-                           class="text-lg"
-                           innerHTML={marked
-                              .parse(item.def!, { async: false })
-                              .replace(pReges, "")}
-                        ></span>
-                     </Show>
-                     <Show when={props.trans && item.def && item.trans}>
-                        <span>&ensp;</span>
-                     </Show>
-                     <Show when={props.trans && item.trans}>
-                        <span class="text-xl font-bold">{item.trans}</span>
-                     </Show>
-                  </p>
+               {(mean) => (
+                  <p
+                     class="&>tt:text-lg &>tt:font-bold &>b:font-bold &>i:font-italic"
+                     innerHTML={`&ensp;-&ensp;${mean}`}
+                  />
                )}
             </For>
          </Show>

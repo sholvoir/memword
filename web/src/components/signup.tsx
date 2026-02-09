@@ -2,48 +2,61 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
-import { createSignal } from "solid-js";
+import { type Accessor, createSignal, type Setter } from "solid-js";
+import type { TDial } from "../lib/idial.ts";
 import * as srv from "../lib/server.ts";
-import * as app from "./app.tsx";
 import Dialog from "./dialog.tsx";
 
 const namePattern = /^[_\w-]+$/;
 const fonePattern = /^\+\d+$/;
 
-export default () => {
+export default ({
+   go,
+   name,
+   setName,
+   showTips,
+   tips,
+}: {
+   go: (d?: TDial) => void;
+   name: Accessor<string>;
+   setName: Setter<string>;
+   showTips: (content: string, autohide?: boolean) => void;
+   tips: Accessor<string>;
+}) => {
    const [phone, setPhone] = createSignal("");
    const handleSignin = () => {
-      app.go("#signin");
+      go("#signin");
    };
    const handleSignup = async () => {
-      if (!namePattern.test(app.name()))
-         return app.showTips("Name can only include _, letter, number and -");
+      if (!namePattern.test(name()))
+         return showTips("Name can only include _, letter, number and -");
       const fone = phone().replaceAll(/[() -]/g, "");
-      if (!fonePattern.test(fone)) return app.showTips("Invalid phone number!");
+      if (!fonePattern.test(fone)) return showTips("Invalid phone number!");
       try {
-         switch ((await srv.signup(fone, app.name())).status) {
+         switch ((await srv.signup(fone, name())).status) {
             case STATUS_CODE.BadRequest:
-               return app.showTips("用户名已注册");
+               return showTips("用户名已注册");
             case STATUS_CODE.Conflict:
-               return app.showTips("电话号码已注册");
+               return showTips("电话号码已注册");
             case STATUS_CODE.OK:
-               app.showTips("注册成功，请登录");
-               return app.go("#signin");
+               showTips("注册成功，请登录");
+               return go("#signin");
             default:
-               app.showTips("未知数服务器错误");
+               showTips("未知数服务器错误");
          }
       } catch {
-         app.showTips("网络错误");
+         showTips("网络错误");
       }
    };
    return (
       <Dialog
+         tips={tips}
          class="p-2 flex flex-col"
          title="注册"
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => app.go("#about")}
+               onClick={() => go("#about")}
             />
          }
       >
@@ -53,7 +66,7 @@ export default () => {
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[app.name, app.setName]}
+               binding={[name, setName]}
                class="mb-3"
             />
             <label for="phone">手机号码(含国际区号)</label>

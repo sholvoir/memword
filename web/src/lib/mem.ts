@@ -5,15 +5,13 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import { JWT } from "@sholvoir/generic/jwt";
 import { now } from "#srv/lib/common.ts";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
-import {
-   defaultSetting,
-   type ISetting,
-} from "#srv/lib/isetting.ts";
-import { dictExpire } from "./common.ts";
+import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import { type IStats, statsFormat } from "./istat.ts";
 import * as srv from "./server.ts";
+
+const dictExpire = 7 * 24 * 60 * 60;
 
 export const user = await (async () => {
    const auth = (await idb.getMeta("_auth")) as string;
@@ -212,11 +210,10 @@ export const uploadBook = async (
    name: string,
    words: string,
    disc?: string,
+   isPublic?: boolean,
    replace?: boolean,
-) => {
-   const res = replace
-      ? await srv.putBook(name, words, disc)
-      : await srv.postBook(name, words, disc);
+): Promise<[number, Record<string, string[]>?]> => {
+   const res = await srv.uploadBook(name, words, disc, isPublic, replace);
    switch (res.status) {
       case STATUS_CODE.NotAcceptable:
          return [res.status, await res.json()];
