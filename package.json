@@ -1,7 +1,7 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.21.6",
+   "version": "0.21.7",
    "type": "module",
    "scripts": {
       "icon": "icons",
@@ -12,7 +12,7 @@
       "preview": "vite preview"
    },
    "imports": {
-      "#srv/*": "../server/src/*"
+      "#srv/*": "../memword-server/src/*"
    },
    "dependencies": {
       "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.2",

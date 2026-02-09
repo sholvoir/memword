@@ -20,7 +20,7 @@
     "baseUrl": ".",
     "paths": {
       "#srv/*": [
-        "../server/src/*"
+        "../memword-server/src/*"
       ]
     }
   }
