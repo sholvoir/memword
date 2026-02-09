@@ -8,7 +8,7 @@ export default defineConfig({
    plugins: [solid(), tailwindcss()],
    build: {
       target: "esnext",
-      outDir: "../server/public",
+      outDir: "docs",
       emptyOutDir: true,
       rollupOptions: {
          input: ["/index.html", "/about.html"],
