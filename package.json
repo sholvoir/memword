@@ -1,7 +1,7 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.21.8",
+   "version": "0.21.9",
    "type": "module",
    "scripts": {
       "icon": "icons",
@@ -17,7 +17,7 @@
    "dependencies": {
       "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.2",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
-      "@sholvoir/dict": "github:sholvoir/dict",
+      "@sholvoir/dict-server": "github:sholvoir/dict-server",
       "js-cookie": "^3.0.5",
       "marked": "^17.0.1",
       "solid-js": "^1.9.11",
