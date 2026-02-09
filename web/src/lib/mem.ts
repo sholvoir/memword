@@ -1,9 +1,6 @@
-// deno-lint-ignore-file no-empty no-cond-assign
-
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import { JWT } from "@sholvoir/generic/jwt";
-import { now } from "#srv/lib/common.ts";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
@@ -51,14 +48,14 @@ export const updateDict = async (item: IItem) => {
             const resp = await srv.getSound(entry.sound);
             if (resp.ok) entry.sound = await blobToBase64(await resp.blob());
          }
-   item.dictSync = now();
+   item.dictSync = `${Date.now()}`;
    idb.putItem(itemMergeDict(item, dict));
    return item;
 };
 
 const itemUpdateDict = async (item: IItem) => {
    if (!item.dictSync) return await updateDict(item);
-   if (item.dictSync + dictExpire < now()) updateDict(item);
+   if (+item.dictSync + dictExpire < Date.now()) updateDict(item);
    return item;
 };
 
@@ -112,7 +109,7 @@ export const addTasks = async (bid: string) => {
 
 export const syncTasks = async () => {
    try {
-      const thisTime = now();
+      const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
       const resp = await srv.postTasks(tasks);
@@ -153,7 +150,7 @@ export const totalStats = async () => {
 export const getServerBooks = async () => {
    const books = await srv.getBooks();
    if (books.length) {
-      const time = now();
+      const time = `${Date.now()}`;
       const deleted = await idb.syncBooks(books);
       const setting = (await idb.getMeta("_setting")) as ISetting;
       if (setting?.books.length) {

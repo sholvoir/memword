@@ -1,12 +1,11 @@
 import type { IDict } from "@sholvoir/dict/server/src/lib/imic.ts";
-import { now } from "#srv/lib/common.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 
 export interface IItem extends IDict, ITask {
-   dictSync?: number;
+   dictSync?: string;
 }
 
-export const neverItem = (word: string, time: number): IItem => ({
+export const neverItem = (word: string, time: string): IItem => ({
    word,
    last: time,
    next: time,
@@ -14,7 +13,7 @@ export const neverItem = (word: string, time: number): IItem => ({
 });
 
 export const newItem = (dict: IDict): IItem => {
-   const time = now();
+   const time = `${Date.now()}`;
    return {
       word: dict.word,
       entries: dict.entries,

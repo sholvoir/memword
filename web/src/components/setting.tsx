@@ -9,7 +9,6 @@ import {
    type Setter,
 } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import { now } from "#srv/lib/common.ts";
 import { compareWL, type IBook } from "#srv/lib/ibook.ts";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import * as idb from "../lib/indexdb.ts";
@@ -74,7 +73,7 @@ export default ({
    const handleOKClick = async () => {
       await mem.syncSetting({
          format: settingFormat,
-         version: now(),
+         version: `${Date.now()}`,
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });

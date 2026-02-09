@@ -1,4 +1,4 @@
-import type { ITask } from "../../server/src/lib/itask.ts";
+import type { ITask } from "#srv/lib/itask.ts";
 
 export const statsFormat = "0.2.1";
 
@@ -49,7 +49,7 @@ export const initStats = (): IStats => ({
 
 export const addTaskToStat = (stat: IStat, item: ITask) => {
    stat.total[item.level]++;
-   if (item.next < stat.time) stat.task[item.level]++;
+   if (+item.next < stat.time) stat.task[item.level]++;
 };
 
 export type TBAggr = [number, number, number, number, number, number];

@@ -1,5 +1,4 @@
 import type { IDict } from "@sholvoir/dict/server/src/lib/imic.ts";
-import { now } from "#srv/lib/common.ts";
 import type { IBook } from "#srv/lib/ibook.ts";
 import type { IIssue } from "#srv/lib/iissue.ts";
 import { type ITask, studyTask } from "#srv/lib/itask.ts";
@@ -203,7 +202,7 @@ export const getItems = (lastgte: number) =>
 
 export const addTasks = (words: Iterable<string>) =>
    new Promise<void>((resolve, reject) => {
-      const time = now();
+      const time = `${Date.now()}`;
       const transaction = db.transaction("item", "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
@@ -232,7 +231,8 @@ export const mergeTasks = (tasks: Iterable<ITask>) =>
          const item = cursor.value as IItem;
          if (taskMap.has(item.word)) {
             const task = taskMap.get(item.word)!;
-            if (task.last > item.last) cursor.update(itemMergeTask(item, task));
+            if (+task.last > +item.last)
+               cursor.update(itemMergeTask(item, task));
             taskMap.delete(item.word);
          } else cursor.delete();
          cursor.continue();
@@ -249,7 +249,7 @@ export const updateDict = (dict: IDict) =>
       iStore.get(dict.word).onsuccess = (e1) => {
          item = (e1.target as IDBRequest<IItem>).result;
          item &&
-            (item.dictSync = now()) &&
+            (item.dictSync = `${Date.now()}`) &&
             iStore.put(itemMergeDict(item, dict));
       };
    });
@@ -263,7 +263,10 @@ export const getEpisode = (filter?: (word: string) => boolean) =>
       transaction
          .objectStore("item")
          .index("next")
-         .openCursor(IDBKeyRange.upperBound(now()), "prev").onsuccess = (e) => {
+         .openCursor(
+            IDBKeyRange.upperBound(`${Date.now()}`),
+            "prev",
+         ).onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) return;
          const item = cursor.value as IItem;
@@ -275,7 +278,7 @@ export const getEpisode = (filter?: (word: string) => boolean) =>
 
 export const getStats = (books: Array<IBook>) =>
    new Promise<Array<IStat>>((resolve, reject) => {
-      const time = now();
+      const time = Date.now();
       const tstat = initStat(time, undefined, "全部词汇");
       const stats: Array<IStat> = books.map((book) =>
          initStat(time, book.bid, book.disc),

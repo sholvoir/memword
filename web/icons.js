@@ -45,5 +45,5 @@ for (const prefix in icons) {
 }
 
 // Save CSS file
-await writeFile("src/icons.css", code, "utf8");
+await writeFile("src/components/icons.css", code, "utf8");
 console.log(`Saved CSS (${code.length} bytes)`);
