@@ -130,7 +130,7 @@ export const syncTasks = async () => {
 const submitIssues = async () => {
    const issues = await idb.getIssues();
    for (const issue of issues) {
-      const res = await srv.postIssue(issue.issue);
+      const res = await srv.postDictIssue(issue.issue);
       if (!res.ok) break;
       await idb.deleteIssue(issue.iid!);
    }

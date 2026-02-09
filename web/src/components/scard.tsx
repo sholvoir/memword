@@ -9,12 +9,7 @@ export default (props: { entry: IEntry; trans?: boolean }) => (
                <p class="text-xl font-bold text-[var(--accent-color)]">{pos}</p>
             </Show>
             <For each={means}>
-               {(mean) => (
-                  <p
-                     class="&>tt:text-lg &>tt:font-bold &>b:font-bold &>i:font-italic"
-                     innerHTML={`&ensp;-&ensp;${mean}`}
-                  />
-               )}
+               {(mean) => <p innerHTML={`&ensp;-&ensp;${mean}`} />}
             </For>
          </Show>
       )}
