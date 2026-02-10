@@ -13,12 +13,10 @@ export default ({
    book,
    go,
    showTips,
-   user,
 }: {
    book: Accessor<IBook | undefined>;
    go: (d?: TDial) => void;
    showTips: (content: string, autohide?: boolean) => void;
-   user: Accessor<string>;
 }) => {
    const [bname, setBName] = createSignal("");
    const [disc, setDisc] = createSignal("");
@@ -27,7 +25,7 @@ export default ({
    const [isPublic, setPublic] = createSignal(false);
    const [revision, setRevision] = createSignal("");
    const handleDownloadClick = async () => {
-      const bid = `${user()}/${bname()}`;
+      const bid = `${mem.user}/${bname()}`;
       const book = await mem.getBook(bid);
       if (!book?.content) return;
       setWords(Array.from(book.content).sort().join("\n"));

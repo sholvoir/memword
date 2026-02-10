@@ -35,7 +35,6 @@ export default ({
    sprint,
    tips,
    totalStats,
-   user,
    vocabulary,
 }: {
    bid: Accessor<string | undefined>;
@@ -50,7 +49,6 @@ export default ({
    sprint: Accessor<number>;
    tips: Accessor<string>;
    totalStats: () => Promise<IStats>;
-   user: Accessor<string>;
    vocabulary: Accessor<Set<string>>;
 }) => {
    const finish = async () => {
@@ -186,7 +184,9 @@ export default ({
       vocabulary().add(word);
    };
    createResource(async () => {
-      setMyBooks(await idb.getBooks((book) => splitID(book.bid)[0] === user()));
+      setMyBooks(
+         await idb.getBooks((book) => splitID(book.bid)[0] === mem.user),
+      );
    });
    return (
       <Dialog

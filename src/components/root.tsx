@@ -15,11 +15,6 @@ import Setting from "./setting.tsx";
 import Study from "./study.tsx";
 
 export default () => {
-   const [user] = createSignal(
-      document
-         .querySelector("meta[name='username']")
-         ?.getAttribute("content") ?? "",
-   );
    const [stats, setStats] = createSignal<IStats>(initStats());
    const [tips, setTips] = createSignal("");
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
@@ -34,7 +29,7 @@ export default () => {
    let timeout: NodeJS.Timeout | undefined;
    const totalStats = async () => setStats(await mem.totalStats());
    const hideTips = () => setTips("");
-   const go = (d?: TDial) => setLoca(d ?? (user() ? "#home" : "#about"));
+   const go = (d?: TDial) => setLoca(d ?? (mem.user ? "#home" : "#about"));
    const showTips = (content: string, autohide = true) => {
       setTips(content);
       if (autohide) {
@@ -59,7 +54,7 @@ export default () => {
       />
    ));
    dialogs.set("#help", () => <Help go={go} />);
-   dialogs.set("#about", () => <About user={user} go={go} />);
+   dialogs.set("#about", () => <About go={go} />);
    dialogs.set("#issue", () => (
       <Issue go={go} showTips={showTips} tips={tips} />
    ));
@@ -71,7 +66,6 @@ export default () => {
          showLoading={showLoading}
          showTips={showTips}
          tips={tips}
-         user={user}
       />
    ));
    dialogs.set("#search", () => (
@@ -98,16 +92,13 @@ export default () => {
          sprint={sprint}
          tips={tips}
          totalStats={totalStats}
-         user={user}
          vocabulary={vocabulary}
       />
    ));
-   dialogs.set("#book", () => (
-      <Book go={go} book={book} showTips={showTips} user={user} />
-   ));
+   dialogs.set("#book", () => <Book go={go} book={book} showTips={showTips} />);
 
    const init = async () => {
-      if (user()) {
+      if (mem.user) {
          go("#home");
          await totalStats();
          (async () => {

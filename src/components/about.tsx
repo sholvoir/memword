@@ -1,25 +1,20 @@
-import { type Accessor, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import "./about.css";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
 import type { TDial } from "../lib/idial.ts";
+import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({
-   user,
-   go,
-}: {
-   user?: Accessor<string>;
-   go: (d?: TDial) => void;
-}) => {
+export default ({ go }: { go: (d?: TDial) => void }) => {
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
    return (
       <Dialog
          left={
-            <Show when={user?.()}>
+            <Show when={mem.user}>
                <BButton
                   class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
                   onClick={() => go("#home")}
@@ -71,7 +66,7 @@ export default ({
                ，是成功的关键。
             </p>
          </div>
-         <Show when={!user?.()}>
+         <Show when={!mem.user}>
             <div>
                <h1>开始学习</h1>
                <p>

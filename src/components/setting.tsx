@@ -23,7 +23,6 @@ export default ({
    showLoading,
    showTips,
    tips,
-   user,
 }: {
    go: (d?: TDial) => void;
    setBook: Setter<IBook | undefined>;
@@ -31,7 +30,6 @@ export default ({
    showLoading: Accessor<boolean>;
    showTips: (content: string, autohide?: boolean) => void;
    tips: Accessor<string>;
-   user: Accessor<string>;
 }) => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
@@ -73,7 +71,7 @@ export default ({
    const handleOKClick = async () => {
       await mem.syncSetting({
          format: settingFormat,
-         version: `${Date.now()}`,
+         version: Date.now(),
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
@@ -113,7 +111,7 @@ export default ({
       setSubBooks(
          await idb.getBooks((wl) => mem.setting.books.includes(wl.bid)),
       );
-      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(user())));
+      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user)));
    });
    return (
       <Dialog

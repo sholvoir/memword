@@ -11,6 +11,13 @@ const DICT_API_BASE =
       ? "http://localhost:8080/api/v2"
       : "https://dict.micinfotech.com/api/v2";
 
+export const token = await (async () => {
+   const res = await getJson<{ token: string }>(`${API_BASE}/token`);
+   return res?.token;
+})();
+
+const authHeader = { Authorization: `Bearer ${token}` };
+
 export const otp = (name: string) => fetch(url(`${API_BASE}/otp`, { name }));
 
 export const signup = (phone: string, name: string) =>
@@ -101,8 +108,4 @@ export const postIssue = (issue: string) =>
    fetch(`${API_BASE}/issue`, jsonInit({ issue }));
 
 export const postDictIssue = (issue: string) =>
-   fetch(`${DICT_API_BASE}/issue`, {
-      credentials: "include",
-      mode: "cors",
-      ...jsonInit({ issue }),
-   });
+   fetch(`${DICT_API_BASE}/issue`, jsonInit({ issue }, "POST", authHeader));

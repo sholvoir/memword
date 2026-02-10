@@ -11,9 +11,8 @@ import * as srv from "./server.ts";
 const dictExpire = 7 * 24 * 60 * 60;
 
 export const user = await (async () => {
-   const auth = (await idb.getMeta("_auth")) as string;
-   if (!auth) return "";
-   return (JWT.decode(auth)[1]?.aud as string) ?? "";
+   if (!srv.token) return "";
+   return (JWT.decode(srv.token)[1]?.aud as string) ?? "";
 })();
 
 export let setting: ISetting =
