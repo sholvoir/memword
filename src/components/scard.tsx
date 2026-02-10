@@ -1,4 +1,4 @@
-import type { IEntry } from "@sholvoir/dict/server/src/lib/imic.ts";
+import type { IEntry } from "@sholvoir/dict-server/src/lib/imic.ts";
 import { For, Show } from "solid-js";
 
 export default (props: { entry: IEntry; trans?: boolean }) => (

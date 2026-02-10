@@ -48,14 +48,14 @@ export const updateDict = async (item: IItem) => {
             const resp = await srv.getSound(entry.sound);
             if (resp.ok) entry.sound = await blobToBase64(await resp.blob());
          }
-   item.dictSync = `${Date.now()}`;
+   item.dictSync = Date.now();
    idb.putItem(itemMergeDict(item, dict));
    return item;
 };
 
 const itemUpdateDict = async (item: IItem) => {
    if (!item.dictSync) return await updateDict(item);
-   if (+item.dictSync + dictExpire < Date.now()) updateDict(item);
+   if (item.dictSync + dictExpire < Date.now()) updateDict(item);
    return item;
 };
 
@@ -150,7 +150,7 @@ export const totalStats = async () => {
 export const getServerBooks = async () => {
    const books = await srv.getBooks();
    if (books.length) {
-      const time = `${Date.now()}`;
+      const time = Date.now();
       const deleted = await idb.syncBooks(books);
       const setting = (await idb.getMeta("_setting")) as ISetting;
       if (setting?.books.length) {
