@@ -6,6 +6,7 @@ import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
 import type { TDial } from "../lib/idial.ts";
 import * as mem from "../lib/mem.ts";
+import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 
 export default ({ go }: { go: (d?: TDial) => void }) => {
@@ -29,7 +30,10 @@ export default ({ go }: { go: (d?: TDial) => void }) => {
                <Input binding={[auth, setAuth]} />
                <BButton
                   class="button bg-slate-300 text-slate-800"
-                  onClick={() => location.replace(`.?auth=${auth()}`)}
+                  onClick={() => {
+                     srv.renew(auth());
+                     location.replace(".");
+                  }}
                >
                   Login
                </BButton>

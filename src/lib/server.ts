@@ -26,6 +26,9 @@ export const signup = (phone: string, name: string) =>
 export const signin = (name: string, code: string) =>
    fetch(url(`${API_BASE}/signin`, { name, code }));
 
+export const renew = (auth?: string) =>
+   fetch(url(`${API_BASE}/renew`, { auth }));
+
 export const getDict = (word: string) =>
    getJson<IDict>(url(`${DICT_API_BASE}/dict`, { q: word, mic: "1" }));
 
