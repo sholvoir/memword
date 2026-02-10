@@ -101,4 +101,7 @@ export const postIssue = (issue: string) =>
    fetch(`${API_BASE}/issue`, jsonInit({ issue }));
 
 export const postDictIssue = (issue: string) =>
-   fetch(`${DICT_API_BASE}/issue`, jsonInit({ issue }));
+   fetch(`${DICT_API_BASE}/issue`, {
+      credentials: "include",
+      ...jsonInit({ issue }),
+   });
