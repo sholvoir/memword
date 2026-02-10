@@ -103,5 +103,6 @@ export const postIssue = (issue: string) =>
 export const postDictIssue = (issue: string) =>
    fetch(`${DICT_API_BASE}/issue`, {
       credentials: "include",
+      mode: "cors",
       ...jsonInit({ issue }),
    });
