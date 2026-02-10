@@ -8,7 +8,7 @@ import * as idb from "./indexdb.ts";
 import { type IStats, statsFormat } from "./istat.ts";
 import * as srv from "./server.ts";
 
-const dictExpire = 7 * 24 * 60 * 60;
+const dictExpire = 7 * 24 * 60 * 60 * 1000;
 
 export const user = await (async () => {
    if (!srv.token) return "";
