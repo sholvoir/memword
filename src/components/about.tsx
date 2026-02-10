@@ -41,14 +41,8 @@ export default ({
             </div>
          </Show>
          <div>
-            <h1>快乐背单词</h1>
+            <h1 onClick={() => location.reload()}>快乐背单词</h1>
             <p>版本：{version}</p>
-            <BButton
-               class="px-2 py-1 button bg-orange-300 text-slate-800"
-               onClick={() => location.reload()}
-            >
-               重新加载
-            </BButton>
          </div>
          <div>
             <h1>语言基础</h1>
