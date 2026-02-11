@@ -92,9 +92,8 @@ export default ({
       setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      showTips("Submiting...", false);
       await mem.submitIssue(citem()!.word);
-      hideTips();
+      showTips("Submitted");
    };
    const handleDelete = async () => {
       showTips((await mem.deleteItem(citem()!.word)) ? "删除成功" : "删除失败");

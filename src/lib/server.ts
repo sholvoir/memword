@@ -4,7 +4,7 @@ import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import type { ISetting } from "#srv/lib/isetting.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 
-const API_BASE = "https://memword.micinfotech.com/api/v2";
+const API_BASE = "/api/v2";
 const COMMON_BOOK_BASE_URL = "https://www.micinfotech.com/vocabulary";
 const DICT_API_BASE =
    window.location.hostname === "localhost"
