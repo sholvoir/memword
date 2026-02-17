@@ -13,7 +13,6 @@ import {
    Show,
 } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import type { IStats } from "src/lib/istat.ts";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { type IItem, item2task } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
@@ -48,13 +47,11 @@ export default ({
    showTips: (content: string, autohide?: boolean) => void;
    sprint: Accessor<number>;
    tips: Accessor<string>;
-   totalStats: () => Promise<IStats>;
+   totalStats: () => void;
    vocabulary: Accessor<Set<string>>;
 }) => {
-   const finish = async () => {
+   const finish = () => {
       go(sprint() < 0 ? "#search" : undefined);
-      await totalStats();
-      //await mem.syncTasks();
       totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);

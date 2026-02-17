@@ -13,7 +13,6 @@ import { compareWL, type IBook } from "#srv/lib/ibook.ts";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
-import { totalStats } from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
 export default ({
@@ -23,6 +22,7 @@ export default ({
    showLoading,
    showTips,
    tips,
+   totalStats,
 }: {
    go: (d?: TDial) => void;
    setBook: Setter<IBook | undefined>;
@@ -30,6 +30,7 @@ export default ({
    showLoading: Accessor<boolean>;
    showTips: (content: string, autohide?: boolean) => void;
    tips: Accessor<string>;
+   totalStats: () => void;
 }) => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
@@ -65,7 +66,7 @@ export default ({
    const handleAddTaskClick = async () => {
       setShowLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
-      await totalStats();
+      totalStats();
       setShowLoading(false);
    };
    const handleOKClick = async () => {
@@ -75,7 +76,7 @@ export default ({
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
-      await totalStats();
+      totalStats();
       go();
    };
    const handleSignoutClick = () => {

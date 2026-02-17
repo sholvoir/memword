@@ -66,6 +66,7 @@ export default () => {
          showLoading={showLoading}
          showTips={showTips}
          tips={tips}
+         totalStats={totalStats}
       />
    ));
    dialogs.set("#search", () => (
