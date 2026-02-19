@@ -285,7 +285,7 @@ export default ({
                   <Show
                      when={(citem()?.entries?.length ?? 0) > 1}
                      fallback={
-                        <div class="grow [&>p>tt]:text-lg [&>p>tt]:font-bold [&>p>b]:font-bold [&>p>i]:font-italic">
+                        <div class="grow [&>p>strong]:text-lg">
                            <Scard
                               entry={citem()?.entries?.[0]!}
                               trans={
@@ -300,7 +300,7 @@ export default ({
                      <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
                         <For each={citem()?.entries}>
                            {(card) => (
-                              <div class="grow [&>p>tt]:text-lg [&>p>tt]:font-bold [&>p>b]:font-bold [&>p>i]:font-italic">
+                              <div class="grow [&>p>strong]:text-lg">
                                  <Scard
                                     entry={card}
                                     trans={
