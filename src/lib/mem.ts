@@ -5,7 +5,7 @@ import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
-import { type IStats, statsFormat } from "./istat.ts";
+import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
 import * as srv from "./server.ts";
 
 const dictExpire = 7 * 24 * 60 * 60 * 1000;
@@ -75,12 +75,22 @@ export const search = async (word: string) => {
    return await itemUpdateDict(item);
 };
 
-export const getEpisode = async (bid?: string) => {
+export const getEpisode = async (bid?: string, blevel?: number) => {
    let items: Array<IItem>;
    if (bid) {
       const wordSet = (await getBook(bid))?.content as Set<string>;
-      items = await idb.getEpisode((word) => wordSet.has(word));
-   } else items = await idb.getEpisode();
+      if (blevel !== undefined)
+         items = await idb.getEpisode(
+            (item) =>
+               wordSet.has(item.word) &&
+               isBLevelIncludesLevel(blevel, item.level),
+         );
+      else items = await idb.getEpisode((item) => wordSet.has(item.word));
+   } else if (blevel !== undefined)
+      items = await idb.getEpisode((item) =>
+         isBLevelIncludesLevel(blevel, item.level),
+      );
+   else items = await idb.getEpisode();
    if (items[1]) itemUpdateDict(items[1]);
    if (items[0]) return await itemUpdateDict(items[0]);
 };

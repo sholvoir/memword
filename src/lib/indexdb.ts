@@ -253,7 +253,7 @@ export const updateDict = (dict: IDict) =>
       };
    });
 
-export const getEpisode = (filter?: (word: string) => boolean) =>
+export const getEpisode = (filter?: (item: IItem) => boolean) =>
    new Promise<Array<IItem>>((resolve, reject) => {
       const result: Array<IItem> = [];
       const transaction = db.transaction("item", "readonly");
@@ -268,7 +268,7 @@ export const getEpisode = (filter?: (word: string) => boolean) =>
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) return;
          const item = cursor.value as IItem;
-         if (!filter || filter(item.word)) result.push(item);
+         if (!filter || filter(item)) result.push(item);
          if (result.length > 1) return;
          cursor.continue();
       };
