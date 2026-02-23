@@ -1,7 +1,7 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { IBook } from "#srv/lib/ibook.ts";
-import type { IIssue } from "#srv/lib/iissue.ts";
 import { type ITask, studyTask } from "#srv/lib/itask.ts";
+import type { IIssue } from "./iissue.ts";
 import {
    type IItem,
    itemMergeDict,

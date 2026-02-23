@@ -1,8 +1,8 @@
 {
     "deno.enable": false,
     "editor.codeActionsOnSave": {
-        "source.organizeImports.biome": "explicit",
-        "source.fixAll.biome": "explicit"
+        "source.organizeImports.biome": "always",
+        "source.fixAll.biome": "always"
     },
     "editor.tabSize": 3,
     "editor.indentSize": "tabSize",

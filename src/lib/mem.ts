@@ -1,6 +1,5 @@
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
-import { JWT } from "@sholvoir/generic/jwt";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
@@ -10,10 +9,9 @@ import * as srv from "./server.ts";
 
 const dictExpire = 7 * 24 * 60 * 60 * 1000;
 
-export const user = await (async () => {
-   if (!srv.token) return "";
-   return (JWT.decode(srv.token)[1]?.aud as string) ?? "";
-})();
+export const user = (await srv.getUser())?.name;
+
+export const auth = (await idb.getMeta("_auth")) as string | undefined
 
 export let setting: ISetting =
    ((await idb.getMeta("_setting")) as ISetting) ?? defaultSetting();
@@ -136,7 +134,7 @@ export const syncTasks = async () => {
 const submitIssues = async () => {
    const issues = await idb.getIssues();
    for (const issue of issues) {
-      const res = await srv.postDictIssue(issue.issue);
+      const res = await srv.postIssue(issue);
       if (!res.ok) break;
       await idb.deleteIssue(issue.iid!);
    }

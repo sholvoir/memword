@@ -3,6 +3,7 @@ import { getJson, jsonInit, textHeader, url } from "@sholvoir/generic/http";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import type { ISetting } from "#srv/lib/isetting.ts";
 import type { ITask } from "#srv/lib/itask.ts";
+import type { IIssue } from "./iissue";
 
 const API_BASE = "/api/v2";
 const COMMON_BOOK_BASE_URL = "https://www.micinfotech.com/vocabulary";
@@ -11,12 +12,7 @@ const DICT_API_BASE =
       ? "http://localhost:8080/api/v2"
       : "https://dict.micinfotech.com/api/v2";
 
-export const token = await (async () => {
-   const res = await getJson<{ token: string }>(`${API_BASE}/token`);
-   return res?.token;
-})();
-
-const authHeader = { Authorization: `Bearer ${token}` };
+export const getUser = () => getJson<{ name: string }>(`${API_BASE}/user`);
 
 export const otp = (name: string) => fetch(url(`${API_BASE}/otp`, { name }));
 
@@ -107,8 +103,8 @@ export const getSound = (surl: string) =>
 export const postSetting = (setting: ISetting) =>
    fetch(`${API_BASE}/setting`, jsonInit(setting));
 
-export const postIssue = (issue: string) =>
-   fetch(`${API_BASE}/issue`, jsonInit({ issue }));
-
-export const postDictIssue = (issue: string) =>
-   fetch(`${DICT_API_BASE}/issue`, jsonInit({ issue }, "POST", authHeader));
+export const postIssue = (issue: IIssue) =>
+   fetch(
+      url(`${API_BASE}/issue`, { d: issue.d }),
+      jsonInit({ issue: issue.issue }),
+   );

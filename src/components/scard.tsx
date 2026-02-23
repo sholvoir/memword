@@ -6,7 +6,7 @@ export default (props: { entry: IEntry; trans?: boolean }) => (
       {([pos, means]) => (
          <Show when={props.trans || pos !== "ecdict"}>
             <Show when={pos}>
-               <p class="text-xl font-bold text-[var(--accent-color)]">{pos}</p>
+               <p class="text-xl font-bold text-(--accent-color)">{pos}</p>
             </Show>
             <For each={means}>
                {(mean) => <p innerHTML={`&ensp;-&ensp;${mean}`} />}
