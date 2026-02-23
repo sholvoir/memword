@@ -66,12 +66,12 @@ export const getIssues = () =>
       request.onsuccess = () => resolve(request.result);
    });
 
-export const addIssue = (issue: string) =>
+export const addIssue = (issue: IIssue) =>
    new Promise<void>((resolve, reject) => {
       const request = db
          .transaction("issue", "readwrite")
          .objectStore("issue")
-         .add({ issue });
+         .add(issue);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });

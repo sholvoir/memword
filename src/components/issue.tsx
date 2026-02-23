@@ -2,7 +2,7 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import TAInput from "@sholvoir/solid-components/input-textarea";
 import { type Accessor, createSignal } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import * as srv from "../lib/server.ts";
+import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
 export default ({
@@ -16,11 +16,9 @@ export default ({
 }) => {
    const [issue, setIssue] = createSignal("");
    const handleSubmitClick = async () => {
-      const res = await srv.postIssue(issue());
-      if (res.ok) {
-         showTips("提交成功!");
-         go();
-      } else showTips("提交失败!");
+      await mem.submitIssue(issue());
+      showTips("提交成功!");
+      go();
    };
    return (
       <Dialog class="p-2 flex flex-col" title="提交问题" tips={tips}>

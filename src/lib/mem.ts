@@ -11,7 +11,7 @@ const dictExpire = 7 * 24 * 60 * 60 * 1000;
 
 export const user = (await srv.getUser())?.name;
 
-export const auth = (await idb.getMeta("_auth")) as string | undefined
+export const auth = (await idb.getMeta("_auth")) as string | undefined;
 
 export let setting: ISetting =
    ((await idb.getMeta("_setting")) as ISetting) ?? defaultSetting();
@@ -132,16 +132,15 @@ export const syncTasks = async () => {
 };
 
 const submitIssues = async () => {
-   const issues = await idb.getIssues();
-   for (const issue of issues) {
+   for (const issue of await idb.getIssues()) {
       const res = await srv.postIssue(issue);
       if (!res.ok) break;
       await idb.deleteIssue(issue.iid!);
    }
 };
 
-export const submitIssue = async (issue: string) => {
-   await idb.addIssue(issue);
+export const submitIssue = async (issue: string, d?: "1") => {
+   await idb.addIssue({ issue, d });
    submitIssues();
 };
 

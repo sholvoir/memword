@@ -89,7 +89,7 @@ export default ({
       setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      await mem.submitIssue(citem()!.word);
+      await mem.submitIssue(citem()!.word, "1");
       showTips("Submitted");
    };
    const handleDelete = async () => {
