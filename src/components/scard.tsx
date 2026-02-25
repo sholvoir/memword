@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js";
 
-export default ({ meanings }: { meanings?: Record<string, string[]> }) => (
-   <Show when={meanings}>
-      <For each={Object.entries(meanings!)}>
+export default (props: { meanings?: Record<string, string[]> }) => (
+   <Show when={props.meanings}>
+      <For each={Object.entries(props.meanings!)}>
          {([pos, means]) => (
             <>
                <Show when={pos}>

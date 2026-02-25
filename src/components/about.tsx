@@ -9,7 +9,7 @@ import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({ go }: { go: (d?: TDial) => void }) => {
+export default (props: { go: (d?: TDial) => void }) => {
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
    return (
@@ -18,7 +18,7 @@ export default ({ go }: { go: (d?: TDial) => void }) => {
             <Show when={mem.user}>
                <BButton
                   class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-                  onClick={() => go("#home")}
+                  onClick={() => props.go("#home")}
                />
             </Show>
          }
@@ -78,7 +78,7 @@ export default ({ go }: { go: (d?: TDial) => void }) => {
                   <RButton
                      class="button bg-orange-300 text-slate-800"
                      title="login"
-                     onClick={() => go("#signup")}
+                     onClick={() => props.go("#signup")}
                   >
                      登录
                   </RButton>

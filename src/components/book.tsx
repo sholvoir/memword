@@ -9,11 +9,7 @@ import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({
-   book,
-   go,
-   showTips,
-}: {
+export default (props: {
    book: Accessor<IBook | undefined>;
    go: (d?: TDial) => void;
    showTips: (content: string, autohide?: boolean) => void;
@@ -42,27 +38,27 @@ export default ({
          );
          switch (status) {
             case STATUS_CODE.BadRequest:
-               return showTips("Error: 无名称或无内容");
+               return props.showTips("Error: 无名称或无内容");
             case STATUS_CODE.NotAcceptable:
                setRevision(
                   Object.entries(result as Record<string, string[]>)
                      .map(([key, value]) => `${key}: ${value.join(",")}`)
                      .join("\n"),
                );
-               return showTips("未通过拼写检查");
+               return props.showTips("未通过拼写检查");
             case STATUS_CODE.OK: {
-               showTips("词书上传成功");
-               go("#setting");
+               props.showTips("词书上传成功");
+               props.go("#setting");
             }
          }
       } catch {
-         showTips("网络错误");
+         props.showTips("网络错误");
       }
    };
    createEffect(() => {
-      if (book()) {
-         setBName(splitID(book()!.bid)[1]);
-         if (book()!.disc) setDisc(book()!.disc!);
+      if (props.book()) {
+         setBName(splitID(props.book()!.bid)[1]);
+         if (props.book()!.disc) setDisc(props.book()!.disc!);
       }
    }, []);
    return (
@@ -96,7 +92,7 @@ export default ({
             <div class="grow"></div>
             <Button
                class="w-24 button btn-normal"
-               onClick={() => go("#setting")}
+               onClick={() => props.go("#setting")}
             >
                取消
             </Button>

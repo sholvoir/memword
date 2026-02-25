@@ -21,18 +21,7 @@ const statInfo = (stat: IStat) => {
    return { bid: stat.bid!, totals, tasks, width, title };
 };
 
-export default ({
-   go,
-   setBId,
-   setCItem,
-   setPhaseAnswer,
-   setShowLoading,
-   setSprint,
-   showLoading,
-   showTips,
-   stats,
-   totalStats,
-}: {
+export default (props: {
    go: (d?: TDial) => void;
    setBId: Setter<string | undefined>;
    setCItem: Setter<IItem | undefined>;
@@ -45,24 +34,28 @@ export default ({
    totalStats: () => void;
 }) => {
    const startStudy = async (wl?: string) => {
-      setShowLoading(true);
-      const item = await mem.getEpisode(setBId(wl));
-      setShowLoading(false);
+      props.setShowLoading(true);
+      const item = await mem.getEpisode(props.setBId(wl));
+      props.setShowLoading(false);
       if (item) {
-         setCItem(item);
-         setPhaseAnswer(false);
-         setSprint(0);
-         go("#study");
+         props.setCItem(item);
+         props.setPhaseAnswer(false);
+         props.setSprint(0);
+         props.go("#study");
       } else {
-         showTips("No More Task");
-         totalStats();
+         props.showTips("No More Task");
+         props.totalStats();
       }
    };
    return (
-      <Dialog class="flex flex-col" title="学习进度" showLoading={showLoading}>
+      <Dialog
+         class="flex flex-col"
+         title="学习进度"
+         showLoading={props.showLoading}
+      >
          <div class="body grow overflow-y-auto">
             <div class="p-2 flex flex-wrap justify-between gap-4">
-               <For each={stats().stats}>
+               <For each={props.stats().stats}>
                   {(stat: IStat) => (
                      <Stat {...statInfo(stat)} startStudy={startStudy} />
                   )}
@@ -74,7 +67,7 @@ export default ({
 		 [&>button>span]:align-[-30%] [&>button]:min-w-[110px] [&>button>span]:text-4xl
 		 font-bold overflow-x-auto [scrollbar-width:none]"
          >
-            <Button onClick={() => go("#search")}>
+            <Button onClick={() => props.go("#search")}>
                <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
                词典
             </Button>
@@ -82,19 +75,19 @@ export default ({
                <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
                学习
             </Button>
-            <Button onClick={() => go("#setting")}>
+            <Button onClick={() => props.go("#setting")}>
                <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}
                设置
             </Button>
-            <Button onClick={() => go("#about")}>
+            <Button onClick={() => props.go("#about")}>
                <span class="icon--tabler icon--tabler--info-octagon"></span>{" "}
                关于
             </Button>
-            <Button onClick={() => go("#issue")}>
+            <Button onClick={() => props.go("#issue")}>
                <span class="icon--material-symbols icon--material-symbols--error"></span>{" "}
                问题
             </Button>
-            <Button onClick={() => go("#help")}>
+            <Button onClick={() => props.go("#help")}>
                <span class="icon--material-symbols icon--material-symbols--help-outline"></span>{" "}
                帮助
             </Button>

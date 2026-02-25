@@ -1,50 +1,45 @@
 import { For } from "solid-js";
 import { BLevelName, type TBAggr } from "../lib/istat.ts";
 
-const BlevelBar = ({
-   blevel,
-   totals,
-   tasks,
-   width,
-}: {
+const BlevelBar = (props: {
    blevel: number;
    totals: TBAggr;
    tasks: TBAggr;
    width: number;
 }) => (
    <>
-      <div class="text-left">{BLevelName[blevel]}</div>
-      <div class="relative bg-[var(--bg-title)] h-6 py-1 w-full hover:cursor-pointer">
+      <div class="text-left">{BLevelName[props.blevel]}</div>
+      <div class="relative bg-(--bg-title) h-6 py-1 w-full hover:cursor-pointer">
          <div
             class="my-auto h-4 bg-slate-400"
             style={{
-               width: `${width ? (totals[blevel] * 100) / width : 100}%`,
+               width: `${
+                  props.width
+                     ? (props.totals[props.blevel] * 100) / props.width
+                     : 100
+               }%`,
             }}
          >
             <div
                class="ml-auto h-full bg-orange-500"
                style={{
                   width: `${
-                     totals[blevel] ? (tasks[blevel] * 100) / totals[blevel] : 0
+                     props.totals[props.blevel]
+                        ? (props.tasks[props.blevel] * 100) /
+                          props.totals[props.blevel]
+                        : 0
                   }%`,
                }}
             />
          </div>
          <div class="absolute top-0 right-1">
-            {tasks[blevel]}|{totals[blevel]}
+            {props.tasks[props.blevel]}|{props.totals[props.blevel]}
          </div>
       </div>
    </>
 );
 
-export default ({
-   bid,
-   startStudy,
-   tasks,
-   title,
-   totals,
-   width,
-}: {
+export default (props: {
    bid: string;
    startStudy: (wl?: string) => void;
    tasks: TBAggr;
@@ -57,18 +52,18 @@ export default ({
          <button
             type="button"
             class="hover:cursor-pointer hover:underline"
-            onClick={() => startStudy(bid)}
+            onClick={() => props.startStudy(props.bid)}
          >
-            {title}
+            {props.title}
          </button>
       </div>
       <For each={[0, 1, 2, 3, 4, 5]}>
          {(blevel) => (
             <BlevelBar
                blevel={blevel}
-               totals={totals}
-               tasks={tasks}
-               width={width}
+               totals={props.totals}
+               tasks={props.tasks}
+               width={props.width}
             />
          )}
       </For>

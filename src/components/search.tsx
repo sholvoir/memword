@@ -6,14 +6,7 @@ import type { TDial } from "../lib/idial.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({
-   showTips,
-   setCItem,
-   setPhaseAnswer,
-   setSprint,
-   vocabulary,
-   go,
-}: {
+export default (props: {
    showTips: (content: string, autohide?: boolean) => void;
    setCItem: Setter<IItem | undefined>;
    setPhaseAnswer: Setter<boolean>;
@@ -26,11 +19,11 @@ export default ({
       const text = word[0]().trim();
       if (!text) return;
       const item = await mem.search(text);
-      if (!item) return showTips("Not Found!");
-      setCItem(item);
-      setPhaseAnswer(true);
-      setSprint(-1);
-      go("#study");
+      if (!item) return props.showTips("Not Found!");
+      props.setCItem(item);
+      props.setPhaseAnswer(true);
+      props.setSprint(-1);
+      props.go("#study");
    };
    return (
       <Dialog
@@ -38,7 +31,7 @@ export default ({
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => go()}
+               onClick={() => props.go()}
             />
          }
          title="词典"
@@ -51,7 +44,7 @@ export default ({
             class="m-2 w-[calc(100%-16px)]"
             binding={word}
             onChange={handleSearchClick}
-            options={vocabulary()}
+            options={props.vocabulary()}
          />
       </Dialog>
    );

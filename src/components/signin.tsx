@@ -11,13 +11,7 @@ import Dialog from "./dialog.tsx";
 
 let timer: any;
 
-export default ({
-   go,
-   name,
-   setName,
-   showTips,
-   tips,
-}: {
+export default (props: {
    go: (d?: TDial) => void;
    name: Accessor<string>;
    setName: Setter<string>;
@@ -39,55 +33,55 @@ export default ({
          }
       }, 1000);
       try {
-         switch ((await srv.otp(name())).status) {
+         switch ((await srv.otp(props.name())).status) {
             case STATUS_CODE.BadRequest:
-               return showTips("请输入用户名");
+               return props.showTips("请输入用户名");
             case STATUS_CODE.NotFound:
-               return showTips("未找到用户");
+               return props.showTips("未找到用户");
             case STATUS_CODE.FailedDependency:
-               return showTips("此用户未注册手机号码");
+               return props.showTips("此用户未注册手机号码");
             case STATUS_CODE.TooEarly:
-               return showTips("请求OTP过于频繁");
+               return props.showTips("请求OTP过于频繁");
             case STATUS_CODE.OK:
-               return showTips("OTP已发送");
+               return props.showTips("OTP已发送");
             default:
-               showTips("未知服务器错误");
+               props.showTips("未知服务器错误");
          }
       } catch {
-         showTips("网络错误");
+         props.showTips("网络错误");
       }
    };
 
    const handleClickLogin = async () => {
       try {
-         switch (await mem.signin(name(), code())) {
+         switch (await mem.signin(props.name(), code())) {
             case STATUS_CODE.BadRequest:
-               return showTips("请输入用户名和密码");
+               return props.showTips("请输入用户名和密码");
             case STATUS_CODE.NotFound:
-               return showTips("未找到用户");
+               return props.showTips("未找到用户");
             case STATUS_CODE.Unauthorized:
-               return showTips("错误的密码");
+               return props.showTips("错误的密码");
             case STATUS_CODE.OK:
-               showTips("已登录");
+               props.showTips("已登录");
                if (timer) clearInterval(timer);
                location.reload();
                break;
             default:
-               showTips("未知服务器错误");
+               props.showTips("未知服务器错误");
          }
       } catch {
-         showTips("网络错误");
+         props.showTips("网络错误");
       }
    };
    return (
       <Dialog
-         tips={tips}
+         tips={props.tips}
          class="p-2 flex flex-col"
          title="登录"
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => go("#about")}
+               onClick={() => props.go("#about")}
             />
          }
       >
@@ -97,13 +91,13 @@ export default ({
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[name, setName]}
+               binding={[props.name, props.setName]}
             />
             <div class="text-right mb-3">
                尚未
                <BButton
                   class="btn-anchor font-bold"
-                  onClick={() => go("#signup")}
+                  onClick={() => props.go("#signup")}
                >
                   注册
                </BButton>

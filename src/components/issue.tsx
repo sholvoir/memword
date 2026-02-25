@@ -5,11 +5,7 @@ import type { TDial } from "src/lib/idial.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({
-   go,
-   showTips,
-   tips,
-}: {
+export default (props: {
    go: (d?: TDial) => void;
    showTips: (content: string, autohide?: boolean) => void;
    tips: Accessor<string>;
@@ -17,17 +13,17 @@ export default ({
    const [issue, setIssue] = createSignal("");
    const handleSubmitClick = async () => {
       await mem.submitIssue(issue());
-      showTips("提交成功!");
-      go();
+      props.showTips("提交成功!");
+      props.go();
    };
    return (
-      <Dialog class="p-2 flex flex-col" title="提交问题" tips={tips}>
+      <Dialog class="p-2 flex flex-col" title="提交问题" tips={props.tips}>
          <label for="issue">请在这里描述你的问题:</label>
          <TAInput name="issue" class="grow" binding={[issue, setIssue]}>
             {issue()}
          </TAInput>
          <div class="flex gap-2 mt-2 pb-3 justify-end">
-            <Button class="w-24 button btn-normal" onClick={() => go()}>
+            <Button class="w-24 button btn-normal" onClick={() => props.go()}>
                取消
             </Button>
             <Button class="w-24 button btn-prime" onClick={handleSubmitClick}>

@@ -15,15 +15,7 @@ import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 
-export default ({
-   go,
-   setBook,
-   setShowLoading,
-   showLoading,
-   showTips,
-   tips,
-   totalStats,
-}: {
+export default (props: {
    go: (d?: TDial) => void;
    setBook: Setter<IBook | undefined>;
    setShowLoading: Setter<boolean>;
@@ -42,16 +34,16 @@ export default ({
    const [bookFilter, setBookFilter] = createSignal("^common");
 
    const handleNewBookClick = () => {
-      setBook(undefined);
-      go("#book");
+      props.setBook(undefined);
+      props.go("#book");
    };
    const handleUpdateBookClick = () => {
-      setBook(myBooks()[myIndex()]);
-      go("#book");
+      props.setBook(myBooks()[myIndex()]);
+      props.go("#book");
    };
    const handleDeleteBookClick = async () => {
       const success = await mem.deleteBook(myBooks()[myIndex()].bid);
-      showTips(success ? "删除成功" : "删除失败");
+      props.showTips(success ? "删除成功" : "删除失败");
       if (success) setMyBooks(myBooks().filter((_, i) => i !== myIndex()));
    };
    const handleAddSubClick = () => {
@@ -64,10 +56,10 @@ export default ({
       ]);
    };
    const handleAddTaskClick = async () => {
-      setShowLoading(true);
+      props.setShowLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
-      totalStats();
-      setShowLoading(false);
+      props.totalStats();
+      props.setShowLoading(false);
    };
    const handleOKClick = async () => {
       await mem.syncSetting({
@@ -76,8 +68,8 @@ export default ({
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
-      totalStats();
-      go();
+      props.totalStats();
+      props.go();
    };
    const handleSignoutClick = () => {
       idb.clear();
@@ -112,14 +104,14 @@ export default ({
       setSubBooks(
          await idb.getBooks((wl) => mem.setting.books.includes(wl.bid)),
       );
-      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user)));
+      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user!)));
    });
    return (
       <Dialog
          class="p-2 gap-2 flex flex-col"
          title="设置"
-         tips={tips}
-         showLoading={showLoading}
+         tips={props.tips}
+         showLoading={props.showLoading}
       >
          <Checkbox
             binding={[showTrans, setShowTrans]}
@@ -209,7 +201,7 @@ export default ({
             <Button class="button btn-prime grow" onClick={handleOKClick}>
                保存
             </Button>
-            <Button class="button btn-normal grow" onClick={() => go()}>
+            <Button class="button btn-normal grow" onClick={() => props.go()}>
                取消
             </Button>
          </div>

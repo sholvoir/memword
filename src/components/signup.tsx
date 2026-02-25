@@ -10,13 +10,7 @@ import Dialog from "./dialog.tsx";
 const namePattern = /^[_\w-]+$/;
 const fonePattern = /^\+\d+$/;
 
-export default ({
-   go,
-   name,
-   setName,
-   showTips,
-   tips,
-}: {
+export default (props: {
    go: (d?: TDial) => void;
    name: Accessor<string>;
    setName: Setter<string>;
@@ -25,38 +19,39 @@ export default ({
 }) => {
    const [phone, setPhone] = createSignal("");
    const handleSignin = () => {
-      go("#signin");
+      props.go("#signin");
    };
    const handleSignup = async () => {
-      if (!namePattern.test(name()))
-         return showTips("Name can only include _, letter, number and -");
+      if (!namePattern.test(props.name()))
+         return props.showTips("Name can only include _, letter, number and -");
       const fone = phone().replaceAll(/[() -]/g, "");
-      if (!fonePattern.test(fone)) return showTips("Invalid phone number!");
+      if (!fonePattern.test(fone))
+         return props.showTips("Invalid phone number!");
       try {
-         switch ((await srv.signup(fone, name())).status) {
+         switch ((await srv.signup(fone, props.name())).status) {
             case STATUS_CODE.BadRequest:
-               return showTips("用户名已注册");
+               return props.showTips("用户名已注册");
             case STATUS_CODE.Conflict:
-               return showTips("电话号码已注册");
+               return props.showTips("电话号码已注册");
             case STATUS_CODE.OK:
-               showTips("注册成功，请登录");
-               return go("#signin");
+               props.showTips("注册成功，请登录");
+               return props.go("#signin");
             default:
-               showTips("未知数服务器错误");
+               props.showTips("未知数服务器错误");
          }
       } catch {
-         showTips("网络错误");
+         props.showTips("网络错误");
       }
    };
    return (
       <Dialog
-         tips={tips}
+         tips={props.tips}
          class="p-2 flex flex-col"
          title="注册"
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => go("#about")}
+               onClick={() => props.go("#about")}
             />
          }
       >
@@ -66,7 +61,7 @@ export default ({
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[name, setName]}
+               binding={[props.name, props.setName]}
                class="mb-3"
             />
             <label for="phone">手机号码(含国际区号)</label>

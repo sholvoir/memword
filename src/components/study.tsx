@@ -21,21 +21,7 @@ import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import Scard from "./scard.tsx";
 
-export default ({
-   bid,
-   citem,
-   go,
-   hideTips,
-   isPhaseAnswer,
-   setCItem,
-   setPhaseAnswer,
-   setSprint,
-   showTips,
-   sprint,
-   tips,
-   totalStats,
-   vocabulary,
-}: {
+export default (props: {
    bid: Accessor<string | undefined>;
    citem: Accessor<IItem | undefined>;
    go: (d?: TDial) => void;
@@ -51,8 +37,8 @@ export default ({
    vocabulary: Accessor<Set<string>>;
 }) => {
    const finish = () => {
-      go(sprint() < 0 ? "#search" : undefined);
-      totalStats();
+      props.go(props.sprint() < 0 ? "#search" : undefined);
+      props.totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
@@ -68,32 +54,34 @@ export default ({
    const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    let player!: HTMLAudioElement;
    const handleIKnown = async (level?: number) => {
-      if (citem())
-         srv.putTask(item2task(await idb.studied(citem()!.word, level)));
+      if (props.citem())
+         srv.putTask(item2task(await idb.studied(props.citem()!.word, level)));
    };
    const studyNext = async () => {
-      if (sprint() < 0) return finish();
-      setSprint((s) => s + 1);
-      setCItem(undefined);
-      setPhaseAnswer(false);
+      if (props.sprint() < 0) return finish();
+      props.setSprint((s) => s + 1);
+      props.setCItem(undefined);
+      props.setPhaseAnswer(false);
       setShowTrans(false);
-      const item = await mem.getEpisode(bid());
+      const item = await mem.getEpisode(props.bid());
       if (!item) return finish();
-      setCItem(item);
+      props.setCItem(item);
       setCIndex(0);
    };
    const handleRefresh = async () => {
-      showTips("Get Server Data...", false);
-      const item = await mem.updateDict(citem()!);
-      hideTips();
-      setCItem({ ...item });
+      props.showTips("Get Server Data...", false);
+      const item = await mem.updateDict(props.citem()!);
+      props.hideTips();
+      props.setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      await mem.submitIssue(citem()!.word, "1");
-      showTips("Submitted");
+      await mem.submitIssue(props.citem()!.word, "1");
+      props.showTips("Submitted");
    };
    const handleDelete = async () => {
-      showTips((await mem.deleteItem(citem()!.word)) ? "删除成功" : "删除失败");
+      props.showTips(
+         (await mem.deleteItem(props.citem()!.word)) ? "删除成功" : "删除失败",
+      );
       await studyNext();
    };
    const handleKeyPress = (e: KeyboardEvent & DivTargeted) => {
@@ -107,13 +95,13 @@ export default ({
          case "X":
          case "n":
          case "x":
-            if (isPhaseAnswer()) handleIKnown().then(studyNext);
+            if (props.isPhaseAnswer()) handleIKnown().then(studyNext);
             break;
          case "M":
          case "Z":
          case "m":
          case "z":
-            if (isPhaseAnswer()) handleIKnown(0).then(studyNext);
+            if (props.isPhaseAnswer()) handleIKnown(0).then(studyNext);
             break;
       }
    };
@@ -125,7 +113,7 @@ export default ({
       }
    };
    const handleTouchStart = (e: TouchEvent & DivTargeted) => {
-      if (!isPhaseAnswer()) return;
+      if (!props.isPhaseAnswer()) return;
       const div = e.currentTarget;
       touchPos.endY = touchPos.startY = e.touches[0].clientY;
       touchPos.offset = 0;
@@ -133,7 +121,7 @@ export default ({
       touchPos.canUp = div.scrollHeight - div.clientHeight - div.scrollTop <= 3;
    };
    const handleTouchMove = (e: TouchEvent & DivTargeted) => {
-      if (!isPhaseAnswer()) return;
+      if (!props.isPhaseAnswer()) return;
       touchPos.endY = e.touches[0].clientY;
       const diff = touchPos.endY - touchPos.startY;
       if ((diff < 0 && touchPos.canUp) || (diff > 0 && touchPos.canDown)) {
@@ -143,7 +131,7 @@ export default ({
       }
    };
    const handleTouchCancel = (e: TouchEvent & DivTargeted) => {
-      if (!isPhaseAnswer()) return;
+      if (!props.isPhaseAnswer()) return;
       e.currentTarget.style.top = `${(touchPos.offset = 0)}`;
    };
    const handleTouchEnd = async (e: TouchEvent & DivTargeted) => {
@@ -159,10 +147,10 @@ export default ({
    const handleClick = (e?: MouseEvent & DivTargeted) => {
       e?.stopPropagation();
       if (isShowAddToBookMenu()) return setShowAddToBookMenu(false);
-      const cardsN = citem()?.entries?.length ?? 0;
+      const cardsN = props.citem()?.entries?.length ?? 0;
       //if (cardsN === 0) return;
-      if (!isPhaseAnswer()) {
-         setPhaseAnswer(true);
+      if (!props.isPhaseAnswer()) {
+         props.setPhaseAnswer(true);
          player.play();
       } else if (cardsN === 1) player.play();
       else if (cindex() < cardsN - 1) setCIndex((c) => c + 1);
@@ -170,14 +158,14 @@ export default ({
    };
    const handleAddToBook = async (book: IBook) => {
       setShowAddToBookMenu(false);
-      const word = citem()!.word;
+      const word = props.citem()!.word;
       const wordSet = (await mem.getBook(book.bid))?.content as Set<string>;
-      if (wordSet?.has(word)) return showTips("已包含");
+      if (wordSet?.has(word)) return props.showTips("已包含");
       const [_, bookName] = splitID(book.bid);
       const [status] = await mem.uploadBook(bookName, word);
-      showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
+      props.showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
-      vocabulary().add(word);
+      props.vocabulary().add(word);
    };
    createResource(async () => {
       setMyBooks(
@@ -195,32 +183,32 @@ export default ({
          }
          onKeyUp={handleKeyPress}
          tabIndex={-1}
-         tips={tips}
-         title={`学习${sprint() > 0 ? `(${sprint()})` : ""}`}
+         tips={props.tips}
+         title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
       >
-         <Show when={citem()}>
+         <Show when={props.citem()}>
             <div class="relative flex gap-4 text-[150%] justify-between items-end">
                <SButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"
                   class="icon--material-symbols icon--material-symbols--check-circle text-green-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <SButton
                   onClick={() => handleIKnown(0).then(studyNext)}
                   title="Z/M"
                   class="icon--mdi icon--mdi--cross-circle text-fuchsia-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <SButton
                   onClick={() => handleIKnown(13).then(studyNext)}
                   class="icon--material-symbols icon--material-symbols--family-star text-yellow-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <SButton
                   onClick={handleDelete}
                   class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <SButton
                   onClick={() => player.play()}
@@ -229,26 +217,26 @@ export default ({
                <SButton
                   onClick={handleReportIssue}
                   class="icon--material-symbols icon--material-symbols--error text-red-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <SButton
                   onClick={handleRefresh}
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                />
                <Show when={!mem.setting.trans}>
                   <SButton
                      onClick={() => setShowTrans((s) => !s)}
                      class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
-                     disabled={!isPhaseAnswer()}
+                     disabled={!props.isPhaseAnswer()}
                   ></SButton>
                </Show>
                <SButton
                   onClick={() => setShowAddToBookMenu((s) => !s)}
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
-                  disabled={!isPhaseAnswer()}
+                  disabled={!props.isPhaseAnswer()}
                ></SButton>
-               <div class="text-lg">{citem()?.level}</div>
+               <div class="text-lg">{props.citem()?.level}</div>
                <Show when={isShowAddToBookMenu()}>
                   <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
                      <For each={myBooks()}>
@@ -274,35 +262,39 @@ export default ({
                on:touchcancel={handleTouchCancel}
             >
                <div class="py-2 flex gap-2 flex-wrap justify-between">
-                  <div class="text-4xl font-bold">{citem()?.word}</div>
-                  {isPhaseAnswer() && (
+                  <div class="text-4xl font-bold">{props.citem()?.word}</div>
+                  {props.isPhaseAnswer() && (
                      <div class="text-2xl flex items-center">
-                        {citem()?.entries?.[cindex()].phonetic}
+                        {props.citem()?.entries?.[cindex()].phonetic}
                      </div>
                   )}
                </div>
-               <Show when={isPhaseAnswer()}>
+               <Show when={props.isPhaseAnswer()}>
                   <Show
-                     when={(citem()?.entries?.length ?? 0) > 1}
+                     when={(props.citem()?.entries?.length ?? 0) > 1}
                      fallback={
                         <div
                            class={`grow [&>p>strong]:${
-                              isShowTrans() || sprint() < 0 || mem.setting.trans
+                              isShowTrans() ||
+                              props.sprint() < 0 ||
+                              mem.setting.trans
                                  ? "text-lg"
                                  : "hidden"
                            }`}
                         >
-                           <Scard meanings={citem()?.entries?.[0]?.meanings} />
+                           <Scard
+                              meanings={props.citem()?.entries?.[0]?.meanings}
+                           />
                         </div>
                      }
                   >
                      <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
-                        <For each={citem()?.entries}>
+                        <For each={props.citem()?.entries}>
                            {(card) => (
                               <div
                                  class={`grow [&>p>strong]:${
                                     isShowTrans() ||
-                                    sprint() < 0 ||
+                                    props.sprint() < 0 ||
                                     mem.setting.trans
                                        ? "text-lg"
                                        : "hidden"
@@ -318,7 +310,7 @@ export default ({
                <audio
                   ref={player}
                   autoplay
-                  src={citem()?.entries?.at(cindex())?.sound ?? ""}
+                  src={props.citem()?.entries?.at(cindex())?.sound ?? ""}
                />
             </div>
          </Show>
