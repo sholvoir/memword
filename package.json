@@ -1,23 +1,25 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.22.8",
+   "version": "0.22.9",
    "type": "module",
    "scripts": {
+      "start": "vite",
       "dev": "vite",
       "force": "vite --force",
       "build": "vite build",
       "worker": "vite build --config vite.worker.config.ts",
-      "preview": "vite preview"
+      "serve": "vite preview"
    },
    "imports": {
       "#srv/*": "../memword-server/src/*"
    },
    "dependencies": {
+      "@sholvoir/dict-server": "github:sholvoir/dict-server",
       "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.2",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
-      "@sholvoir/dict-server": "github:sholvoir/dict-server",
       "js-cookie": "^3.0.5",
+      "solid-devtools": "^0.34.5",
       "solid-js": "^1.9.11",
       "yaml": "^2.8.2"
    },
