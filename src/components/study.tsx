@@ -36,6 +36,7 @@ export default (props: {
    totalStats: () => void;
    vocabulary: Accessor<Set<string>>;
 }) => {
+   const entries = () => props.citem()?.entries ?? [];
    const finish = () => {
       props.go(props.sprint() < 0 ? "#search" : undefined);
       props.totalStats();
@@ -271,37 +272,29 @@ export default (props: {
                </div>
                <Show when={props.isPhaseAnswer()}>
                   <Show
-                     when={(props.citem()?.entries?.length ?? 0) > 1}
+                     when={entries().length > 1}
                      fallback={
-                        <div
-                           class={`grow [&>p>strong]:${
+                        <Scard
+                           meanings={entries()[0]?.meanings}
+                           showTrans={
                               isShowTrans() ||
                               props.sprint() < 0 ||
                               mem.setting.trans
-                                 ? "text-lg"
-                                 : "hidden"
-                           }`}
-                        >
-                           <Scard
-                              meanings={props.citem()?.entries?.[0]?.meanings}
-                           />
-                        </div>
+                           }
+                        />
                      }
                   >
                      <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
-                        <For each={props.citem()?.entries}>
-                           {(card) => (
-                              <div
-                                 class={`grow [&>p>strong]:${
+                        <For each={entries()}>
+                           {(entry) => (
+                              <Scard
+                                 meanings={entry.meanings}
+                                 showTrans={
                                     isShowTrans() ||
                                     props.sprint() < 0 ||
                                     mem.setting.trans
-                                       ? "text-lg"
-                                       : "hidden"
-                                 }`}
-                              >
-                                 <Scard meanings={card.meanings} />
-                              </div>
+                                 }
+                              />
                            )}
                         </For>
                      </Tab>
