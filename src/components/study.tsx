@@ -9,6 +9,8 @@ import {
    createResource,
    createSignal,
    For,
+   onCleanup,
+   onMount,
    type Setter,
    Show,
 } from "solid-js";
@@ -85,7 +87,7 @@ export default (props: {
       );
       await studyNext();
    };
-   const handleKeyPress = (e: KeyboardEvent & DivTargeted) => {
+   const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
       if (e.ctrlKey || e.altKey) return;
       switch (e.key) {
@@ -173,6 +175,8 @@ export default (props: {
          await idb.getBooks((book) => splitID(book.bid)[0] === mem.user),
       );
    });
+   onMount(() => document.addEventListener("keyup", handleKeyPress));
+   onCleanup(() => document.removeEventListener("keyup", handleKeyPress));
    return (
       <Dialog
          class="flex flex-col p-2 outline-none"
@@ -182,8 +186,6 @@ export default (props: {
                onClick={finish}
             />
          }
-         onKeyUp={handleKeyPress}
-         tabIndex={-1}
          tips={props.tips}
          title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
       >
