@@ -1,3 +1,4 @@
+import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
@@ -30,9 +31,7 @@ export const syncSetting = async (cSetting?: ISetting) => {
    } catch {}
 };
 
-export const updateDict = async (item: IItem) => {
-   const dict = await srv.getDict(item.word);
-   if (!dict) return item;
+const ecdictIssue = (dict: IDict) => {
    if (dict.entries)
       A: for (const entry of dict.entries)
          if (entry.meanings)
@@ -41,6 +40,12 @@ export const updateDict = async (item: IItem) => {
                   submitIssue(dict.word, "1");
                   break A;
                }
+};
+
+export const updateDict = async (item: IItem) => {
+   const dict = await srv.getDict(item.word);
+   if (!dict) return item;
+   ecdictIssue(dict);
    if (
       item.version !== undefined &&
       dict.version !== undefined &&
@@ -71,6 +76,7 @@ export const search = async (word: string) => {
       try {
          const dict = await srv.getDict(word);
          if (!dict) return;
+         ecdictIssue(dict);
          const nitem = newItem(dict);
          idb.tempItems.set(word, nitem);
          return nitem;
