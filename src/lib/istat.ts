@@ -19,8 +19,14 @@ export type TAggr = [
    number,
    number,
    number,
+   number,
+   number,
+   number,
+   number,
 ];
-const newAggr = (): TAggr => [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+const newAggr = (): TAggr => [
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+];
 
 export interface IStat {
    time: number;
@@ -57,11 +63,11 @@ export const BLevelName = ["未学", "新学", "中等", "熟悉", "熟练", "�
 
 export const aggrToBAggr = (aggr: TAggr): TBAggr => [
    aggr[0],
-   aggr[1] + aggr[2] + aggr[3] + aggr[4] + aggr[5],
-   aggr[6] + aggr[7] + aggr[8] + aggr[9],
-   aggr[10] + aggr[11] + aggr[12],
-   aggr[13] + aggr[14],
-   aggr[15],
+   aggr[1] + aggr[2] + aggr[3] + aggr[4] + aggr[5] + aggr[6],
+   aggr[7] + aggr[8] + aggr[9] + aggr[10] + aggr[11],
+   aggr[12] + aggr[13] + aggr[14] + aggr[15],
+   aggr[16] + aggr[17] + aggr[18],
+   aggr[19],
 ];
 
 export const isBLevelIncludesLevel = (blevel: number, level: number) => {
@@ -69,15 +75,15 @@ export const isBLevelIncludesLevel = (blevel: number, level: number) => {
       case 0:
          return level <= 0;
       case 1:
-         return level >= 1 && level <= 5;
+         return level >= 1 && level <= 6;
       case 2:
-         return level >= 6 && level <= 9;
+         return level >= 7 && level <= 11;
       case 3:
-         return level >= 10 && level <= 12;
+         return level >= 12 && level <= 15;
       case 4:
-         return level >= 13 && level <= 14;
+         return level >= 16 && level <= 18;
       case 5:
-         return level >= 15;
+         return level >= 19;
       default:
          return true;
    }
