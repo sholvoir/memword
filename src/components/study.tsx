@@ -16,7 +16,7 @@ import {
 } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
 import { type IBook, splitID } from "#srv/lib/ibook.ts";
-import { type IItem, item2task } from "../lib/iitem.ts";
+import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
@@ -204,7 +204,9 @@ export default (props: {
                   disabled={!props.isPhaseAnswer()}
                />
                <SButton
-                  onClick={() => handleIKnown(13).then(studyNext)}
+                  onClick={() =>
+                     handleIKnown(TASK_MAX_LEVEL - 1).then(studyNext)
+                  }
                   class="icon--material-symbols icon--material-symbols--family-star text-yellow-500"
                   disabled={!props.isPhaseAnswer()}
                />
