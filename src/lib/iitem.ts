@@ -1,7 +1,7 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 
-export const TASK_MAX_LEVEL = 19;
+export const TASK_MAX_LEVEL = 17;
 const TASK_MAX_NEXT = 2000000000000;
 
 export interface IItem extends IDict, ITask {
@@ -58,6 +58,6 @@ export const studyTask = (task: ITask, level?: number): ITask => {
    task.next =
       level >= TASK_MAX_LEVEL
          ? TASK_MAX_NEXT
-         : now + Math.round(3659 * level ** 3 * 1.5 ** level);
+         : now + Math.round(11723 * level ** 3 * 1.5 ** level);
    return task;
 };

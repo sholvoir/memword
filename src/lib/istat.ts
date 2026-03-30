@@ -1,6 +1,6 @@
 import type { ITask } from "#srv/lib/itask.ts";
 
-export const statsFormat = "0.2.1";
+export const statsFormat = "0.2.2";
 
 export type TAggr = [
    number,
@@ -21,11 +21,9 @@ export type TAggr = [
    number,
    number,
    number,
-   number,
-   number,
 ];
 const newAggr = (): TAggr => [
-   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
 export interface IStat {
@@ -63,11 +61,11 @@ export const BLevelName = ["未学", "新学", "中等", "熟悉", "熟练", "�
 
 export const aggrToBAggr = (aggr: TAggr): TBAggr => [
    aggr[0],
-   aggr[1] + aggr[2] + aggr[3] + aggr[4] + aggr[5] + aggr[6],
-   aggr[7] + aggr[8] + aggr[9] + aggr[10] + aggr[11],
-   aggr[12] + aggr[13] + aggr[14] + aggr[15],
-   aggr[16] + aggr[17] + aggr[18],
-   aggr[19],
+   aggr[1] + aggr[2] + aggr[3] + aggr[4],
+   aggr[5] + aggr[6] + aggr[7] + aggr[8],
+   aggr[9] + aggr[10] + aggr[11] + aggr[12],
+   aggr[13] + aggr[14] + aggr[15] + aggr[16],
+   aggr[17],
 ];
 
 export const isBLevelIncludesLevel = (blevel: number, level: number) => {
@@ -75,15 +73,15 @@ export const isBLevelIncludesLevel = (blevel: number, level: number) => {
       case 0:
          return level <= 0;
       case 1:
-         return level >= 1 && level <= 6;
+         return level >= 1 && level <= 4;
       case 2:
-         return level >= 7 && level <= 11;
+         return level >= 5 && level <= 8;
       case 3:
-         return level >= 12 && level <= 15;
+         return level >= 9 && level <= 12;
       case 4:
-         return level >= 16 && level <= 18;
+         return level >= 13 && level <= 16;
       case 5:
-         return level >= 19;
+         return level >= 17;
       default:
          return true;
    }
