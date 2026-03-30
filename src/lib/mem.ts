@@ -148,8 +148,8 @@ export const syncTasks = async () => {
 const submitIssues = async () => {
    for (const issue of await idb.getIssues()) {
       const res = await srv.postIssue(issue);
-      if (!res.ok) break;
-      await idb.deleteIssue(issue.iid!);
+      if (res.ok || res.status === STATUS_CODE.Conflict)
+         await idb.deleteIssue(issue.iid!);
    }
 };
 
