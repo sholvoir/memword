@@ -1,8 +1,8 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
-import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
+import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";

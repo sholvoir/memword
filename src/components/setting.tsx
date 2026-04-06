@@ -9,8 +9,8 @@ import {
    type Setter,
 } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import { compareWL, type IBook } from "#srv/lib/ibook.ts";
 import { settingFormat } from "#srv/lib/isetting.ts";
+import { compareWL, type IBook } from "../lib/ibook.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";

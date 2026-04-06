@@ -2,7 +2,7 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import { type Accessor, For, type Setter } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
 import type { IItem } from "src/lib/iitem.ts";
-import { splitID } from "#srv/lib/ibook.ts";
+import { splitID } from "../lib/ibook.ts";
 import { aggrToBAggr, type IStat, type IStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";

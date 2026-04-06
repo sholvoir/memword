@@ -1,6 +1,6 @@
 import { createEffect, createSignal, type JSX } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import type { IBook } from "#srv/lib/ibook.ts";
+import type { IBook } from "../lib/ibook.ts";
 import type { TDial } from "../lib/idial.ts";
 import type { IItem } from "../lib/iitem.ts";
 import { type IStats, initStats } from "../lib/istat.ts";

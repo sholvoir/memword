@@ -1,8 +1,8 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import { getJson, jsonInit, textHeader, url } from "@sholvoir/generic/http";
-import { type IBook, splitID } from "#srv/lib/ibook.ts";
 import type { ISetting } from "#srv/lib/isetting.ts";
 import type { ITask } from "#srv/lib/itask.ts";
+import { type IBook, splitID } from "../lib/ibook.ts";
 import type { IIssue } from "./iissue";
 
 const API_BASE = "/api/v2";

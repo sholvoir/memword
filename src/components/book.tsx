@@ -5,7 +5,7 @@ import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
 import { type Accessor, createEffect, createSignal } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import { type IBook, splitID } from "#srv/lib/ibook.ts";
+import { type IBook, splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 

@@ -1,6 +1,6 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
-import type { IBook } from "#srv/lib/ibook.ts";
 import type { ITask } from "#srv/lib/itask.ts";
+import type { IBook } from "../lib/ibook.ts";
 import type { IIssue } from "./iissue.ts";
 import {
    type IItem,

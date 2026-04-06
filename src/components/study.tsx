@@ -15,7 +15,7 @@ import {
    Show,
 } from "solid-js";
 import type { TDial } from "src/lib/idial.ts";
-import { type IBook, splitID } from "#srv/lib/ibook.ts";
+import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
