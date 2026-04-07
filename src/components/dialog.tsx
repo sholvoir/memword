@@ -6,7 +6,7 @@ export default (
       left?: JSX.Element;
       title: JSX.Element;
       right?: JSX.Element;
-      tips?: Accessor<string>;
+      tips?: Accessor<string | undefined>;
       showLoading?: Accessor<boolean>;
    } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">,
 ) => {

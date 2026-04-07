@@ -16,7 +16,7 @@ import Study from "./study.tsx";
 
 export default () => {
    const [stats, setStats] = createSignal<IStats>(initStats());
-   const [tips, setTips] = createSignal("");
+   const [tips, setTips] = createSignal<string>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [citem, setCItem] = createSignal<IItem>();
    const [bid, setBId] = createSignal<string>();
@@ -26,15 +26,14 @@ export default () => {
    const [loca, setLoca] = createSignal<TDial>("#home");
    const [vocabulary, setVocabulary] = createSignal<Set<string>>(new Set());
 
-   let timeout: NodeJS.Timeout | undefined;
+   let timeout: number | undefined;
    const totalStats = async () => setStats(await mem.totalStats());
-   const hideTips = () => setTips("");
    const go = (d?: TDial) => setLoca(d ?? (mem.user ? "#home" : "#about"));
-   const showTips = (content: string, autohide = true) => {
+   const showTips = (content?: string, autohide = true) => {
       setTips(content);
       if (autohide) {
          if (timeout) clearTimeout(timeout);
-         timeout = setTimeout(hideTips, 3000);
+         timeout = setTimeout(setTips, 3000);
       }
    };
 
@@ -84,7 +83,6 @@ export default () => {
          bid={bid}
          citem={citem}
          go={go}
-         hideTips={hideTips}
          isPhaseAnswer={isPhaseAnswer}
          setCItem={setCItem}
          setPhaseAnswer={setPhaseAnswer}

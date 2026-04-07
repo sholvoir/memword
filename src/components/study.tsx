@@ -27,14 +27,13 @@ export default (props: {
    bid: Accessor<string | undefined>;
    citem: Accessor<IItem | undefined>;
    go: (d?: TDial) => void;
-   hideTips: () => void;
    isPhaseAnswer: Accessor<boolean>;
    setCItem: Setter<IItem | undefined>;
    setPhaseAnswer: Setter<boolean>;
    setSprint: Setter<number>;
-   showTips: (content: string, autohide?: boolean) => void;
+   showTips: (content?: string, autohide?: boolean) => void;
    sprint: Accessor<number>;
-   tips: Accessor<string>;
+   tips: Accessor<string | undefined>;
    totalStats: () => void;
    vocabulary: Accessor<Set<string>>;
 }) => {
@@ -74,7 +73,7 @@ export default (props: {
    const handleRefresh = async () => {
       props.showTips("Get Server Data...", false);
       const item = await mem.updateDict(props.citem()!);
-      props.hideTips();
+      props.showTips();
       props.setCItem({ ...item });
    };
    const handleReportIssue = async () => {

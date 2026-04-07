@@ -21,7 +21,7 @@ export default (props: {
    setShowLoading: Setter<boolean>;
    showLoading: Accessor<boolean>;
    showTips: (content: string, autohide?: boolean) => void;
-   tips: Accessor<string>;
+   tips: Accessor<string | undefined>;
    totalStats: () => void;
 }) => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);

@@ -8,7 +8,7 @@ import Dialog from "./dialog.tsx";
 export default (props: {
    go: (d?: TDial) => void;
    showTips: (content: string, autohide?: boolean) => void;
-   tips: Accessor<string>;
+   tips: Accessor<string | undefined>;
 }) => {
    const [issue, setIssue] = createSignal("");
    const handleSubmitClick = async () => {
