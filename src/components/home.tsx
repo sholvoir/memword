@@ -63,17 +63,25 @@ export default (props: {
             </div>
          </div>
          <div
-            class="tail shrink-0 px-4 pt-2 pb-5 flex gap-3 justify-between [&>button]:grow
-		 [&>button>span]:align-[-30%] [&>button]:min-w-[110px] [&>button>span]:text-4xl
+            class="tail shrink-0 px-4 pt-2 pb-5 flex gap-2 justify-between [&>button]:grow
+		 [&>button>span]:align-[-30%] [&>button]:min-w-[90px] [&>button>span]:text-4xl
 		 font-bold overflow-x-auto [scrollbar-width:none]"
          >
+            <Button onClick={() => props.go("#trans")}>
+               <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
+               翻译
+            </Button>
             <Button onClick={() => props.go("#search")}>
                <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
                词典
             </Button>
             <Button onClick={() => startStudy()}>
                <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
-               学习
+               单词
+            </Button>
+            <Button onClick={() => startStudy()}>
+               <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
+               句子
             </Button>
             <Button onClick={() => props.go("#setting")}>
                <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}

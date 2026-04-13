@@ -13,6 +13,7 @@ import Issue from "./issue.tsx";
 import Dict from "./search.tsx";
 import Setting from "./setting.tsx";
 import Study from "./study.tsx";
+import Trans from "./trans.tsx";
 
 export default () => {
    const [stats, setStats] = createSignal<IStats>(initStats());
@@ -95,6 +96,9 @@ export default () => {
       />
    ));
    dialogs.set("#book", () => <Book go={go} book={book} showTips={showTips} />);
+   dialogs.set("#trans", () => (
+      <Trans go={go} tips={tips} showTips={showTips} vocabulary={vocabulary} />
+   ));
 
    const init = async () => {
       if (mem.user) {

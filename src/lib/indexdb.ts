@@ -9,23 +9,36 @@ import {
    neverItem,
    studyTask,
 } from "./iitem.ts";
+import type { ISentence } from "./isentence.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
 
 export const tempItems = new Map<string, IItem>();
 type kvKey = "_sync-time" | "_setting" | "_auth" | "_vocabulary";
 
 const db: IDBDatabase = await new Promise((resolve, reject) => {
-   const request = indexedDB.open("memword", 1);
+   const request = indexedDB.open("memword", 2);
    request.onerror = reject;
    request.onsuccess = () => resolve(request.result);
    request.onupgradeneeded = () => {
       const d = request.result;
-      d.createObjectStore("mata", { keyPath: "key" });
-      d.createObjectStore("book", { keyPath: "bid" });
-      d.createObjectStore("issue", { keyPath: "iid", autoIncrement: true });
-      const iStore = d.createObjectStore("item", { keyPath: "word" });
-      iStore.createIndex("last", "last");
-      iStore.createIndex("next", "next");
+      if (!d.objectStoreNames.contains("mata"))
+         d.createObjectStore("mata", { keyPath: "key" });
+      if (!d.objectStoreNames.contains("book"))
+         d.createObjectStore("book", { keyPath: "bid" });
+      if (!d.objectStoreNames.contains("issue"))
+         d.createObjectStore("issue", { keyPath: "iid", autoIncrement: true });
+      if (!d.objectStoreNames.contains("item")) {
+         const iStore = d.createObjectStore("item", { keyPath: "word" });
+         iStore.createIndex("last", "last");
+         iStore.createIndex("next", "next");
+      }
+      if (!d.objectStoreNames.contains("sentence")) {
+         const sStore = d.createObjectStore("sentence", {
+            keyPath: "sentence",
+         });
+         sStore.createIndex("last", "last");
+         sStore.createIndex("next", "next");
+      }
    };
 });
 
@@ -322,4 +335,32 @@ export const studied = (word: string, level?: number) =>
                iStore.put(item);
             }
          };
+   });
+
+export const getStEpisode = () =>
+   new Promise<ISentence | undefined>((resolve, reject) => {
+      let result: ISentence | undefined;
+      const transaction = db.transaction("sentence", "readonly");
+      transaction.onerror = reject;
+      transaction.oncomplete = () => resolve(result);
+      transaction
+         .objectStore("sentence")
+         .index("next")
+         .openCursor(IDBKeyRange.upperBound(Date.now()), "prev").onsuccess = (
+         e,
+      ) => {
+         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+         if (!cursor) return;
+         return cursor.value as ISentence;
+      };
+   });
+
+export const putSentence = (sentence: ISentence) =>
+   new Promise<void>((resolve, reject) => {
+      const request = db
+         .transaction("sentence", "readwrite")
+         .objectStore("sentence")
+         .put(sentence);
+      request.onerror = reject;
+      request.onsuccess = () => resolve();
    });

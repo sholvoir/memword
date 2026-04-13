@@ -5,6 +5,7 @@ import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
+import { newSentence } from "./isentence.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
 import * as srv from "./server.ts";
 
@@ -133,7 +134,7 @@ export const syncTasks = async () => {
       const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
-      const resp = await srv.postTasks(tasks);
+      const resp = await srv.postTasks(tasks, "1");
       if (!resp.ok)
          return console.error("Network Error: get sync task data error.");
       const ntasks = await resp.json();
@@ -252,6 +253,12 @@ export const deleteBook = async (bid: string) => {
    } catch {
       return false;
    }
+};
+
+export const addSentence = async (sentence: string, trans: string) => {
+   const st = newSentence(sentence, trans);
+   await idb.putSentence(st);
+   await srv.putSentence(st);
 };
 
 export const signin = async (name: string, code: string) => {

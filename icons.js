@@ -22,7 +22,7 @@ const icons = {
       "volume-up",
    ],
    mdi: ["chevron-down", "chevron-up", "cross-circle"],
-   hugeicons: ["online-learning-01"],
+   hugeicons: ["online-learning-01", "online-learning-02", "translate"],
    tabler: ["info-octagon"],
    "icon-park-outline": ["chinese"],
 };

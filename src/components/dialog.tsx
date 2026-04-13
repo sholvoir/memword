@@ -1,15 +1,15 @@
 import { type Accessor, type JSX, Show, splitProps } from "solid-js";
 import Loading from "./icon-loading.tsx";
 
-export default (
-   props: {
-      left?: JSX.Element;
-      title: JSX.Element;
-      right?: JSX.Element;
-      tips?: Accessor<string | undefined>;
-      showLoading?: Accessor<boolean>;
-   } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">,
-) => {
+export type DialogProps = {
+   left?: JSX.Element;
+   title: JSX.Element;
+   right?: JSX.Element;
+   tips?: Accessor<string | undefined>;
+   showLoading?: Accessor<boolean>;
+} & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">;
+
+export default (props: DialogProps) => {
    const [local, others] = splitProps(props, [
       "left",
       "title",

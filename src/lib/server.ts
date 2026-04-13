@@ -1,9 +1,16 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
-import { getJson, jsonInit, textHeader, url } from "@sholvoir/generic/http";
+import {
+   getJson,
+   jsonInit,
+   textHeader,
+   textInit,
+   url,
+} from "@sholvoir/generic/http";
 import type { ISetting } from "#srv/lib/isetting.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import type { IIssue } from "./iissue";
+import type { ISentence } from "./isentence.ts";
 
 const API_BASE = "/api/v2";
 const COMMON_BOOK_BASE_URL = "https://www.micinfotech.com/vocabulary";
@@ -28,14 +35,11 @@ export const renew = (auth?: string) =>
 export const getDict = (word: string) =>
    getJson<IDict>(url(`${DICT_API_BASE}/dict`, { q: word, mic: "1" }));
 
-export const postTasks = (tasks: Array<ITask>) =>
-   fetch(`${API_BASE}/task`, jsonInit(tasks));
+export const postTasks = (tasks: Array<ITask>, sync?: "1") =>
+   fetch(url(`${API_BASE}/task`, { sync }), jsonInit(tasks));
 
 export const deleteTasks = (words: Array<string>) =>
    fetch(`${API_BASE}/task`, jsonInit(words, "DELETE"));
-
-export const putTask = (task: ITask) =>
-   fetch(`${API_BASE}/task`, jsonInit(task, "PUT"));
 
 export const getBooks = async () => {
    const books = (await getJson<Array<IBook>>(`${API_BASE}/book`)) ?? [];
@@ -108,3 +112,9 @@ export const postIssue = (issue: IIssue) =>
       url(`${API_BASE}/issue`, { d: issue.d }),
       jsonInit({ issue: issue.issue }),
    );
+
+export const putSentence = (sentence: ISentence) =>
+   fetch(`${API_BASE}/sentence`, jsonInit(sentence));
+
+export const postTrans = (sentence: string) =>
+   fetch(`${API_BASE}/trans`, textInit(sentence));

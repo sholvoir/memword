@@ -1,6 +1,4 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
-import { wait } from "@sholvoir/generic/wait";
-import SButton from "@sholvoir/solid-components/button-base";
 import BButton from "@sholvoir/solid-components/button-base";
 import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
@@ -20,7 +18,7 @@ import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
-import Dialog from "./dialog.tsx";
+import Dialog from "./dialog-e.tsx";
 import Scard from "./scard.tsx";
 
 export default (props: {
@@ -44,20 +42,15 @@ export default (props: {
    };
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
-   const touchPos = {
-      startY: 0,
-      endY: 0,
-      offset: 0,
-      canUp: false,
-      canDown: false,
-   };
 
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
    const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    let player!: HTMLAudioElement;
    const handleIKnown = async (level?: number) => {
       if (props.citem())
-         srv.putTask(item2task(await idb.studied(props.citem()!.word, level)));
+         srv.postTasks([
+            item2task(await idb.studied(props.citem()!.word, level)),
+         ]);
    };
    const studyNext = async () => {
       if (props.sprint() < 0) return finish();
@@ -107,45 +100,7 @@ export default (props: {
             break;
       }
    };
-   const continueMove = async (div: HTMLDivElement, x: number) => {
-      div.style.top = `${(touchPos.offset += x)}px`;
-      if (Math.abs(touchPos.offset) < globalThis.innerHeight) {
-         await wait(30);
-         await continueMove(div, x);
-      }
-   };
-   const handleTouchStart = (e: TouchEvent & DivTargeted) => {
-      if (!props.isPhaseAnswer()) return;
-      const div = e.currentTarget;
-      touchPos.endY = touchPos.startY = e.touches[0].clientY;
-      touchPos.offset = 0;
-      touchPos.canDown = e.currentTarget.scrollTop <= 3;
-      touchPos.canUp = div.scrollHeight - div.clientHeight - div.scrollTop <= 3;
-   };
-   const handleTouchMove = (e: TouchEvent & DivTargeted) => {
-      if (!props.isPhaseAnswer()) return;
-      touchPos.endY = e.touches[0].clientY;
-      const diff = touchPos.endY - touchPos.startY;
-      if ((diff < 0 && touchPos.canUp) || (diff > 0 && touchPos.canDown)) {
-         e.currentTarget.style.top = `${(touchPos.offset = diff)}px`;
-         e.stopPropagation();
-         e.preventDefault();
-      }
-   };
-   const handleTouchCancel = (e: TouchEvent & DivTargeted) => {
-      if (!props.isPhaseAnswer()) return;
-      e.currentTarget.style.top = `${(touchPos.offset = 0)}`;
-   };
-   const handleTouchEnd = async (e: TouchEvent & DivTargeted) => {
-      const div = e.currentTarget;
-      if (Math.abs(touchPos.offset) >= globalThis.innerHeight / 6) {
-         const down = touchPos.offset > 0;
-         await handleIKnown(down ? 0 : undefined);
-         await continueMove(div, down ? 60 : -60);
-         await studyNext();
-      }
-      div.style.top = `${(touchPos.offset = 0)}`;
-   };
+
    const handleClick = (e?: MouseEvent & DivTargeted) => {
       e?.stopPropagation();
       if (isShowAddToBookMenu()) return setShowAddToBookMenu(false);
@@ -178,7 +133,7 @@ export default (props: {
    onCleanup(() => document.removeEventListener("keyup", handleKeyPress));
    return (
       <Dialog
-         class="flex flex-col p-2 outline-none"
+         class="flex flex-col px-2 pt-2 pb-4 outline-none overflow-y-auto"
          left={
             <BButton
                class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
@@ -187,59 +142,64 @@ export default (props: {
          }
          tips={props.tips}
          title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
+         onClick={handleClick}
+         onKeyup={handleKeyPress}
+         touchEnabled={props.isPhaseAnswer()}
+         beforeAnimation={(down) => handleIKnown(down ? 0 : undefined)}
+         afterAnimation={studyNext}
       >
          <Show when={props.citem()}>
             <div class="relative flex gap-4 text-[150%] justify-between items-end">
-               <SButton
+               <BButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"
                   class="icon--material-symbols icon--material-symbols--check-circle text-green-500"
                   disabled={!props.isPhaseAnswer()}
                />
-               <SButton
+               <BButton
                   onClick={() => handleIKnown(0).then(studyNext)}
                   title="Z/M"
                   class="icon--mdi icon--mdi--cross-circle text-fuchsia-500"
                   disabled={!props.isPhaseAnswer()}
                />
-               <SButton
+               <BButton
                   onClick={() =>
                      handleIKnown(TASK_MAX_LEVEL - 1).then(studyNext)
                   }
                   class="icon--material-symbols icon--material-symbols--family-star text-yellow-500"
                   disabled={!props.isPhaseAnswer()}
                />
-               <SButton
+               <BButton
                   onClick={handleDelete}
                   class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
                   disabled={!props.isPhaseAnswer()}
                />
-               <SButton
+               <BButton
                   onClick={() => player.play()}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
-               <SButton
+               <BButton
                   onClick={handleReportIssue}
                   class="icon--material-symbols icon--material-symbols--error text-red-500"
                   disabled={!props.isPhaseAnswer()}
                />
-               <SButton
+               <BButton
                   onClick={handleRefresh}
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
                   disabled={!props.isPhaseAnswer()}
                />
                <Show when={!mem.setting.trans}>
-                  <SButton
+                  <BButton
                      onClick={() => setShowTrans((s) => !s)}
                      class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
                      disabled={!props.isPhaseAnswer()}
-                  ></SButton>
+                  ></BButton>
                </Show>
-               <SButton
+               <BButton
                   onClick={() => setShowAddToBookMenu((s) => !s)}
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
                   disabled={!props.isPhaseAnswer()}
-               ></SButton>
+               ></BButton>
                <div class="text-lg">{props.citem()?.level}</div>
                <Show when={isShowAddToBookMenu()}>
                   <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
@@ -257,58 +217,49 @@ export default (props: {
                   </div>
                </Show>
             </div>
-            <div
-               class="relative grow h-0 pb-4 flex flex-col overflow-y-auto"
-               on:click={handleClick}
-               on:touchstart={handleTouchStart}
-               on:touchmove={handleTouchMove}
-               on:touchend={handleTouchEnd}
-               on:touchcancel={handleTouchCancel}
-            >
-               <div class="py-2 flex gap-2 flex-wrap justify-between">
-                  <div class="text-4xl font-bold">{props.citem()?.word}</div>
-                  {props.isPhaseAnswer() && (
-                     <div class="text-2xl flex items-center">
-                        {props.citem()?.entries?.[cindex()].phonetic}
-                     </div>
-                  )}
-               </div>
-               <Show when={props.isPhaseAnswer()}>
-                  <Show
-                     when={entries().length > 1}
-                     fallback={
-                        <Scard
-                           meanings={entries()[0]?.meanings}
-                           showTrans={
-                              isShowTrans() ||
-                              props.sprint() < 0 ||
-                              mem.setting.trans
-                           }
-                        />
-                     }
-                  >
-                     <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
-                        <For each={entries()}>
-                           {(entry) => (
-                              <Scard
-                                 meanings={entry.meanings}
-                                 showTrans={
-                                    isShowTrans() ||
-                                    props.sprint() < 0 ||
-                                    mem.setting.trans
-                                 }
-                              />
-                           )}
-                        </For>
-                     </Tab>
-                  </Show>
-               </Show>
-               <audio
-                  ref={player}
-                  autoplay
-                  src={props.citem()?.entries?.at(cindex())?.sound ?? ""}
-               />
+            <div class="py-2 flex gap-2 flex-wrap justify-between">
+               <div class="text-4xl font-bold">{props.citem()?.word}</div>
+               {props.isPhaseAnswer() && (
+                  <div class="text-2xl flex items-center">
+                     {props.citem()?.entries?.[cindex()].phonetic}
+                  </div>
+               )}
             </div>
+            <Show when={props.isPhaseAnswer()}>
+               <Show
+                  when={entries().length > 1}
+                  fallback={
+                     <Scard
+                        meanings={entries()[0]?.meanings}
+                        showTrans={
+                           isShowTrans() ||
+                           props.sprint() < 0 ||
+                           mem.setting.trans
+                        }
+                     />
+                  }
+               >
+                  <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
+                     <For each={entries()}>
+                        {(entry) => (
+                           <Scard
+                              meanings={entry.meanings}
+                              showTrans={
+                                 isShowTrans() ||
+                                 props.sprint() < 0 ||
+                                 mem.setting.trans
+                              }
+                           />
+                        )}
+                     </For>
+                  </Tab>
+               </Show>
+            </Show>
+            <audio
+               ref={player}
+               autoplay
+               src={props.citem()?.entries?.at(cindex())?.sound ?? ""}
+            />
          </Show>
       </Dialog>
    );
