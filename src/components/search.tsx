@@ -1,4 +1,3 @@
-import BButton from "@sholvoir/solid-components/button-base";
 import TInput from "@sholvoir/solid-components/input-text";
 import { type Accessor, createSignal, type Setter } from "solid-js";
 import type { IItem } from "src/lib/iitem.ts";
@@ -28,12 +27,7 @@ export default (props: {
    return (
       <Dialog
          class="flex flex-col text-lg"
-         left={
-            <BButton
-               class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => props.go()}
-            />
-         }
+         leftClick={() => props.go()}
          title="词典"
       >
          <TInput

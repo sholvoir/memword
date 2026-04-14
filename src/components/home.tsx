@@ -79,7 +79,7 @@ export default (props: {
                <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
                单词
             </Button>
-            <Button onClick={() => startStudy()}>
+            <Button onClick={() => props.go("#sentence")}>
                <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
                句子
             </Button>

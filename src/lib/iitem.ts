@@ -1,5 +1,6 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { ITask } from "#srv/lib/itask.ts";
+import type { ITrace } from "#srv/lib/itrace.ts";
 
 export const TASK_MAX_LEVEL = 17;
 const TASK_MAX_NEXT = 2000000000000;
@@ -35,10 +36,10 @@ export const item2task = ({ word, last, next, level }: IItem): ITask => ({
    level,
 });
 
-export const itemMergeTask = (item: IItem, task: ITask) => {
-   item.last = task.last;
-   item.next = task.next;
-   item.level = task.level;
+export const itemMergeTrace = (item: IItem, trace: ITrace) => {
+   item.last = trace.last;
+   item.next = trace.next;
+   item.level = trace.level;
    return item;
 };
 

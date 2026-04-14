@@ -1,7 +1,7 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.24.0",
+   "version": "0.24.1",
    "type": "module",
    "scripts": {
       "start": "vite",
@@ -16,7 +16,7 @@
    },
    "dependencies": {
       "@sholvoir/dict-server": "github:sholvoir/dict-server",
-      "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.4",
+      "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.5",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
       "js-cookie": "^3.0.5",
       "solid-devtools": "^0.34.5",
@@ -24,7 +24,7 @@
       "yaml": "^2.8.3"
    },
    "devDependencies": {
-      "@iconify/json": "^2.2.461",
+      "@iconify/json": "^2.2.462",
       "@iconify/utils": "^3.1.0",
       "@tailwindcss/vite": "^4.2.2",
       "@types/bun": "^1.3.12",

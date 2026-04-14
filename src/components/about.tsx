@@ -14,14 +14,7 @@ export default (props: { go: (d?: TDial) => void }) => {
    const [auth, setAuth] = createSignal("");
    return (
       <Dialog
-         left={
-            <Show when={mem.user}>
-               <BButton
-                  class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-                  onClick={() => props.go("#home")}
-               />
-            </Show>
-         }
+         leftClick={mem.user ? () => props.go("#home") : undefined}
          title="快乐背单词"
          class="about flex flex-col pb-4 font-extrabold overflow-y-auto"
       >

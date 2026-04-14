@@ -1,18 +1,8 @@
-import BButton from "@sholvoir/solid-components/button-base";
 import type { TDial } from "../lib/idial.ts";
 import Dialog from "./dialog.tsx";
 
 export default (props: { go: (d?: TDial) => void }) => (
-   <Dialog
-      class="flex flex-col pb-4"
-      left={
-         <BButton
-            class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-            onClick={() => props.go()}
-         />
-      }
-      title="帮助"
-   >
+   <Dialog class="flex flex-col pb-4" leftClick={() => props.go()} title="帮助">
       <ol class="list-decimal py-2 pr-2 pl-8 [&>li]:mx-2 overflow-y-auto">
          <li>
             如何使用本软件？

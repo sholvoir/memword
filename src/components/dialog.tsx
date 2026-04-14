@@ -1,23 +1,26 @@
+import BButton from "@sholvoir/solid-components/button-base";
 import { type Accessor, type JSX, Show, splitProps } from "solid-js";
 import Loading from "./icon-loading.tsx";
 
 export type DialogProps = {
    left?: JSX.Element;
-   title: JSX.Element;
+   leftClick?: () => void;
    right?: JSX.Element;
-   tips?: Accessor<string | undefined>;
    showLoading?: Accessor<boolean>;
+   tips?: Accessor<string | undefined>;
+   title: JSX.Element;
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">;
 
 export default (props: DialogProps) => {
    const [local, others] = splitProps(props, [
-      "left",
-      "title",
-      "right",
-      "class",
       "children",
-      "tips",
+      "class",
+      "left",
+      "leftClick",
+      "right",
       "showLoading",
+      "tips",
+      "title",
    ]);
    return (
       <>
@@ -27,7 +30,19 @@ export default (props: DialogProps) => {
             } text-center`}
          >
             <div class="min-w-7 [app-region:no-drag]">
-               <Show when={local.left}>{local.left}</Show>
+               <Show
+                  when={local.left}
+                  fallback={
+                     <Show when={local.leftClick}>
+                        <BButton
+                           class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
+                           onClick={local.leftClick}
+                        />
+                     </Show>
+                  }
+               >
+                  {local.left}
+               </Show>
             </div>
             <div class="grow font-bold [app-region:drag]">
                {local.tips?.() || local.title}

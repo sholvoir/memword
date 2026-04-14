@@ -7,8 +7,6 @@ import {
    createResource,
    createSignal,
    For,
-   onCleanup,
-   onMount,
    type Setter,
    Show,
 } from "solid-js";
@@ -129,23 +127,16 @@ export default (props: {
          await idb.getBooks((book) => splitID(book.bid)[0] === mem.user),
       );
    });
-   onMount(() => document.addEventListener("keyup", handleKeyPress));
-   onCleanup(() => document.removeEventListener("keyup", handleKeyPress));
    return (
       <Dialog
          class="flex flex-col px-2 pt-2 pb-4 outline-none overflow-y-auto"
-         left={
-            <BButton
-               class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={finish}
-            />
-         }
+         leftClick={finish}
          tips={props.tips}
          title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
          onClick={handleClick}
          onKeyup={handleKeyPress}
          touchEnabled={props.isPhaseAnswer()}
-         beforeAnimation={(down) => handleIKnown(down ? 0 : undefined)}
+         beforeAnimation={(up) => handleIKnown(up ? undefined : 0)}
          afterAnimation={studyNext}
       >
          <Show when={props.citem()}>

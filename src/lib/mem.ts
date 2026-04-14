@@ -146,6 +146,24 @@ export const syncTasks = async () => {
    }
 };
 
+export const syncSentences = async () => {
+   try {
+      const thisTime = Date.now();
+      const lastTime = ((await idb.getMeta("_st-time")) ?? 1) as number;
+      const sts = await idb.getSentences(lastTime);
+      for (const st of sts) delete st.trans;
+      const resp = await srv.postSentences(sts, "1");
+      if (!resp.ok)
+         return console.error("Network Error: get sync sentences data error.");
+      const nsts = await resp.json();
+      await idb.mergeTraceToSentences(nsts);
+      await idb.setMeta("_st-time", thisTime);
+      return true;
+   } catch {
+      return false;
+   }
+};
+
 const submitIssues = async () => {
    for (const issue of await idb.getIssues()) {
       const res = await srv.postIssue(issue);
@@ -258,7 +276,7 @@ export const deleteBook = async (bid: string) => {
 export const addSentence = async (sentence: string, trans: string) => {
    const st = newSentence(sentence, trans);
    await idb.putSentence(st);
-   await srv.putSentence(st);
+   await srv.postSentences([st]);
 };
 
 export const signin = async (name: string, code: string) => {

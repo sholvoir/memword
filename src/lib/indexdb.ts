@@ -5,15 +5,15 @@ import type { IIssue } from "./iissue.ts";
 import {
    type IItem,
    itemMergeDict,
-   itemMergeTask,
+   itemMergeTrace,
    neverItem,
    studyTask,
 } from "./iitem.ts";
-import type { ISentence } from "./isentence.ts";
+import { type ISentence, sentenceMergeTrace } from "./isentence.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
 
 export const tempItems = new Map<string, IItem>();
-type kvKey = "_sync-time" | "_setting" | "_auth" | "_vocabulary";
+type kvKey = "_sync-time" | "_st-time" | "_setting" | "_auth" | "_vocabulary";
 
 const db: IDBDatabase = await new Promise((resolve, reject) => {
    const request = indexedDB.open("memword", 2);
@@ -245,7 +245,8 @@ export const mergeTasks = (tasks: Iterable<ITask>) =>
          const item = cursor.value as IItem;
          if (taskMap.has(item.word)) {
             const task = taskMap.get(item.word)!;
-            if (task.last > item.last) cursor.update(itemMergeTask(item, task));
+            if (task.last > item.last)
+               cursor.update(itemMergeTrace(item, task));
             taskMap.delete(item.word);
          } else cursor.delete();
          cursor.continue();
@@ -333,8 +334,29 @@ export const studied = (word: string, level?: number) =>
             if (item1) {
                item = studyTask(item1, level);
                iStore.put(item);
-            }
+            } else iStore.add((item = neverItem(word, Date.now())));
          };
+   });
+
+export const putSentence = (sentence: ISentence) =>
+   new Promise<void>((resolve, reject) => {
+      const request = db
+         .transaction("sentence", "readwrite")
+         .objectStore("sentence")
+         .put(sentence);
+      request.onerror = reject;
+      request.onsuccess = () => resolve();
+   });
+
+export const getSentences = (lastgte: number) =>
+   new Promise<Array<ISentence>>((resolve, reject) => {
+      const request = db
+         .transaction("sentence", "readonly")
+         .objectStore("sentence")
+         .index("last")
+         .getAll(IDBKeyRange.lowerBound(lastgte));
+      request.onerror = reject;
+      request.onsuccess = () => resolve(request.result);
    });
 
 export const getStEpisode = () =>
@@ -351,16 +373,30 @@ export const getStEpisode = () =>
       ) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) return;
-         return cursor.value as ISentence;
+         return (result = cursor.value);
       };
    });
 
-export const putSentence = (sentence: ISentence) =>
+export const mergeTraceToSentences = (sentences: Iterable<ISentence>) =>
    new Promise<void>((resolve, reject) => {
-      const request = db
-         .transaction("sentence", "readwrite")
-         .objectStore("sentence")
-         .put(sentence);
-      request.onerror = reject;
-      request.onsuccess = () => resolve();
+      const stMap = new Map<string, ISentence>();
+      for (const st of sentences) stMap.set(st.sentence, st);
+      const transaction = db.transaction("sentence", "readwrite");
+      transaction.onerror = reject;
+      transaction.oncomplete = () => resolve();
+      const sStore = transaction.objectStore("sentence");
+      sStore.openCursor().onsuccess = (e) => {
+         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+         if (!cursor) {
+            for (const [_, st] of stMap) sStore.add(st);
+            return;
+         }
+         const sst = cursor.value as ISentence;
+         if (stMap.has(sst.sentence)) {
+            const st = stMap.get(sst.sentence)!;
+            if (st.last > sst.last) cursor.update(sentenceMergeTrace(sst, st));
+            stMap.delete(sst.sentence);
+         } else cursor.delete();
+         cursor.continue();
+      };
    });

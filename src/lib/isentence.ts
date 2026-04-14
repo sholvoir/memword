@@ -1,4 +1,5 @@
 import type { ISentence } from "#srv/lib/isentence.ts";
+import type { ITrace } from "#srv/lib/itrace.ts";
 
 export type { ISentence };
 
@@ -24,7 +25,7 @@ export const sentenceToWords = (
       if (i !== 0) return { word };
       const lword = word.toLowerCase();
       if (vocabulary.has(lword)) {
-         words.push(word);
+         words.push(lword);
          continue;
       }
       return { word };
@@ -43,14 +44,21 @@ export const newSentence = (sentence: string, trans: string): ISentence => {
    };
 };
 
-export const studySentence = (task: ISentence, know?: boolean): ISentence => {
-   let level = know ? ++task.level : (task.level = 1);
-   if (task.level > ST_MAX_LEVEL) task.level = level = ST_MAX_LEVEL;
+export const studySentence = (st: ISentence, know?: boolean): ISentence => {
+   let level = know ? ++st.level : (st.level = 1);
+   if (st.level > ST_MAX_LEVEL) st.level = level = ST_MAX_LEVEL;
    const now = Date.now();
-   task.last = now;
-   task.next =
+   st.last = now;
+   st.next =
       level >= ST_MAX_LEVEL
          ? TASK_MAX_NEXT
          : now + Math.round(134848 * level ** 3 * 1.5 ** level);
-   return task;
+   return st;
+};
+
+export const sentenceMergeTrace = (st: ISentence, trace: ITrace) => {
+   st.last = trace.last;
+   st.next = trace.next;
+   st.level = trace.level;
+   return st;
 };

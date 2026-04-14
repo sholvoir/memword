@@ -59,10 +59,10 @@ export default (
    const handleTouchEnd = async (e: TouchEvent & DivTargeted) => {
       const div = e.currentTarget;
       if (Math.abs(touchPos.offset) >= globalThis.innerHeight / 6) {
-         const down = touchPos.offset > 0;
-         if (local.beforeAnimation) await local.beforeAnimation(down);
-         await continueMove(div, down ? 60 : -60);
-         if (local.afterAnimation) await local.afterAnimation(down);
+         const up = touchPos.offset < 0;
+         if (local.beforeAnimation) await local.beforeAnimation(up);
+         await continueMove(div, up ? -60 : 60);
+         if (local.afterAnimation) await local.afterAnimation(up);
       }
       div.style.top = `${(touchPos.offset = 0)}`;
    };

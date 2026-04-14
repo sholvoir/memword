@@ -78,12 +78,7 @@ export default (props: {
          tips={props.tips}
          class="p-2 flex flex-col"
          title="登录"
-         left={
-            <BButton
-               class="text-[150%] icon--material-symbols icon--material-symbols--chevron-left align-bottom"
-               onClick={() => props.go("#about")}
-            />
-         }
+         leftClick={() => props.go("#about")}
       >
          <div class="w-64 m-auto flex flex-col">
             <label for="name">用户名</label>

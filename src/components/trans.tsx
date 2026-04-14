@@ -38,8 +38,8 @@ export default (props: {
       }
    };
    const handleTransClick = async () => {
-      const res = await srv.postTrans(sentence());
-      if (res.ok) setTrans(await res.text());
+      const t = await srv.postTrans(sentence());
+      if (t) setTrans(t);
       else props.showTips("翻译失败");
    };
    const handleAddClick = async () => {

@@ -11,6 +11,7 @@ import Help from "./help.tsx";
 import Home from "./home.tsx";
 import Issue from "./issue.tsx";
 import Dict from "./search.tsx";
+import Sentence from "./sentence.tsx";
 import Setting from "./setting.tsx";
 import Study from "./study.tsx";
 import Trans from "./trans.tsx";
@@ -99,6 +100,14 @@ export default () => {
    dialogs.set("#trans", () => (
       <Trans go={go} tips={tips} showTips={showTips} vocabulary={vocabulary} />
    ));
+   dialogs.set("#sentence", () => (
+      <Sentence
+         go={go}
+         tips={tips}
+         showTips={showTips}
+         vocabulary={vocabulary()}
+      />
+   ));
 
    const init = async () => {
       if (mem.user) {
@@ -111,6 +120,7 @@ export default () => {
             updatedVobab().then((nvocab) => nvocab && setVocabulary(nvocab));
             await mem.syncSetting();
             await mem.syncTasks();
+            await mem.syncSentences();
             await totalStats();
          })();
       } else go("#about");

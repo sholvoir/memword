@@ -1,6 +1,7 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import {
    getJson,
+   getText,
    jsonInit,
    textHeader,
    textInit,
@@ -113,8 +114,11 @@ export const postIssue = (issue: IIssue) =>
       jsonInit({ issue: issue.issue }),
    );
 
-export const putSentence = (sentence: ISentence) =>
-   fetch(`${API_BASE}/sentence`, jsonInit(sentence));
+export const getSentence = (sentence: string) =>
+   getText(url(`${API_BASE}/sentence`, { st: sentence }));
+
+export const postSentences = (sentences: Array<ISentence>, sync?: "1") =>
+   fetch(url(`${API_BASE}/sentence`, { sync }), jsonInit(sentences));
 
 export const postTrans = (sentence: string) =>
-   fetch(`${API_BASE}/trans`, textInit(sentence));
+   getText(`${API_BASE}/trans`, textInit(sentence));
