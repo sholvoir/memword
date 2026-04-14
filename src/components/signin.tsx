@@ -4,23 +4,18 @@ import BButton from "@sholvoir/solid-components/button-base";
 import Button from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
 import { type Accessor, createSignal, type Setter } from "solid-js";
-import type { TDial } from "../lib/idial.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 
 let timer: any;
 
-export default (props: {
-   go: (d?: TDial) => void;
-   name: Accessor<string>;
-   setName: Setter<string>;
-   showTips: (content: string, autohide?: boolean) => void;
-   tips: Accessor<string>;
-}) => {
+export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
    const [code, setCode] = createSignal("");
    const [counter, setCounter] = createSignal(0);
    const [canSendOTP, setCanSendOTP] = createSignal(true);
+   const { go, showTips } = useG()!;
 
    const handleSend = async () => {
       setCanSendOTP(false);
@@ -35,20 +30,20 @@ export default (props: {
       try {
          switch ((await srv.otp(props.name())).status) {
             case STATUS_CODE.BadRequest:
-               return props.showTips("请输入用户名");
+               return showTips("请输入用户名");
             case STATUS_CODE.NotFound:
-               return props.showTips("未找到用户");
+               return showTips("未找到用户");
             case STATUS_CODE.FailedDependency:
-               return props.showTips("此用户未注册手机号码");
+               return showTips("此用户未注册手机号码");
             case STATUS_CODE.TooEarly:
-               return props.showTips("请求OTP过于频繁");
+               return showTips("请求OTP过于频繁");
             case STATUS_CODE.OK:
-               return props.showTips("OTP已发送");
+               return showTips("OTP已发送");
             default:
-               props.showTips("未知服务器错误");
+               showTips("未知服务器错误");
          }
       } catch {
-         props.showTips("网络错误");
+         showTips("网络错误");
       }
    };
 
@@ -56,30 +51,25 @@ export default (props: {
       try {
          switch (await mem.signin(props.name(), code())) {
             case STATUS_CODE.BadRequest:
-               return props.showTips("请输入用户名和密码");
+               return showTips("请输入用户名和密码");
             case STATUS_CODE.NotFound:
-               return props.showTips("未找到用户");
+               return showTips("未找到用户");
             case STATUS_CODE.Unauthorized:
-               return props.showTips("错误的密码");
+               return showTips("错误的密码");
             case STATUS_CODE.OK:
-               props.showTips("已登录");
+               showTips("已登录");
                if (timer) clearInterval(timer);
                location.reload();
                break;
             default:
-               props.showTips("未知服务器错误");
+               showTips("未知服务器错误");
          }
       } catch {
-         props.showTips("网络错误");
+         showTips("网络错误");
       }
    };
    return (
-      <Dialog
-         tips={props.tips}
-         class="p-2 flex flex-col"
-         title="登录"
-         leftClick={() => props.go("#about")}
-      >
+      <Dialog class="p-2 flex flex-col" title="登录">
          <div class="w-64 m-auto flex flex-col">
             <label for="name">用户名</label>
             <SInput
@@ -92,7 +82,7 @@ export default (props: {
                尚未
                <BButton
                   class="btn-anchor font-bold"
-                  onClick={() => props.go("#signup")}
+                  onClick={() => go("#signup")}
                >
                   注册
                </BButton>

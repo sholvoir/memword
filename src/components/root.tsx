@@ -7,6 +7,7 @@ import { type IStats, initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
 import About from "./about.tsx";
 import Book from "./book.tsx";
+import { useG } from "./g-provider.tsx";
 import Help from "./help.tsx";
 import Home from "./home.tsx";
 import Issue from "./issue.tsx";
@@ -18,65 +19,41 @@ import Trans from "./trans.tsx";
 
 export default () => {
    const [stats, setStats] = createSignal<IStats>(initStats());
-   const [tips, setTips] = createSignal<string>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [citem, setCItem] = createSignal<IItem>();
    const [bid, setBId] = createSignal<string>();
    const [sprint, setSprint] = createSignal(-1);
    const [book, setBook] = createSignal<IBook>();
-   const [showLoading, setShowLoading] = createSignal(false);
-   const [loca, setLoca] = createSignal<TDial>("#home");
    const [vocabulary, setVocabulary] = createSignal<Set<string>>(new Set());
+   const { go, loca } = useG()!;
 
-   let timeout: number | undefined;
    const totalStats = async () => setStats(await mem.totalStats());
-   const go = (d?: TDial) => setLoca(d ?? (mem.user ? "#home" : "#about"));
-   const showTips = (content?: string, autohide = true) => {
-      setTips(content);
-      if (autohide) {
-         if (timeout) clearTimeout(timeout);
-         timeout = setTimeout(setTips, 3000);
-      }
-   };
 
    const dialogs = new Map<TDial, () => JSX.Element>();
+   dialogs.set("#help", () => <Help />);
+   dialogs.set("#about", () => <About />);
+   dialogs.set("#issue", () => <Issue />);
+   dialogs.set("#book", () => <Book book={book()} />);
+   dialogs.set("#trans", () => <Trans vocabulary={vocabulary()} />);
+   dialogs.set("#sentence", () => <Sentence vocabulary={vocabulary()} />);
    dialogs.set("#home", () => (
       <Home
-         go={go}
          setBId={setBId}
          setCItem={setCItem}
          setPhaseAnswer={setPhaseAnswer}
-         setShowLoading={setShowLoading}
          setSprint={setSprint}
-         showLoading={showLoading}
-         showTips={showTips}
          stats={stats}
          totalStats={totalStats}
       />
    ));
-   dialogs.set("#help", () => <Help go={go} />);
-   dialogs.set("#about", () => <About go={go} />);
-   dialogs.set("#issue", () => (
-      <Issue go={go} showTips={showTips} tips={tips} />
-   ));
    dialogs.set("#setting", () => (
-      <Setting
-         go={go}
-         setBook={setBook}
-         setShowLoading={setShowLoading}
-         showLoading={showLoading}
-         showTips={showTips}
-         tips={tips}
-         totalStats={totalStats}
-      />
+      <Setting setBook={setBook} totalStats={totalStats} />
    ));
    dialogs.set("#search", () => (
       <Dict
-         go={go}
          setCItem={setCItem}
          setPhaseAnswer={setPhaseAnswer}
          setSprint={setSprint}
-         showTips={showTips}
          vocabulary={vocabulary}
       />
    ));
@@ -84,28 +61,13 @@ export default () => {
       <Study
          bid={bid}
          citem={citem}
-         go={go}
          isPhaseAnswer={isPhaseAnswer}
          setCItem={setCItem}
          setPhaseAnswer={setPhaseAnswer}
          setSprint={setSprint}
-         showTips={showTips}
          sprint={sprint}
-         tips={tips}
          totalStats={totalStats}
          vocabulary={vocabulary}
-      />
-   ));
-   dialogs.set("#book", () => <Book go={go} book={book} showTips={showTips} />);
-   dialogs.set("#trans", () => (
-      <Trans go={go} tips={tips} showTips={showTips} vocabulary={vocabulary} />
-   ));
-   dialogs.set("#sentence", () => (
-      <Sentence
-         go={go}
-         tips={tips}
-         showTips={showTips}
-         vocabulary={vocabulary()}
       />
    ));
 
@@ -129,5 +91,9 @@ export default () => {
    createEffect(() => {
       init();
    });
-   return <Dynamic component={dialogs.get(loca())}></Dynamic>;
+   return (
+      <Dynamic
+         component={dialogs.get(loca() ?? (mem.user ? "#home" : "#about"))}
+      ></Dynamic>
+   );
 };

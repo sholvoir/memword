@@ -1,21 +1,17 @@
-import { type Accessor, createResource, createSignal, Show } from "solid-js";
+import { createResource, createSignal, Show } from "solid-js";
 import type { ISentence } from "#srv/lib/isentence.ts";
-import type { TDial } from "../lib/idial.ts";
 import { item2task } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import { sentenceToWords, studySentence } from "../lib/isentence.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
+import { useG } from "./g-provider.tsx";
 
-export default (props: {
-   go: (d?: TDial) => void;
-   showTips: (content?: string, autohide?: boolean) => void;
-   tips: Accessor<string | undefined>;
-   vocabulary: Set<string>;
-}) => {
+export default (props: { vocabulary: Set<string> }) => {
    const [sentence, setSentence] = createSignal<ISentence>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
+   const { showTips } = useG()!;
 
    const speak = () => {
       if (sentence()) {
@@ -26,7 +22,7 @@ export default (props: {
    const studyNext = async () => {
       const st = await idb.getStEpisode();
       if (!st) {
-         props.showTips("No More Sentence!");
+         showTips("No More Sentence!");
          setSentence();
          setPhaseAnswer(false);
       } else {
@@ -87,8 +83,6 @@ export default (props: {
    return (
       <Dialog
          class="h-full p-2 outline-none relative flex flex-col"
-         leftClick={() => props.go()}
-         tips={props.tips}
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
          onClick={handleClick}
          onKeyup={handleKeyPress}

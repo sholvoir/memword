@@ -10,32 +10,30 @@ import {
    type Setter,
    Show,
 } from "solid-js";
-import type { TDial } from "src/lib/idial.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
+import { useG } from "./g-provider.tsx";
 import Scard from "./scard.tsx";
 
 export default (props: {
    bid: Accessor<string | undefined>;
    citem: Accessor<IItem | undefined>;
-   go: (d?: TDial) => void;
    isPhaseAnswer: Accessor<boolean>;
    setCItem: Setter<IItem | undefined>;
    setPhaseAnswer: Setter<boolean>;
    setSprint: Setter<number>;
-   showTips: (content?: string, autohide?: boolean) => void;
    sprint: Accessor<number>;
-   tips: Accessor<string | undefined>;
    totalStats: () => void;
    vocabulary: Accessor<Set<string>>;
 }) => {
    const entries = () => props.citem()?.entries ?? [];
+   const { go, showTips } = useG()!;
    const finish = () => {
-      props.go(props.sprint() < 0 ? "#search" : undefined);
+      go(props.sprint() < 0 ? "#search" : undefined);
       props.totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);
@@ -62,17 +60,17 @@ export default (props: {
       setCIndex(0);
    };
    const handleRefresh = async () => {
-      props.showTips("Get Server Data...", false);
+      showTips("Get Server Data...", false);
       const item = await mem.updateDict(props.citem()!);
-      props.showTips();
+      showTips();
       props.setCItem({ ...item });
    };
    const handleReportIssue = async () => {
       await mem.submitIssue(props.citem()!.word, "1");
-      props.showTips("Submitted");
+      showTips("Submitted");
    };
    const handleDelete = async () => {
-      props.showTips(
+      showTips(
          (await mem.deleteItem(props.citem()!.word)) ? "删除成功" : "删除失败",
       );
       await studyNext();
@@ -115,10 +113,10 @@ export default (props: {
       setShowAddToBookMenu(false);
       const word = props.citem()!.word;
       const wordSet = (await mem.getBook(book.bid))?.content as Set<string>;
-      if (wordSet?.has(word)) return props.showTips("已包含");
+      if (wordSet?.has(word)) return showTips("已包含");
       const [_, bookName] = splitID(book.bid);
       const [status] = await mem.uploadBook(bookName, word);
-      props.showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
+      showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
       props.vocabulary().add(word);
    };
@@ -131,7 +129,6 @@ export default (props: {
       <Dialog
          class="flex flex-col px-2 pt-2 pb-4 outline-none overflow-y-auto"
          leftClick={finish}
-         tips={props.tips}
          title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
          onClick={handleClick}
          onKeyup={handleKeyPress}

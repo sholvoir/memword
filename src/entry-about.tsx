@@ -3,48 +3,28 @@ import { Dynamic, render } from "solid-js/web";
 import "./components/index.css";
 import "./components/icons.css";
 import About from "./components/about.tsx";
+import GProvider, { useG } from "./components/g-provider.tsx";
 import Signin from "./components/signin.tsx";
 import Signup from "./components/signup.tsx";
 import type { TDial } from "./lib/idial.ts";
 
 const Entry = () => {
-   const [loca, setLoca] = createSignal<TDial>("#about");
    const [name, setName] = createSignal("");
-   const [tips, setTips] = createSignal("");
-
-   let timeout: NodeJS.Timeout | undefined;
-   const go = (d?: TDial) => setLoca(d ?? "#about");
-   const hideTips = () => setTips("");
-   const showTips = (content: string, autohide = true) => {
-      setTips(content);
-      if (autohide) {
-         if (timeout) clearTimeout(timeout);
-         timeout = setTimeout(hideTips, 3000);
-      }
-   };
+   const { loca } = useG()!;
 
    const dialogs = new Map<TDial, () => JSX.Element>();
-   dialogs.set("#about", () => <About go={go} />);
-   dialogs.set("#signup", () => (
-      <Signup
-         go={go}
-         name={name}
-         setName={setName}
-         showTips={showTips}
-         tips={tips}
-      />
-   ));
-   dialogs.set("#signin", () => (
-      <Signin
-         go={go}
-         name={name}
-         setName={setName}
-         showTips={showTips}
-         tips={tips}
-      />
-   ));
+   dialogs.set("#about", () => <About />);
+   dialogs.set("#signup", () => <Signup name={name} setName={setName} />);
+   dialogs.set("#signin", () => <Signin name={name} setName={setName} />);
 
-   return <Dynamic component={dialogs.get(loca())}></Dynamic>;
+   return <Dynamic component={dialogs.get(loca() ?? "#about")}></Dynamic>;
 };
 
-render(() => <Entry />, document.getElementById("root")!);
+render(
+   () => (
+      <GProvider>
+         <Entry />
+      </GProvider>
+   ),
+   document.getElementById("root")!,
+);

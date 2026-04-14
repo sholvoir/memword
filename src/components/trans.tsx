@@ -1,20 +1,16 @@
 import Button from "@sholvoir/solid-components/button-ripple";
-import { type Accessor, createSignal } from "solid-js";
-import type { TDial } from "../lib/idial.ts";
+import { createSignal } from "solid-js";
 import { sentenceToWords } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 
-export default (props: {
-   go: (d?: TDial) => void;
-   showTips: (content?: string, autohide?: boolean) => void;
-   tips: Accessor<string | undefined>;
-   vocabulary: Accessor<Set<string>>;
-}) => {
+export default (props: { vocabulary: Set<string> }) => {
    const [sentence, setSentence] = createSignal("");
    const [trans, setTrans] = createSignal<string>("");
    const [words, setWords] = createSignal<string[]>([]);
+   const { go, showTips } = useG()!;
    const handleSentenceOnInput = (
       e: InputEvent & {
          currentTarget: HTMLTextAreaElement;
@@ -22,13 +18,13 @@ export default (props: {
       },
    ) => {
       setSentence(e.target.value);
-      const result = sentenceToWords(props.vocabulary(), e.target.value);
+      const result = sentenceToWords(props.vocabulary, e.target.value);
       if (result.words) {
          setWords(result.words);
-         props.showTips();
+         showTips();
       } else {
          setWords([]);
-         props.showTips(`未找到, ${result.word!}`, false);
+         showTips(`未找到, ${result.word!}`, false);
       }
    };
    const handlePlayClick = () => {
@@ -40,14 +36,14 @@ export default (props: {
    const handleTransClick = async () => {
       const t = await srv.postTrans(sentence());
       if (t) setTrans(t);
-      else props.showTips("翻译失败");
+      else showTips("翻译失败");
    };
    const handleAddClick = async () => {
       await mem.addSentence(sentence(), trans());
-      props.showTips("添加成功!");
+      showTips("添加成功!");
    };
    return (
-      <Dialog class="p-2 flex flex-col gap-2" title="句子" tips={props.tips}>
+      <Dialog class="p-2 flex flex-col gap-2" title="句子">
          <textarea
             name="sentence"
             class="grow"
@@ -61,7 +57,7 @@ export default (props: {
             onInput={(e) => setTrans(e.target.value)}
          />
          <div class="flex gap-2 pb-3 justify-end">
-            <Button class="w-24 button btn-normal" onClick={() => props.go()}>
+            <Button class="w-24 button btn-normal" onClick={() => go()}>
                取消
             </Button>
             <Button class="w-24 button btn-normal" onClick={handlePlayClick}>

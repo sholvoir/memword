@@ -1,20 +1,22 @@
-import { createSignal, Show } from "solid-js";
+import { createResource, createSignal, Show } from "solid-js";
 import "./about.css";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
-import type { TDial } from "../lib/idial.ts";
 import * as mem from "../lib/mem.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 
-export default (props: { go: (d?: TDial) => void }) => {
+export default () => {
+   const [sversion, setSversion] = createSignal("");
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
+   const { go } = useG()!;
+   createResource(async () => setSversion((await srv.version_get()) ?? ""));
    return (
       <Dialog
-         leftClick={mem.user ? () => props.go("#home") : undefined}
          title="快乐背单词"
          class="about flex flex-col pb-4 font-extrabold overflow-y-auto"
       >
@@ -34,7 +36,9 @@ export default (props: { go: (d?: TDial) => void }) => {
          </Show>
          <div>
             <h1 onClick={() => location.reload()}>快乐背单词</h1>
-            <p>版本：{version}</p>
+            <p>
+               版本：{sversion()}-{version}
+            </p>
          </div>
          <div>
             <h1>语言基础</h1>
@@ -71,7 +75,7 @@ export default (props: { go: (d?: TDial) => void }) => {
                   <RButton
                      class="button bg-orange-300 text-slate-800"
                      title="login"
-                     onClick={() => props.go("#signup")}
+                     onClick={() => go("#signup")}
                   >
                      登录
                   </RButton>

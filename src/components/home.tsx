@@ -1,11 +1,11 @@
 import Button from "@sholvoir/solid-components/button-ripple";
 import { type Accessor, For, type Setter } from "solid-js";
-import type { TDial } from "src/lib/idial.ts";
 import type { IItem } from "src/lib/iitem.ts";
 import { splitID } from "../lib/ibook.ts";
 import { aggrToBAggr, type IStat, type IStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 import Stat from "./stat.tsx";
 
 const sum = (s: number, b: number) => s + b;
@@ -22,37 +22,30 @@ const statInfo = (stat: IStat) => {
 };
 
 export default (props: {
-   go: (d?: TDial) => void;
    setBId: Setter<string | undefined>;
    setCItem: Setter<IItem | undefined>;
    setPhaseAnswer: (phaseAnswer: boolean) => void;
-   setShowLoading: Setter<boolean>;
    setSprint: (sprint: number) => void;
-   showLoading: Accessor<boolean>;
-   showTips: (tips: string) => void;
    stats: Accessor<IStats>;
    totalStats: () => void;
 }) => {
+   const { go, showTips, showLoading } = useG()!;
    const startStudy = async (wl?: string) => {
-      props.setShowLoading(true);
+      showLoading(true);
       const item = await mem.getEpisode(props.setBId(wl));
-      props.setShowLoading(false);
+      showLoading(false);
       if (item) {
          props.setCItem(item);
          props.setPhaseAnswer(false);
          props.setSprint(0);
-         props.go("#study");
+         go("#study");
       } else {
-         props.showTips("No More Task");
+         showTips("No More Task");
          props.totalStats();
       }
    };
    return (
-      <Dialog
-         class="flex flex-col"
-         title="学习进度"
-         showLoading={props.showLoading}
-      >
+      <Dialog class="flex flex-col" title="学习进度">
          <div class="body grow overflow-y-auto">
             <div class="p-2 flex flex-wrap justify-between gap-4">
                <For each={props.stats().stats}>
@@ -67,11 +60,11 @@ export default (props: {
 		 [&>button>span]:align-[-30%] [&>button]:min-w-[90px] [&>button>span]:text-4xl
 		 font-bold overflow-x-auto [scrollbar-width:none]"
          >
-            <Button onClick={() => props.go("#trans")}>
+            <Button onClick={() => go("#trans")}>
                <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
                翻译
             </Button>
-            <Button onClick={() => props.go("#search")}>
+            <Button onClick={() => go("#search")}>
                <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
                词典
             </Button>
@@ -79,23 +72,23 @@ export default (props: {
                <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
                单词
             </Button>
-            <Button onClick={() => props.go("#sentence")}>
+            <Button onClick={() => go("#sentence")}>
                <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
                句子
             </Button>
-            <Button onClick={() => props.go("#setting")}>
+            <Button onClick={() => go("#setting")}>
                <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}
                设置
             </Button>
-            <Button onClick={() => props.go("#about")}>
+            <Button onClick={() => go("#about")}>
                <span class="icon--tabler icon--tabler--info-octagon"></span>{" "}
                关于
             </Button>
-            <Button onClick={() => props.go("#issue")}>
+            <Button onClick={() => go("#issue")}>
                <span class="icon--material-symbols icon--material-symbols--error"></span>{" "}
                问题
             </Button>
-            <Button onClick={() => props.go("#help")}>
+            <Button onClick={() => go("#help")}>
                <span class="icon--material-symbols icon--material-symbols--help-outline"></span>{" "}
                帮助
             </Button>

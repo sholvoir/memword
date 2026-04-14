@@ -3,23 +3,22 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
-import { type Accessor, createEffect, createSignal } from "solid-js";
-import type { TDial } from "src/lib/idial.ts";
+import { createSignal } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 
-export default (props: {
-   book: Accessor<IBook | undefined>;
-   go: (d?: TDial) => void;
-   showTips: (content: string, autohide?: boolean) => void;
-}) => {
-   const [bname, setBName] = createSignal("");
-   const [disc, setDisc] = createSignal("");
+export default (props: { book?: IBook }) => {
+   const [bname, setBName] = createSignal(
+      props.book ? splitID(props.book.bid)[1] : "",
+   );
+   const [disc, setDisc] = createSignal(props.book?.disc ?? "");
    const [words, setWords] = createSignal("");
    const [replace, setReplace] = createSignal(false);
    const [isPublic, setPublic] = createSignal(false);
    const [revision, setRevision] = createSignal("");
+   const { go, showTips } = useG()!;
    const handleDownloadClick = async () => {
       const bid = `${mem.user}/${bname()}`;
       const book = await mem.getBook(bid);
@@ -38,29 +37,23 @@ export default (props: {
          );
          switch (status) {
             case STATUS_CODE.BadRequest:
-               return props.showTips("Error: 无名称或无内容");
+               return showTips("Error: 无名称或无内容");
             case STATUS_CODE.NotAcceptable:
                setRevision(
                   Object.entries(result as Record<string, string[]>)
                      .map(([key, value]) => `${key}: ${value.join(",")}`)
                      .join("\n"),
                );
-               return props.showTips("未通过拼写检查");
+               return showTips("未通过拼写检查");
             case STATUS_CODE.OK: {
-               props.showTips("词书上传成功");
-               props.go("#setting");
+               showTips("词书上传成功");
+               go("#setting");
             }
          }
       } catch {
-         props.showTips("网络错误");
+         showTips("网络错误");
       }
    };
-   createEffect(() => {
-      if (props.book()) {
-         setBName(splitID(props.book()!.bid)[1]);
-         if (props.book()!.disc) setDisc(props.book()!.disc!);
-      }
-   }, []);
    return (
       <Dialog class="flex flex-col p-2" title="上传我的词书">
          <label for="name">名称</label>
@@ -92,7 +85,7 @@ export default (props: {
             <div class="grow"></div>
             <Button
                class="w-24 button btn-normal"
-               onClick={() => props.go("#setting")}
+               onClick={() => go("#setting")}
             >
                取消
             </Button>

@@ -122,3 +122,5 @@ export const postSentences = (sentences: Array<ISentence>, sync?: "1") =>
 
 export const postTrans = (sentence: string) =>
    getText(`${API_BASE}/trans`, textInit(sentence));
+
+export const version_get = () => getText(`${API_BASE}/version`);

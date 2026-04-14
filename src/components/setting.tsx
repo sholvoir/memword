@@ -2,26 +2,16 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import Input from "@sholvoir/solid-components/input-simple";
 import List from "@sholvoir/solid-components/list";
-import {
-   type Accessor,
-   createResource,
-   createSignal,
-   type Setter,
-} from "solid-js";
-import type { TDial } from "src/lib/idial.ts";
+import { createResource, createSignal, type Setter } from "solid-js";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import { compareWL, type IBook } from "../lib/ibook.ts";
 import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
+import { useG } from "./g-provider.tsx";
 
 export default (props: {
-   go: (d?: TDial) => void;
    setBook: Setter<IBook | undefined>;
-   setShowLoading: Setter<boolean>;
-   showLoading: Accessor<boolean>;
-   showTips: (content: string, autohide?: boolean) => void;
-   tips: Accessor<string | undefined>;
    totalStats: () => void;
 }) => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
@@ -32,18 +22,19 @@ export default (props: {
    const [books, setBooks] = createSignal<Array<IBook>>([]);
    const [cindex, setCIndex] = createSignal(0);
    const [bookFilter, setBookFilter] = createSignal("^common");
+   const { go, showTips, showLoading } = useG()!;
 
    const handleNewBookClick = () => {
       props.setBook(undefined);
-      props.go("#book");
+      go("#book");
    };
    const handleUpdateBookClick = () => {
       props.setBook(myBooks()[myIndex()]);
-      props.go("#book");
+      go("#book");
    };
    const handleDeleteBookClick = async () => {
       const success = await mem.deleteBook(myBooks()[myIndex()].bid);
-      props.showTips(success ? "删除成功" : "删除失败");
+      showTips(success ? "删除成功" : "删除失败");
       if (success) setMyBooks(myBooks().filter((_, i) => i !== myIndex()));
    };
    const handleAddSubClick = () => {
@@ -56,10 +47,10 @@ export default (props: {
       ]);
    };
    const handleAddTaskClick = async () => {
-      props.setShowLoading(true);
+      showLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
       props.totalStats();
-      props.setShowLoading(false);
+      showLoading(false);
    };
    const handleOKClick = async () => {
       await mem.syncSetting({
@@ -69,7 +60,7 @@ export default (props: {
          books: subBooks().map((wl) => wl.bid),
       });
       props.totalStats();
-      props.go();
+      go();
    };
    const handleSignoutClick = () => {
       idb.clear();
@@ -107,12 +98,7 @@ export default (props: {
       setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user!)));
    });
    return (
-      <Dialog
-         class="p-2 gap-2 flex flex-col"
-         title="设置"
-         tips={props.tips}
-         showLoading={props.showLoading}
-      >
+      <Dialog class="p-2 gap-2 flex flex-col" title="设置">
          <Checkbox
             binding={[showTrans, setShowTrans]}
             label="Always Show Trans"
@@ -201,7 +187,7 @@ export default (props: {
             <Button class="button btn-prime grow" onClick={handleOKClick}>
                保存
             </Button>
-            <Button class="button btn-normal grow" onClick={() => props.go()}>
+            <Button class="button btn-normal grow" onClick={() => go()}>
                取消
             </Button>
          </div>
