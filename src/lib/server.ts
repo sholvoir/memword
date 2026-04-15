@@ -124,3 +124,6 @@ export const postTrans = (sentence: string) =>
    getText(`${API_BASE}/trans`, textInit(sentence));
 
 export const version_get = () => getText(`${API_BASE}/version`);
+
+export const lemmatization_get = () =>
+   getText(`${COMMON_BOOK_BASE_URL}/lemmatization.yaml`);

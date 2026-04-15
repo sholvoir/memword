@@ -6,7 +6,10 @@ import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
-export default (props: { vocabulary: Set<string> }) => {
+export default (props: {
+   vocabulary: Set<string>;
+   lamma: Record<string, string>;
+}) => {
    const [sentence, setSentence] = createSignal("");
    const [trans, setTrans] = createSignal<string>("");
    const [words, setWords] = createSignal<string[]>([]);
@@ -18,7 +21,11 @@ export default (props: { vocabulary: Set<string> }) => {
       },
    ) => {
       setSentence(e.target.value);
-      const result = sentenceToWords(props.vocabulary, e.target.value);
+      const result = sentenceToWords(
+         props.vocabulary,
+         props.lamma,
+         e.target.value,
+      );
       if (result.words) {
          setWords(result.words);
          showTips();

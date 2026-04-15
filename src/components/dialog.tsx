@@ -10,6 +10,7 @@ export type DialogProps = {
    right?: JSX.Element;
    tips?: Accessor<string | undefined>;
    title: JSX.Element;
+   tools?: JSX.Element;
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "title">;
 
 export default (props: DialogProps) => {
@@ -21,6 +22,7 @@ export default (props: DialogProps) => {
       "noleft",
       "right",
       "title",
+      "tools",
    ]);
    const { tips, go, loading } = useG()!;
    return (
@@ -52,6 +54,7 @@ export default (props: DialogProps) => {
                <Show when={local.right}>{local.right}</Show>
             </div>
          </div>
+         <Show when={local.tools}>{local.tools}</Show>
          <div class={`body relative grow h-0 ${local.class ?? ""}`} {...others}>
             {local.children}
             <Show when={loading()}>

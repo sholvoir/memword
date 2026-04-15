@@ -8,6 +8,7 @@ const TASK_MAX_NEXT = 2000000000000;
 
 export const sentenceToWords = (
    vocabulary: Set<string>,
+   lamma: Record<string, string>,
    sentence: string,
 ): {
    word?: string;
@@ -22,10 +23,14 @@ export const sentenceToWords = (
          words.push(word);
          continue;
       }
-      if (i !== 0) return { word };
       const lword = word.toLowerCase();
-      if (vocabulary.has(lword)) {
+      if (i === 0 || vocabulary.has(lword)) {
          words.push(lword);
+         continue;
+      }
+      const laword = lamma[word] || lamma[lword];
+      if (laword && vocabulary.has(laword)) {
+         words.push(laword);
          continue;
       }
       return { word };

@@ -7,7 +7,10 @@ import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
 
-export default (props: { vocabulary: Set<string> }) => {
+export default (props: {
+   vocabulary: Set<string>;
+   lamma: Record<string, string>;
+}) => {
    const [sentence, setSentence] = createSignal<ISentence>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
@@ -45,7 +48,11 @@ export default (props: { vocabulary: Set<string> }) => {
          await srv.postSentences([st]);
          if (know) {
             const items = [];
-            const result = sentenceToWords(props.vocabulary, st.sentence);
+            const result = sentenceToWords(
+               props.vocabulary,
+               props.lamma,
+               st.sentence,
+            );
             if (result.words)
                for (const word of result.words) {
                   items.push(await idb.studied(word));

@@ -25,6 +25,7 @@ export default () => {
    const [sprint, setSprint] = createSignal(-1);
    const [book, setBook] = createSignal<IBook>();
    const [vocabulary, setVocabulary] = createSignal<Set<string>>(new Set());
+   const [lamma, setLamma] = createSignal<Record<string, string>>({});
    const { go, loca } = useG()!;
 
    const totalStats = async () => setStats(await mem.totalStats());
@@ -34,8 +35,12 @@ export default () => {
    dialogs.set("#about", () => <About />);
    dialogs.set("#issue", () => <Issue />);
    dialogs.set("#book", () => <Book book={book()} />);
-   dialogs.set("#trans", () => <Trans vocabulary={vocabulary()} />);
-   dialogs.set("#sentence", () => <Sentence vocabulary={vocabulary()} />);
+   dialogs.set("#trans", () => (
+      <Trans vocabulary={vocabulary()} lamma={lamma()} />
+   ));
+   dialogs.set("#sentence", () => (
+      <Sentence vocabulary={vocabulary()} lamma={lamma()} />
+   ));
    dialogs.set("#home", () => (
       <Home
          setBId={setBId}
@@ -80,6 +85,8 @@ export default () => {
             const [vocab, updatedVobab] = await mem.getVocabulary();
             if (vocab.size) setVocabulary(vocab);
             updatedVobab().then((nvocab) => nvocab && setVocabulary(nvocab));
+            const la = await mem.getLamma();
+            if (la) setLamma(la);
             await mem.syncSetting();
             await mem.syncTasks();
             await mem.syncSentences();

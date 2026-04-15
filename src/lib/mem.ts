@@ -1,6 +1,7 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
+import { parse } from "yaml";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
@@ -284,4 +285,12 @@ export const signin = async (name: string, code: string) => {
    if (res.ok) await idb.setMeta("_auth", (await res.json()).auth);
    console.log(`signin ${res.status}`);
    return res.status;
+};
+
+export const getLamma = async () => {
+   const text = await srv.lemmatization_get();
+   if (!text) return;
+   try {
+      return parse(text) as Record<string, string>;
+   } catch {}
 };

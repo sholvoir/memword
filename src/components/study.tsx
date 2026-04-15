@@ -127,16 +127,14 @@ export default (props: {
    });
    return (
       <Dialog
+         afterAnimation={studyNext}
+         beforeAnimation={(up) => handleIKnown(up ? undefined : 0)}
          class="flex flex-col px-2 pt-2 pb-4 outline-none overflow-y-auto"
          leftClick={finish}
-         title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
          onClick={handleClick}
          onKeyup={handleKeyPress}
-         touchEnabled={props.isPhaseAnswer()}
-         beforeAnimation={(up) => handleIKnown(up ? undefined : 0)}
-         afterAnimation={studyNext}
-      >
-         <Show when={props.citem()}>
+         title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
+         tools={
             <div class="relative flex gap-4 text-[150%] justify-between items-end">
                <BButton
                   onClick={() => handleIKnown().then(studyNext)}
@@ -205,6 +203,10 @@ export default (props: {
                   </div>
                </Show>
             </div>
+         }
+         touchEnabled={props.isPhaseAnswer()}
+      >
+         <Show when={props.citem()}>
             <div class="py-2 flex gap-2 flex-wrap justify-between">
                <div class="text-4xl font-bold">{props.citem()?.word}</div>
                {props.isPhaseAnswer() && (
