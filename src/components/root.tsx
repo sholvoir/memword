@@ -1,10 +1,12 @@
-import { createEffect, createSignal, type JSX } from "solid-js";
+import { createSignal, type JSX, onMount } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import type { IBook } from "../lib/ibook.ts";
 import type { TDial } from "../lib/idial.ts";
 import type { IItem } from "../lib/iitem.ts";
+import * as idb from "../lib/indexdb.ts";
 import { type IStats, initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
+import * as srv from "../lib/server.ts";
 import About from "./about.tsx";
 import Book from "./book.tsx";
 import { useG } from "./g-provider.tsx";
@@ -18,6 +20,7 @@ import Study from "./study.tsx";
 import Trans from "./trans.tsx";
 
 export default () => {
+   const [sversion, setSversion] = createSignal("");
    const [stats, setStats] = createSignal<IStats>(initStats());
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [citem, setCItem] = createSignal<IItem>();
@@ -32,7 +35,7 @@ export default () => {
 
    const dialogs = new Map<TDial, () => JSX.Element>();
    dialogs.set("#help", () => <Help />);
-   dialogs.set("#about", () => <About />);
+   dialogs.set("#about", () => <About sversion={sversion()} />);
    dialogs.set("#issue", () => <Issue />);
    dialogs.set("#book", () => <Book book={book()} />);
    dialogs.set("#trans", () => (
@@ -76,11 +79,15 @@ export default () => {
       />
    ));
 
-   const init = async () => {
+   onMount(async () => {
       if (mem.user) {
          go("#home");
          await totalStats();
          (async () => {
+            setSversion(((await idb.getMeta("_s-version")) as string) ?? "");
+            srv.version_get().then((v) => {
+               v && setSversion(v) && idb.setMeta("_s-version", v);
+            });
             await mem.getServerBooks();
             const [vocab, updatedVobab] = await mem.getVocabulary();
             if (vocab.size) setVocabulary(vocab);
@@ -93,10 +100,6 @@ export default () => {
             await totalStats();
          })();
       } else go("#about");
-   };
-
-   createEffect(() => {
-      init();
    });
    return (
       <Dynamic

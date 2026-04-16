@@ -1,4 +1,4 @@
-import { createResource, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import "./about.css";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
@@ -9,12 +9,10 @@ import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
-export default () => {
-   const [sversion, setSversion] = createSignal("");
+export default (props: { sversion: string }) => {
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
    const { go } = useG()!;
-   createResource(async () => setSversion((await srv.version_get()) ?? ""));
    return (
       <Dialog
          title="快乐背单词"
@@ -37,7 +35,7 @@ export default () => {
          <div>
             <h1 onClick={() => location.reload()}>快乐背单词</h1>
             <p>
-               版本：{sversion()}-{version}
+               版本：{props.sversion}-{version.split(".")[2]}
             </p>
          </div>
          <div>

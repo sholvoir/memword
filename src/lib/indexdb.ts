@@ -13,7 +13,13 @@ import { type ISentence, sentenceMergeTrace } from "./isentence.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
 
 export const tempItems = new Map<string, IItem>();
-type kvKey = "_sync-time" | "_st-time" | "_setting" | "_auth" | "_vocabulary";
+type kvKey =
+   | "_sync-time"
+   | "_st-time"
+   | "_setting"
+   | "_auth"
+   | "_vocabulary"
+   | "_s-version";
 
 const db: IDBDatabase = await new Promise((resolve, reject) => {
    const request = indexedDB.open("memword", 2);

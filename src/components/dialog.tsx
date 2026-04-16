@@ -4,6 +4,7 @@ import { useG } from "./g-provider.tsx";
 import Loading from "./icon-loading.tsx";
 
 export type DialogProps = {
+   bottom?: JSX.Element;
    left?: JSX.Element;
    leftClick?: () => void;
    noleft?: boolean;
@@ -15,6 +16,7 @@ export type DialogProps = {
 
 export default (props: DialogProps) => {
    const [local, others] = splitProps(props, [
+      "bottom",
       "children",
       "class",
       "left",
@@ -57,12 +59,13 @@ export default (props: DialogProps) => {
          <Show when={local.tools}>{local.tools}</Show>
          <div class={`body relative grow h-0 ${local.class ?? ""}`} {...others}>
             {local.children}
-            <Show when={loading()}>
-               <div class="absolute inset-0 bg-(--bg-half) flex justify-center content-center flex-wrap">
-                  <Loading class="w-16 h-16" />
-               </div>
-            </Show>
          </div>
+         <Show when={local.bottom}>{local.bottom}</Show>
+         <Show when={loading()}>
+            <div class="absolute inset-0 bg-(--bg-half) flex justify-center content-center flex-wrap">
+               <Loading class="w-16 h-16" />
+            </div>
+         </Show>
       </>
    );
 };

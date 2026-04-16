@@ -45,54 +45,56 @@ export default (props: {
       }
    };
    return (
-      <Dialog class="flex flex-col" title="学习进度" noleft={true}>
-         <div class="body grow overflow-y-auto">
-            <div class="p-2 flex flex-wrap justify-between gap-4">
-               <For each={props.stats().stats}>
-                  {(stat: IStat) => (
-                     <Stat {...statInfo(stat)} startStudy={startStudy} />
-                  )}
-               </For>
+      <Dialog
+         class="overflow-y-auto p-2 flex flex-wrap justify-between gap-4"
+         title="学习进度"
+         noleft={true}
+         bottom={
+            <div
+               class="tail shrink-0 px-4 pt-2 pb-5 flex gap-2 justify-between [&>button]:grow
+		            [&>button>span]:align-[-30%] [&>button]:min-w-20 [&>button>span]:text-4xl
+		            font-bold overflow-x-auto [scrollbar-width:none]"
+            >
+               <Button onClick={() => go("#trans")}>
+                  <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
+                  翻译
+               </Button>
+               <Button onClick={() => go("#search")}>
+                  <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
+                  词典
+               </Button>
+               <Button onClick={() => startStudy()}>
+                  <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
+                  单词
+               </Button>
+               <Button onClick={() => go("#sentence")}>
+                  <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
+                  句子
+               </Button>
+               <Button onClick={() => go("#setting")}>
+                  <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}
+                  设置
+               </Button>
+               <Button onClick={() => go("#about")}>
+                  <span class="icon--tabler icon--tabler--info-octagon"></span>{" "}
+                  关于
+               </Button>
+               <Button onClick={() => go("#issue")}>
+                  <span class="icon--material-symbols icon--material-symbols--error"></span>{" "}
+                  问题
+               </Button>
+               <Button onClick={() => go("#help")}>
+                  <span class="icon--material-symbols icon--material-symbols--help-outline"></span>{" "}
+                  帮助
+               </Button>
             </div>
-         </div>
-         <div
-            class="tail shrink-0 px-4 pt-2 pb-5 flex gap-2 justify-between [&>button]:grow
-		 [&>button>span]:align-[-30%] [&>button]:min-w-[90px] [&>button>span]:text-4xl
-		 font-bold overflow-x-auto [scrollbar-width:none]"
-         >
-            <Button onClick={() => go("#trans")}>
-               <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
-               翻译
-            </Button>
-            <Button onClick={() => go("#search")}>
-               <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
-               词典
-            </Button>
-            <Button onClick={() => startStudy()}>
-               <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
-               单词
-            </Button>
-            <Button onClick={() => go("#sentence")}>
-               <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
-               句子
-            </Button>
-            <Button onClick={() => go("#setting")}>
-               <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}
-               设置
-            </Button>
-            <Button onClick={() => go("#about")}>
-               <span class="icon--tabler icon--tabler--info-octagon"></span>{" "}
-               关于
-            </Button>
-            <Button onClick={() => go("#issue")}>
-               <span class="icon--material-symbols icon--material-symbols--error"></span>{" "}
-               问题
-            </Button>
-            <Button onClick={() => go("#help")}>
-               <span class="icon--material-symbols icon--material-symbols--help-outline"></span>{" "}
-               帮助
-            </Button>
-         </div>
+         }
+      >
+         <For each={props.stats().stats}>
+            {(stat: IStat) => (
+               <Stat {...statInfo(stat)} startStudy={startStudy} />
+            )}
+         </For>
       </Dialog>
    );
 };
