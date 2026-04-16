@@ -45,7 +45,7 @@ export default (props: {
       }
    };
    return (
-      <Dialog class="flex flex-col" title="学习进度">
+      <Dialog class="flex flex-col" title="学习进度" noleft={true}>
          <div class="body grow overflow-y-auto">
             <div class="p-2 flex flex-wrap justify-between gap-4">
                <For each={props.stats().stats}>

@@ -135,7 +135,7 @@ export default (props: {
          onKeyup={handleKeyPress}
          title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
          tools={
-            <div class="relative flex gap-4 text-[150%] justify-between items-end">
+            <div class="body px-2 relative flex gap-4 text-[150%] justify-between items-end">
                <BButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"

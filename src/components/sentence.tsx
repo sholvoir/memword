@@ -19,6 +19,11 @@ export default (props: {
    const speak = () => {
       if (sentence()) {
          const utterance = new SpeechSynthesisUtterance(sentence()!.sentence);
+         utterance.lang = "en-US";
+         utterance.rate = 0.8;
+         utterance.voice = speechSynthesis
+            .getVoices()
+            .find((voice) => voice.name === "Google US English")!;
          speechSynthesis.speak(utterance);
       }
    };
