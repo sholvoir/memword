@@ -344,12 +344,12 @@ export const studied = (word: string, level?: number) =>
          };
    });
 
-export const putSentence = (sentence: ISentence) =>
+export const addSentence = (sentence: ISentence) =>
    new Promise<void>((resolve, reject) => {
       const request = db
          .transaction("sentence", "readwrite")
          .objectStore("sentence")
-         .put(sentence);
+         .add(sentence);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });

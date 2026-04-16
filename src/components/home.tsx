@@ -46,7 +46,7 @@ export default (props: {
    };
    return (
       <Dialog
-         class="overflow-y-auto p-2 flex flex-wrap justify-between gap-4"
+         class="overflow-y-auto"
          title="学习进度"
          noleft={true}
          bottom={
@@ -86,11 +86,13 @@ export default (props: {
             </div>
          }
       >
-         <For each={props.stats().stats}>
-            {(stat: IStat) => (
-               <Stat {...statInfo(stat)} startStudy={startStudy} />
-            )}
-         </For>
+         <div class="p-2 flex flex-wrap justify-between gap-4">
+            <For each={props.stats().stats}>
+               {(stat: IStat) => (
+                  <Stat {...statInfo(stat)} startStudy={startStudy} />
+               )}
+            </For>
+         </div>
       </Dialog>
    );
 };

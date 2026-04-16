@@ -276,7 +276,7 @@ export const deleteBook = async (bid: string) => {
 
 export const addSentence = async (sentence: string, trans: string) => {
    const st = newSentence(sentence, trans);
-   await idb.putSentence(st);
+   await idb.addSentence(st);
    await srv.postSentences([st]);
 };
 

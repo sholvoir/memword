@@ -1,7 +1,7 @@
 import Button from "@sholvoir/solid-components/button-ripple";
 import TInput from "@sholvoir/solid-components/input-text";
 import type { TextAreaTargeted } from "@sholvoir/solid-components/targeted";
-import { createSignal, type Setter } from "solid-js";
+import { type Accessor, createSignal, type Setter } from "solid-js";
 import type { IItem } from "../lib/iitem.ts";
 import { sentenceToWords } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
@@ -11,18 +11,23 @@ import { useG } from "./g-provider.tsx";
 
 export default (props: {
    lamma: Record<string, string>;
+   sentence: string;
    setCItem: Setter<IItem | undefined>;
    setPhaseAnswer: Setter<boolean>;
+   setSentence: Setter<string>;
    setSprint: Setter<number>;
+   setTrans: Setter<string>;
+   setWord: Setter<string>;
+   trans: string;
    vocabulary: Set<string>;
+   word: Accessor<string>;
 }) => {
-   const [word, setWord] = createSignal("");
-   const [sentence, setSentence] = createSignal("");
-   const [trans, setTrans] = createSignal<string>("");
    const [words, setWords] = createSignal<string[]>([]);
    const { go, showTips } = useG()!;
    const handleSentenceOnInput = (e: InputEvent & TextAreaTargeted) => {
-      setSentence(e.target.value);
+      props.setSentence(e.target.value);
+      props.setWord("");
+      props.setTrans("");
       const result = sentenceToWords(
          props.vocabulary,
          props.lamma,
@@ -45,13 +50,13 @@ export default (props: {
       const element = e.currentTarget;
       const w = element.value.slice(
          element.selectionStart,
-         element.selectionStart,
+         element.selectionEnd,
       );
       const result = sentenceToWords(props.vocabulary, props.lamma, w);
-      if (result.words) setWord(result.words[0]);
+      if (result.words?.length) props.setWord(result.words[0]);
    };
    const handleDictClick = async () => {
-      const text = word().trim();
+      const text = props.word().trim();
       if (!text) return;
       const item = await mem.search(text);
       if (!item) return showTips("Not Found!");
@@ -61,18 +66,18 @@ export default (props: {
       go("#study");
    };
    const handlePlayClick = () => {
-      if (sentence()) {
-         const utterance = new SpeechSynthesisUtterance(sentence());
+      if (props.sentence) {
+         const utterance = new SpeechSynthesisUtterance(props.sentence);
          speechSynthesis.speak(utterance);
       }
    };
    const handleTransClick = async () => {
-      const t = await srv.postTrans(sentence());
-      if (t) setTrans(t);
+      const t = await srv.postTrans(props.sentence);
+      if (t) props.setTrans(t);
       else showTips("翻译失败");
    };
    const handleAddClick = async () => {
-      await mem.addSentence(sentence(), trans());
+      await mem.addSentence(props.sentence.trim(), props.trans);
       showTips("添加成功!");
    };
    return (
@@ -82,23 +87,22 @@ export default (props: {
             type="search"
             name="word"
             placeholder="word"
-            class="m-2 w-[calc(100%-16px)]"
-            binding={[word, setWord]}
+            binding={[props.word, props.setWord]}
             onChange={handleDictClick}
             options={props.vocabulary}
          />
          <textarea
             name="sentence"
             class="grow"
-            value={sentence()}
+            value={props.sentence}
             onInput={handleSentenceOnInput}
             onSelect={handleSentenceSelect}
          />
          <textarea
             name="trans"
             class="grow"
-            value={trans()}
-            onInput={(e) => setTrans(e.target.value)}
+            value={props.trans}
+            onInput={(e) => props.setTrans(e.target.value)}
          />
          <div class="flex gap-2 pb-3 justify-end">
             <Button class="w-16 button btn-normal" onClick={() => go()}>
@@ -115,7 +119,7 @@ export default (props: {
             </Button>
             <Button
                class="w-16 button btn-prime"
-               disabled={!words().length || !trans()}
+               disabled={!words().length || !props.trans}
                onClick={handleAddClick}
             >
                添加

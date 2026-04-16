@@ -19,13 +19,22 @@ import Study from "./study.tsx";
 import Trans from "./trans.tsx";
 
 export default () => {
+   // about
    const [sversion, setSversion] = createSignal("");
+   // home
    const [stats, setStats] = createSignal<IStats>(initStats());
-   const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
+   // study, trans
    const [citem, setCItem] = createSignal<IItem>();
-   const [bid, setBId] = createSignal<string>();
+   const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(-1);
+   // book
+   const [bid, setBId] = createSignal<string>();
    const [book, setBook] = createSignal<IBook>();
+   // trans
+   const [sentence, setSentence] = createSignal("");
+   const [word, setWord] = createSignal("");
+   const [trans, setTrans] = createSignal<string>("");
+   // common
    const [vocabulary, setVocabulary] = createSignal<Set<string>>(new Set());
    const [lamma, setLamma] = createSignal<Record<string, string>>({});
    const { go, loca } = useG()!;
@@ -37,17 +46,26 @@ export default () => {
    dialogs.set("#about", () => <About sversion={sversion()} />);
    dialogs.set("#issue", () => <Issue />);
    dialogs.set("#book", () => <Book book={book()} />);
-   dialogs.set("#trans", () => (
-      <Trans
-         lamma={lamma()}
-         setCItem={setCItem}
-         setPhaseAnswer={setPhaseAnswer}
-         setSprint={setSprint}
-         vocabulary={vocabulary()}
-      />
+   dialogs.set("#setting", () => (
+      <Setting setBook={setBook} totalStats={totalStats} />
    ));
    dialogs.set("#sentence", () => (
       <Sentence vocabulary={vocabulary()} lamma={lamma()} />
+   ));
+   dialogs.set("#trans", () => (
+      <Trans
+         lamma={lamma()}
+         sentence={sentence()}
+         setCItem={setCItem}
+         setPhaseAnswer={setPhaseAnswer}
+         setSentence={setSentence}
+         setSprint={setSprint}
+         setTrans={setTrans}
+         setWord={setWord}
+         trans={trans()}
+         vocabulary={vocabulary()}
+         word={word}
+      />
    ));
    dialogs.set("#home", () => (
       <Home
@@ -58,9 +76,6 @@ export default () => {
          stats={stats}
          totalStats={totalStats}
       />
-   ));
-   dialogs.set("#setting", () => (
-      <Setting setBook={setBook} totalStats={totalStats} />
    ));
    dialogs.set("#study", () => (
       <Study

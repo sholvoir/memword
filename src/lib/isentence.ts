@@ -24,7 +24,7 @@ export const sentenceToWords = (
          continue;
       }
       const lword = word.toLowerCase();
-      if (i === 0 || vocabulary.has(lword)) {
+      if (i === 0 && vocabulary.has(lword)) {
          words.push(lword);
          continue;
       }

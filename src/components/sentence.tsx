@@ -48,7 +48,7 @@ export default (props: {
    const handleIKnown = async (know?: boolean) => {
       if (sentence()) {
          const st = studySentence(sentence()!, know);
-         await idb.putSentence(st);
+         await idb.addSentence(st);
          delete st.trans;
          await srv.postSentences([st]);
          if (know) {
