@@ -354,6 +354,16 @@ export const addSentence = (sentence: ISentence) =>
       request.onsuccess = () => resolve();
    });
 
+export const putSentence = (sentence: ISentence) =>
+   new Promise<void>((resolve, reject) => {
+      const request = db
+         .transaction("sentence", "readwrite")
+         .objectStore("sentence")
+         .put(sentence);
+      request.onerror = reject;
+      request.onsuccess = () => resolve();
+   });
+
 export const getSentences = (lastgte: number) =>
    new Promise<Array<ISentence>>((resolve, reject) => {
       const request = db

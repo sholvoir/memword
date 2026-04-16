@@ -48,7 +48,7 @@ export default (props: {
    const handleIKnown = async (know?: boolean) => {
       if (sentence()) {
          const st = studySentence(sentence()!, know);
-         await idb.addSentence(st);
+         await idb.putSentence(st);
          delete st.trans;
          await srv.postSentences([st]);
          if (know) {
@@ -94,7 +94,7 @@ export default (props: {
    createResource(studyNext);
    return (
       <Dialog
-         class="h-full p-2 outline-none relative flex flex-col"
+         class="h-full p-2 outline-none relative flex flex-col text-lg"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
          onClick={handleClick}
          onKeyup={handleKeyPress}
