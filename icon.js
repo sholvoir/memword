@@ -13,7 +13,6 @@ const icons = {
       "chevron-left",
       "chevron-right",
       "delete-outline",
-      "dictionary",
       "error",
       "family-star",
       "help-outline",

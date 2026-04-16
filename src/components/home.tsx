@@ -59,10 +59,6 @@ export default (props: {
                   <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
                   翻译
                </Button>
-               <Button onClick={() => go("#search")}>
-                  <span class="icon--material-symbols icon--material-symbols--dictionary"></span>{" "}
-                  词典
-               </Button>
                <Button onClick={() => startStudy()}>
                   <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
                   单词

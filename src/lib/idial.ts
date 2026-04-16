@@ -7,7 +7,6 @@ export const DIALS = [
    "#book",
    "#trans",
    "#sentence",
-   "#search",
    "#study",
    "#signup",
    "#signin",

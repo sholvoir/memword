@@ -33,7 +33,7 @@ export default (props: {
    const entries = () => props.citem()?.entries ?? [];
    const { go, showTips } = useG()!;
    const finish = () => {
-      go(props.sprint() < 0 ? "#search" : undefined);
+      go(props.sprint() < 0 ? "#trans" : undefined);
       props.totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);

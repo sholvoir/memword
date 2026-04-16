@@ -13,7 +13,6 @@ import { useG } from "./g-provider.tsx";
 import Help from "./help.tsx";
 import Home from "./home.tsx";
 import Issue from "./issue.tsx";
-import Dict from "./search.tsx";
 import Sentence from "./sentence.tsx";
 import Setting from "./setting.tsx";
 import Study from "./study.tsx";
@@ -39,7 +38,13 @@ export default () => {
    dialogs.set("#issue", () => <Issue />);
    dialogs.set("#book", () => <Book book={book()} />);
    dialogs.set("#trans", () => (
-      <Trans vocabulary={vocabulary()} lamma={lamma()} />
+      <Trans
+         lamma={lamma()}
+         setCItem={setCItem}
+         setPhaseAnswer={setPhaseAnswer}
+         setSprint={setSprint}
+         vocabulary={vocabulary()}
+      />
    ));
    dialogs.set("#sentence", () => (
       <Sentence vocabulary={vocabulary()} lamma={lamma()} />
@@ -56,14 +61,6 @@ export default () => {
    ));
    dialogs.set("#setting", () => (
       <Setting setBook={setBook} totalStats={totalStats} />
-   ));
-   dialogs.set("#search", () => (
-      <Dict
-         setCItem={setCItem}
-         setPhaseAnswer={setPhaseAnswer}
-         setSprint={setSprint}
-         vocabulary={vocabulary}
-      />
    ));
    dialogs.set("#study", () => (
       <Study
