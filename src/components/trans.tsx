@@ -41,7 +41,7 @@ export default (props: {
          showTips();
       } else {
          setWords([]);
-         showTips(`未找到, ${result.word!}`, false);
+         showTips(`未找到 "${result.word!}"`, false);
       }
    };
    const handleSentenceSelect = (e: Event & TextAreaTargeted) => {

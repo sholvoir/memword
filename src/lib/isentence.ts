@@ -15,10 +15,11 @@ export const sentenceToWords = (
    words?: Array<string>;
 } => {
    const words = [];
-   const array = sentence.replace(/[^A-Za-z '-]/g, "").split(/\s+/);
+   const array = sentence.replace(/[^A-Za-z0-9 '-]/g, "").split(/\s+/);
    for (let i = 0; i < array.length; i++) {
       const word = array[i].trim();
       if (!word) continue;
+      if (/\d/.test(word)) continue;
       if (vocabulary.has(word)) {
          words.push(word);
          continue;
