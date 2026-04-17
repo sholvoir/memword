@@ -15,15 +15,21 @@ export default (props: {
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
    const { showTips } = useG()!;
+   const speechs = new Map<string, SpeechSynthesisUtterance>();
 
    const speak = () => {
       if (sentence()) {
-         const utterance = new SpeechSynthesisUtterance(sentence()!.sentence);
-         utterance.lang = "en-US";
-         utterance.rate = 0.8;
-         utterance.voice = speechSynthesis
-            .getVoices()
-            .find((voice) => voice.name === "Google US English")!;
+         const st = sentence()!.sentence;
+         let utterance = speechs.get(st);
+         if (!utterance) {
+            utterance = new SpeechSynthesisUtterance(st);
+            utterance.lang = "en-US";
+            utterance.rate = 0.8;
+            utterance.voice = speechSynthesis
+               .getVoices()
+               .find((voice) => voice.name === "Google US English")!;
+            speechs.set(st, utterance);
+         }
          speechSynthesis.speak(utterance);
       }
    };
