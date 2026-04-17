@@ -1,6 +1,9 @@
 import Button from "@sholvoir/solid-components/button-ripple";
 import TInput from "@sholvoir/solid-components/input-text";
-import type { TextAreaTargeted } from "@sholvoir/solid-components/targeted";
+import type {
+   TextAreaInputTargeted,
+   TextAreaTargeted,
+} from "@sholvoir/solid-components/targeted";
 import { type Accessor, createSignal, type Setter } from "solid-js";
 import type { IItem } from "../lib/iitem.ts";
 import { sentenceToWords } from "../lib/isentence.ts";
@@ -24,7 +27,7 @@ export default (props: {
 }) => {
    const [words, setWords] = createSignal<string[]>([]);
    const { go, showTips } = useG()!;
-   const handleSentenceOnInput = (e: InputEvent & TextAreaTargeted) => {
+   const handleSentenceOnInput = (e: InputEvent & TextAreaInputTargeted) => {
       props.setSentence(e.target.value);
       props.setWord("");
       props.setTrans("");
@@ -41,12 +44,7 @@ export default (props: {
          showTips(`未找到, ${result.word!}`, false);
       }
    };
-   const handleSentenceSelect = (
-      e: Event & {
-         currentTarget: HTMLTextAreaElement;
-         target: Element;
-      },
-   ) => {
+   const handleSentenceSelect = (e: Event & TextAreaTargeted) => {
       const element = e.currentTarget;
       const w = element.value.slice(
          element.selectionStart,
@@ -78,6 +76,10 @@ export default (props: {
    };
    const handleAddClick = async () => {
       await mem.addSentence(props.sentence.trim(), props.trans);
+      props.setSentence("");
+      props.setWord("");
+      props.setTrans("");
+      setWords([]);
       showTips("添加成功!");
    };
    return (
