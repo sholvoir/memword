@@ -8,15 +8,19 @@ import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
 
 export default (props: {
-   vocabulary: Set<string>;
    lamma: Record<string, string>;
+   totalStats: () => void;
+   vocabulary: Set<string>;
 }) => {
    const [sentence, setSentence] = createSignal<ISentence>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
-   const { showTips } = useG()!;
+   const { go, showTips } = useG()!;
    const speechs = new Map<string, SpeechSynthesisUtterance>();
-
+   const finish = () => {
+      go("#home");
+      props.totalStats();
+   };
    const speak = () => {
       if (sentence()) {
          const st = sentence()!.sentence;
@@ -102,6 +106,7 @@ export default (props: {
       <Dialog
          class="h-full p-2 outline-none relative flex flex-col text-lg"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
+         leftClick={finish}
          onClick={handleClick}
          onKeyup={handleKeyPress}
          touchEnabled={isPhaseAnswer()}

@@ -50,7 +50,11 @@ export default () => {
       <Setting setBook={setBook} totalStats={totalStats} />
    ));
    dialogs.set("#sentence", () => (
-      <Sentence vocabulary={vocabulary()} lamma={lamma()} />
+      <Sentence
+         lamma={lamma()}
+         totalStats={totalStats}
+         vocabulary={vocabulary()}
+      />
    ));
    dialogs.set("#trans", () => (
       <Trans
