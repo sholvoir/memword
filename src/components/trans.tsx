@@ -86,37 +86,48 @@ export default (props: {
       <Dialog class="p-2 flex flex-col gap-2 text-lg" title="翻译">
          <TInput
             autoCapitalize="none"
-            type="search"
-            name="word"
-            placeholder="word"
             binding={[props.word, props.setWord]}
+            name="word"
             onChange={handleDictClick}
             options={props.vocabulary}
+            placeholder="word"
+            type="search"
          />
          <textarea
-            name="sentence"
             class="grow"
-            value={props.sentence}
+            name="sentence"
             onInput={handleSentenceOnInput}
             onSelect={handleSentenceSelect}
+            placeholder="sentence"
+            value={props.sentence}
          />
          <textarea
-            name="trans"
             class="grow"
-            value={props.trans}
+            name="trans"
             onInput={(e) => props.setTrans(e.target.value)}
+            placeholder="trans"
+            value={props.trans}
          />
-         <div class="flex gap-2 pb-3 justify-end">
-            <Button class="w-16 button btn-normal" onClick={() => go()}>
+         <div class="flex gap-2 pb-3">
+            <Button class="flex-auto button btn-normal" onClick={() => go()}>
                取消
             </Button>
-            <Button class="w-16 button btn-normal" onClick={handleDictClick}>
+            <Button
+               class="flex-auto button btn-normal"
+               onClick={handleDictClick}
+            >
                辞典
             </Button>
-            <Button class="w-16 button btn-normal" onClick={handlePlayClick}>
+            <Button
+               class="flex-auto button btn-normal"
+               onClick={handlePlayClick}
+            >
                播放
             </Button>
-            <Button class="w-16 button btn-normal" onClick={handleTransClick}>
+            <Button
+               class="flex-auto button btn-normal"
+               onClick={handleTransClick}
+            >
                翻译
             </Button>
             <Button

@@ -60,7 +60,7 @@ export default (props: {
          const st = studySentence(sentence()!, know);
          await idb.putSentence(st);
          delete st.trans;
-         await srv.postSentences([st]);
+         srv.postSentences([st]);
          if (know) {
             const items = [];
             const result = sentenceToWords(
