@@ -11,6 +11,21 @@ import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
 
+const speechs = new Map<string, SpeechSynthesisUtterance>();
+const getUrrerance = (text: string) => {
+   const utterance = new SpeechSynthesisUtterance(text);
+   utterance.lang = "en-US";
+   utterance.rate = 0.8;
+   utterance.voice = speechSynthesis
+      .getVoices()
+      .find((voice) => voice.name === "Google US English")!;
+   speechs.set(text, utterance);
+   return utterance;
+};
+
+const speak = (text?: string) =>
+   text && speechSynthesis.speak(speechs.get(text) ?? getUrrerance(text));
+
 export default (props: {
    lamma: Record<string, string>;
    totalStats: () => void;
@@ -20,27 +35,11 @@ export default (props: {
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
    const { go, showTips } = useG()!;
-   const speechs = new Map<string, SpeechSynthesisUtterance>();
    const finish = () => {
       go("#home");
       props.totalStats();
    };
-   const speak = () => {
-      if (sentence()) {
-         const st = sentence()!.sentence;
-         let utterance = speechs.get(st);
-         if (!utterance) {
-            utterance = new SpeechSynthesisUtterance(st);
-            utterance.lang = "en-US";
-            utterance.rate = 0.8;
-            utterance.voice = speechSynthesis
-               .getVoices()
-               .find((voice) => voice.name === "Google US English")!;
-            speechs.set(st, utterance);
-         }
-         speechSynthesis.speak(utterance);
-      }
-   };
+
    const studyNext = async () => {
       const st = await idb.getStEpisode();
       if (!st) {
@@ -56,7 +55,7 @@ export default (props: {
          setSentence(st);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
-         speak();
+         speak(st.sentence);
       }
    };
    const handleIKnown = async (know?: boolean) => {
@@ -83,14 +82,14 @@ export default (props: {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak();
+      speak(sentence()?.sentence);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
       if (e.ctrlKey || e.altKey) return;
       switch (e.key) {
          case " ":
-            speak();
+            speak(sentence()?.sentence);
             break;
          case "N":
          case "X":
