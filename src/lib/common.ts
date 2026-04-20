@@ -1,0 +1,1 @@
+export const TASK_MAX_NEXT = 2000000000000;

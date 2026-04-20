@@ -1,9 +1,9 @@
 import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 import type { ITrace } from "#srv/lib/itrace.ts";
+import { TASK_MAX_NEXT } from "./common.ts";
 
 export const TASK_MAX_LEVEL = 17;
-const TASK_MAX_NEXT = 2000000000000;
 
 export interface IItem extends IDict, ITask {
    dictSync?: number;

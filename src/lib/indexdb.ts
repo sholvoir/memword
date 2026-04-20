@@ -364,6 +364,16 @@ export const putSentence = (sentence: ISentence) =>
       request.onsuccess = () => resolve();
    });
 
+export const deleteSentence = (sentence: string) =>
+   new Promise<void>((resolve, reject) => {
+      const request = db
+         .transaction("sentence", "readwrite")
+         .objectStore("sentence")
+         .delete(sentence);
+      request.onerror = reject;
+      request.onsuccess = () => resolve();
+   });
+
 export const getSentences = (lastgte: number) =>
    new Promise<Array<ISentence>>((resolve, reject) => {
       const request = db

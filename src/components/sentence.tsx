@@ -2,7 +2,11 @@ import { createResource, createSignal, Show } from "solid-js";
 import type { ISentence } from "#srv/lib/isentence.ts";
 import { item2task } from "../lib/iitem.ts";
 import * as idb from "../lib/indexdb.ts";
-import { sentenceToWords, studySentence } from "../lib/isentence.ts";
+import {
+   ST_MAX_LEVEL,
+   sentenceToWords,
+   studySentence,
+} from "../lib/isentence.ts";
 import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
@@ -58,7 +62,8 @@ export default (props: {
    const handleIKnown = async (know?: boolean) => {
       if (sentence()) {
          const st = studySentence(sentence()!, know);
-         await idb.putSentence(st);
+         if (st.level === ST_MAX_LEVEL) await idb.deleteSentence(st.sentence);
+         else await idb.putSentence(st);
          delete st.trans;
          srv.postSentences([st]);
          if (know) {

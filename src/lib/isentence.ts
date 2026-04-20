@@ -1,10 +1,10 @@
 import type { ISentence } from "#srv/lib/isentence.ts";
 import type { ITrace } from "#srv/lib/itrace.ts";
+import { TASK_MAX_NEXT } from "./common.ts";
 
 export type { ISentence };
 
-const ST_MAX_LEVEL = 10;
-const TASK_MAX_NEXT = 2000000000000;
+export const ST_MAX_LEVEL = 10;
 
 export const sentenceToWords = (
    vocabulary: Set<string>,
