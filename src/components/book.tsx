@@ -3,7 +3,7 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
@@ -55,7 +55,32 @@ export default (props: { book?: IBook }) => {
       }
    };
    return (
-      <Dialog class="flex flex-col p-2" title="上传我的词书">
+      <Dialog
+         class="flex flex-col p-2"
+         title="上传我的词书"
+         bottom={
+            <div class="flex gap-2 my-2">
+               <Checkbox binding={[replace, setReplace]} label="Replace" />
+               <Checkbox binding={[isPublic, setPublic]} label="Public" />
+               <div class="grow"></div>
+               <Button
+                  class="w-24 button btn-normal"
+                  onClick={() => go("#setting")}
+               >
+                  取消
+               </Button>
+               <Button
+                  class="w-24 button btn-normal"
+                  onClick={handleDownloadClick}
+               >
+                  下载
+               </Button>
+               <Button class="w-24 button btn-prime" onClick={handleOKClick}>
+                  上传
+               </Button>
+            </div>
+         }
+      >
          <label for="name">名称</label>
          <SInput name="name" binding={[bname, setBName]} />
          <label for="disc" class="mt-2">
@@ -66,39 +91,17 @@ export default (props: { book?: IBook }) => {
             词表
          </label>
          <TaInput name="words" class="grow" binding={[words, setWords]} />
-         {revision().length ? (
-            <>
-               <label for="replace" class="text-(--accent-color) mt-2">
-                  请考虑用下面的词替换
-               </label>
-               <textarea
-                  name="replace"
-                  class="grow"
-                  value={revision()}
-                  onChange={(e) => setRevision(e.currentTarget.value)}
-               />
-            </>
-         ) : undefined}
-         <div class="flex gap-2 my-2">
-            <Checkbox binding={[replace, setReplace]} label="Replace" />
-            <Checkbox binding={[isPublic, setPublic]} label="Public" />
-            <div class="grow"></div>
-            <Button
-               class="w-24 button btn-normal"
-               onClick={() => go("#setting")}
-            >
-               取消
-            </Button>
-            <Button
-               class="w-24 button btn-normal"
-               onClick={handleDownloadClick}
-            >
-               下载
-            </Button>
-            <Button class="w-24 button btn-prime" onClick={handleOKClick}>
-               上传
-            </Button>
-         </div>
+         <Show when={revision().length}>
+            <label for="replace" class="text-(--accent-color) mt-2">
+               请考虑用下面的词替换
+            </label>
+            <textarea
+               name="replace"
+               class="grow"
+               value={revision()}
+               onChange={(e) => setRevision(e.currentTarget.value)}
+            />
+         </Show>
       </Dialog>
    );
 };

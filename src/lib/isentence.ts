@@ -37,6 +37,11 @@ export const sentenceToWords = (
          words.push(laword);
          continue;
       }
+      const rpword = word.replace(/'s$/, "");
+      if (vocabulary.has(rpword)) {
+         words.push(rpword);
+         continue;
+      }
       return { word };
    }
    return { words };

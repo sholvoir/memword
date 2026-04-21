@@ -51,7 +51,7 @@ export default (props: {
          noleft={true}
          bottom={
             <div
-               class="tail shrink-0 px-4 pt-2 pb-5 flex gap-2 justify-between [&>button]:grow
+               class="tail shrink-0 px-4 py-2 flex gap-2 justify-between [&>button]:grow
 		            [&>button>span]:align-[-30%] [&>button]:min-w-21 [&>button>span]:text-4xl
 		            font-bold overflow-x-auto [scrollbar-width:none]"
             >

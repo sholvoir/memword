@@ -19,7 +19,9 @@ const GContext = createContext<IGContext>();
 
 export default (props: any) => {
    let timeout: number | undefined;
-   const [loca, setLoca] = createSignal<TDial>();
+   const [loca, setLoca] = createSignal<TDial | undefined>(
+      (localStorage.getItem("_loca") as TDial) ?? undefined,
+   );
    const [tips, setTips] = createSignal<string>();
    const [loading, setLoading] = createSignal(false);
    const showTips = (content?: string, autohide = true) => {
@@ -29,11 +31,15 @@ export default (props: any) => {
          timeout = setTimeout(setTips, 3000);
       }
    };
+   const go = (d?: TDial) => {
+      setLoca(d);
+      if (d) localStorage.setItem("_loca", d);
+   };
    const store: IGContext = {
       tips,
       showTips,
       loca,
-      go: setLoca,
+      go,
       loading,
       showLoading: setLoading,
    };

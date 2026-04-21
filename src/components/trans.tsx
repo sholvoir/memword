@@ -83,7 +83,42 @@ export default (props: {
       showTips("添加成功!");
    };
    return (
-      <Dialog class="p-2 flex flex-col gap-2 text-lg" title="翻译">
+      <Dialog
+         class="p-2 flex flex-col gap-2 text-lg"
+         title="翻译"
+         bottom={
+            <div class="flex gap-2">
+               <Button class="flex-auto button btn-normal" onClick={() => go()}>
+                  取消
+               </Button>
+               <Button
+                  class="flex-auto button btn-normal"
+                  onClick={handleDictClick}
+               >
+                  辞典
+               </Button>
+               <Button
+                  class="flex-auto button btn-normal"
+                  onClick={handlePlayClick}
+               >
+                  播放
+               </Button>
+               <Button
+                  class="flex-auto button btn-normal"
+                  onClick={handleTransClick}
+               >
+                  翻译
+               </Button>
+               <Button
+                  class="flex-auto button btn-prime"
+                  disabled={!words().length || !props.trans}
+                  onClick={handleAddClick}
+               >
+                  添加
+               </Button>
+            </div>
+         }
+      >
          <TInput
             autoCapitalize="none"
             binding={[props.word, props.setWord]}
@@ -108,36 +143,6 @@ export default (props: {
             placeholder="trans"
             value={props.trans}
          />
-         <div class="flex gap-2 pb-3">
-            <Button class="flex-auto button btn-normal" onClick={() => go()}>
-               取消
-            </Button>
-            <Button
-               class="flex-auto button btn-normal"
-               onClick={handleDictClick}
-            >
-               辞典
-            </Button>
-            <Button
-               class="flex-auto button btn-normal"
-               onClick={handlePlayClick}
-            >
-               播放
-            </Button>
-            <Button
-               class="flex-auto button btn-normal"
-               onClick={handleTransClick}
-            >
-               翻译
-            </Button>
-            <Button
-               class="w-16 button btn-prime"
-               disabled={!words().length || !props.trans}
-               onClick={handleAddClick}
-            >
-               添加
-            </Button>
-         </div>
       </Dialog>
    );
 };
