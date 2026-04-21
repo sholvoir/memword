@@ -59,7 +59,7 @@ export default (props: { book?: IBook }) => {
          class="flex flex-col p-2"
          title="上传我的词书"
          bottom={
-            <div class="flex gap-2 my-2">
+            <div class="px-2 pt-2 pb-5 flex gap-2">
                <Checkbox binding={[replace, setReplace]} label="Replace" />
                <Checkbox binding={[isPublic, setPublic]} label="Public" />
                <div class="grow"></div>

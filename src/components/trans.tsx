@@ -87,7 +87,7 @@ export default (props: {
          class="p-2 flex flex-col gap-2 text-lg"
          title="翻译"
          bottom={
-            <div class="flex gap-2">
+            <div class="px-2 pt-2 pb-5 flex gap-2">
                <Button class="flex-auto button btn-normal" onClick={() => go()}>
                   取消
                </Button>

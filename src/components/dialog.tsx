@@ -61,7 +61,6 @@ export default (props: DialogProps) => {
             {local.children}
          </div>
          <Show when={local.bottom}>{local.bottom}</Show>
-         <div class="h-3"></div>
          <Show when={loading()}>
             <div class="absolute inset-0 bg-(--bg-half) flex justify-center content-center flex-wrap">
                <Loading class="w-16 h-16" />

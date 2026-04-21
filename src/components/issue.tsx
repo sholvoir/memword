@@ -14,19 +14,27 @@ export default () => {
       go();
    };
    return (
-      <Dialog class="p-2 flex flex-col" title="提交问题">
+      <Dialog
+         class="p-2 flex flex-col"
+         title="提交问题"
+         bottom={
+            <div class="px-2 pt-2 pb-5 flex gap-2 justify-end">
+               <Button class="w-24 button btn-normal" onClick={() => go()}>
+                  取消
+               </Button>
+               <Button
+                  class="w-24 button btn-prime"
+                  onClick={handleSubmitClick}
+               >
+                  提交
+               </Button>
+            </div>
+         }
+      >
          <label for="issue">请在这里描述你的问题:</label>
          <TAInput name="issue" class="grow" binding={[issue, setIssue]}>
             {issue()}
          </TAInput>
-         <div class="flex gap-2 mt-2 pb-3 justify-end">
-            <Button class="w-24 button btn-normal" onClick={() => go()}>
-               取消
-            </Button>
-            <Button class="w-24 button btn-prime" onClick={handleSubmitClick}>
-               提交
-            </Button>
-         </div>
       </Dialog>
    );
 };

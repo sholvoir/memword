@@ -98,7 +98,32 @@ export default (props: {
       setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user!)));
    });
    return (
-      <Dialog class="p-2 gap-2 flex flex-col" title="设置">
+      <Dialog
+         class="p-2 gap-2 flex flex-col"
+         title="设置"
+         bottom={
+            <div class="px-2 pt-2 pb-5 flex justify-between gap-2">
+               <Button
+                  class="button btn-normal grow"
+                  onClick={handleAddTaskClick}
+               >
+                  添加任务
+               </Button>
+               <Button
+                  class="button btn-normal grow"
+                  onClick={handleSignoutClick}
+               >
+                  登出
+               </Button>
+               <Button class="button btn-prime grow" onClick={handleOKClick}>
+                  保存
+               </Button>
+               <Button class="button btn-normal grow" onClick={() => go()}>
+                  取消
+               </Button>
+            </div>
+         }
+      >
          <Checkbox
             binding={[showTrans, setShowTrans]}
             label="Always Show Trans"
@@ -177,20 +202,6 @@ export default (props: {
                activeClass="bg-[var(--bg-title)]"
             />
          </fieldset>
-         <div class="pb-3 flex justify-between gap-2">
-            <Button class="button btn-normal grow" onClick={handleAddTaskClick}>
-               添加任务
-            </Button>
-            <Button class="button btn-normal grow" onClick={handleSignoutClick}>
-               登出
-            </Button>
-            <Button class="button btn-prime grow" onClick={handleOKClick}>
-               保存
-            </Button>
-            <Button class="button btn-normal grow" onClick={() => go()}>
-               取消
-            </Button>
-         </div>
       </Dialog>
    );
 };
