@@ -2,7 +2,7 @@
     "deno.enable": false,
     "editor.codeActionsOnSave": {
         "source.organizeImports.biome": "explicit",
-        "source.fixAll.biome": "explicit",
+        "source.fixAll.biome": "explicit"
     },
     "editor.tabSize": 3,
     "editor.indentSize": "tabSize",

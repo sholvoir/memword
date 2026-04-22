@@ -1,6 +1,6 @@
-import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 import type { IBook } from "../lib/ibook.ts";
+import type { IDict } from "./idict.ts";
 import type { IIssue } from "./iissue.ts";
 import {
    type IItem,
@@ -56,8 +56,8 @@ export const clear = () =>
       request.onsuccess = () => resolve();
    });
 
-export const getMeta = (key: kvKey) =>
-   new Promise<unknown>((resolve, reject) => {
+export const getMeta = <T>(key: kvKey) =>
+   new Promise<T | undefined>((resolve, reject) => {
       const request = db
          .transaction("mata", "readonly")
          .objectStore("mata")
@@ -66,7 +66,7 @@ export const getMeta = (key: kvKey) =>
       request.onsuccess = () => resolve(request.result?.value);
    });
 
-export const setMeta = (key: kvKey, value: any) =>
+export const setMeta = <T>(key: kvKey, value: T) =>
    new Promise<void>((resolve, reject) => {
       const request = db
          .transaction("mata", "readwrite")
@@ -136,7 +136,7 @@ export const deleteBook = (bid: string) =>
       request.onsuccess = () => resolve();
    });
 
-export const getBooks = (filter: (book: IBook) => unknown) =>
+export const getBooks = (filter: (book: IBook) => boolean) =>
    new Promise<Array<IBook>>((resolve, reject) => {
       const books: Array<IBook> = [];
       const transaction = db.transaction("book", "readonly");

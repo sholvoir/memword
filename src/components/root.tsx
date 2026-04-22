@@ -3,10 +3,8 @@ import { Dynamic } from "solid-js/web";
 import type { IBook } from "../lib/ibook.ts";
 import type { TDial } from "../lib/idial.ts";
 import type { IItem } from "../lib/iitem.ts";
-import * as idb from "../lib/indexdb.ts";
 import { type IStats, initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
-import * as srv from "../lib/server.ts";
 import About from "./about.tsx";
 import Book from "./book.tsx";
 import { useG } from "./g-provider.tsx";
@@ -100,9 +98,9 @@ export default () => {
          go("#home");
          await totalStats();
          (async () => {
-            setSversion(((await idb.getMeta("_s-version")) as string) ?? "");
-            srv.version_get().then((v) => {
-               v && setSversion(v) && idb.setMeta("_s-version", v);
+            setSversion((await mem.getLocalServerVersion()) ?? "");
+            mem.getServerVersion().then((v) => {
+               v && setSversion(v) && mem.setLocalServerVersion(v);
             });
             await mem.getServerBooks();
             const [vocab, updatedVobab] = await mem.getVocabulary();

@@ -5,7 +5,6 @@ import RButton from "@sholvoir/solid-components/button-ripple";
 import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
 import * as mem from "../lib/mem.ts";
-import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
@@ -24,7 +23,7 @@ export default (props: { sversion: string }) => {
                <BButton
                   class="button bg-slate-300 text-slate-800"
                   onClick={() => {
-                     srv.renew(auth());
+                     mem.renewAuth(auth());
                      location.replace(".");
                   }}
                >

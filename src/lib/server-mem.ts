@@ -1,129 +1,89 @@
-import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import {
    getJson,
    getText,
    jsonInit,
-   textHeader,
    textInit,
    url,
 } from "@sholvoir/generic/http";
 import type { ISetting } from "#srv/lib/isetting.ts";
 import type { ITask } from "#srv/lib/itask.ts";
-import { type IBook, splitID } from "../lib/ibook.ts";
+import type { IBook } from "./ibook.ts";
 import type { IIssue } from "./iissue";
 import type { ISentence } from "./isentence.ts";
 
 const API_BASE = "/api/v2";
-const COMMON_BOOK_BASE_URL = "https://www.micinfotech.com/vocabulary";
-const DICT_API_BASE =
-   window.location.hostname === "localhost"
-      ? "http://localhost:8080/api/v2"
-      : "https://dict.micinfotech.com/api/v2";
 
-export const getUser = () => getJson<{ name: string }>(`${API_BASE}/user`);
+export const book_get = () => getJson<Array<IBook>>(`${API_BASE}/book`);
 
-export const otp = (name: string) => fetch(url(`${API_BASE}/otp`, { name }));
+export const book_delete = (name: string) =>
+   fetch(url(`${API_BASE}/book`, { name }), { method: "DELETE" });
 
-export const signup = (phone: string, name: string) =>
-   fetch(url(`${API_BASE}/signup`, { phone, name }));
-
-export const signin = (name: string, code: string) =>
-   fetch(url(`${API_BASE}/signin`, { name, code }));
-
-export const renew = (auth?: string) =>
-   fetch(url(`${API_BASE}/renew`, { auth }));
-
-export const getDict = (word: string) =>
-   getJson<IDict>(url(`${DICT_API_BASE}/dict`, { q: word, mic: "1" }));
-
-export const postTasks = (tasks: Array<ITask>, sync?: "1") =>
-   fetch(url(`${API_BASE}/task`, { sync }), jsonInit(tasks));
-
-export const deleteTasks = (words: Array<string>) =>
-   fetch(`${API_BASE}/task`, jsonInit(words, "DELETE"));
-
-export const getBooks = async () => {
-   const books = (await getJson<Array<IBook>>(`${API_BASE}/book`)) ?? [];
-   const res = await fetch(`${COMMON_BOOK_BASE_URL}/checksum.json`);
-   if (!res.ok) return books;
-   const checksums: Record<string, { disc: string; checksum: string }> =
-      await res.json();
-   for (const [bname, { disc, checksum }] of Object.entries(checksums))
-      books.push({
-         bid: `common/${bname}`,
-         disc,
-         checksum,
-         public: true,
-      });
-   return books;
-};
-
-export const getBook = async (bid: string) => {
-   const [username, bname] = splitID(bid);
-   if (username === "common") {
-      const res = await fetch(`${COMMON_BOOK_BASE_URL}/${bname}.txt`);
-      if (!res.ok) return;
-      return await res.text();
-   } else {
-      const res = await fetch(`${API_BASE}/book/${bid}`);
-      if (!res.ok) return;
-      return await res.text();
-   }
-};
-
-export const uploadBook = (
+export const book_post = (
    name: string,
    words: string,
    disc?: string,
-   isPublic?: boolean,
-   replace?: boolean,
+   isPublic?: "1",
 ) =>
    fetch(
-      url(`${API_BASE}/book`, {
-         name,
-         disc,
-         public: isPublic ? "1" : undefined,
-      }),
-      {
-         body: words,
-         headers: textHeader,
-         method: replace ? "PUT" : "POST",
-      },
+      url(`${API_BASE}/book`, { name, disc, public: isPublic }),
+      textInit(words),
    );
 
-export const deleteBook = (name: string) =>
-   fetch(url(`${API_BASE}/book`, { name }), { method: "DELETE" });
-
-export const getVocabularyChecksum = () =>
-   getJson<{ checksum: string }>(`${DICT_API_BASE}/vocabulary/checksum`);
-
-export const getVocabulary = () =>
-   getJson<{ words: Array<string>; checksum: string }>(
-      `${DICT_API_BASE}/vocabulary`,
+export const book_put = (
+   name: string,
+   words: string,
+   disc?: string,
+   isPublic?: "1",
+) =>
+   fetch(
+      url(`${API_BASE}/book`, { name, disc, public: isPublic }),
+      textInit(words, "PUT"),
    );
 
-export const getSound = (surl: string) =>
-   fetch(url(`${DICT_API_BASE}/sound`, { q: surl }), { cache: "force-cache" });
+export const book_id_get = (bookId: string) =>
+   getText(`${API_BASE}/book/${bookId}`);
 
-export const postSetting = (setting: ISetting) =>
-   fetch(`${API_BASE}/setting`, jsonInit(setting));
-
-export const postIssue = (issue: IIssue) =>
+export const issue_post = (issue: IIssue) =>
    fetch(
       url(`${API_BASE}/issue`, { d: issue.d }),
       jsonInit({ issue: issue.issue }),
    );
 
-export const getSentence = (sentence: string) =>
-   getText(url(`${API_BASE}/sentence`, { st: sentence }));
+export const otp_get = (name: string) =>
+   fetch(url(`${API_BASE}/otp`, { name }));
 
-export const postSentences = (sentences: Array<ISentence>, sync?: "1") =>
+export const renew_get = (auth?: string) =>
+   fetch(url(`${API_BASE}/renew`, { auth }));
+
+export const sentence_post = (sentences: Array<ISentence>, sync?: "1") =>
    fetch(url(`${API_BASE}/sentence`, { sync }), jsonInit(sentences));
 
-export const postTrans = (sentence: string) =>
+export const sentence_get = (sentence: string) =>
+   getText(url(`${API_BASE}/sentence`, { st: sentence }));
+
+export const sentence_delete = (sentence: string) =>
+   fetch(url(`${API_BASE}/sentence`, { st: sentence }), { method: "DELETE" });
+
+export const setting_post = (setting: ISetting) =>
+   getJson<ISetting>(`${API_BASE}/setting`, jsonInit(setting));
+
+export const signin_get = (name: string, code: string) =>
+   fetch(url(`${API_BASE}/signin`, { name, code }));
+
+export const signup_get = (phone: string, name: string) =>
+   fetch(url(`${API_BASE}/signup`, { phone, name }));
+
+export const signout_get = () => fetch(`${API_BASE}/signout`);
+
+export const task_post = (tasks: Array<ITask>, sync?: "1") =>
+   fetch(url(`${API_BASE}/task`, { sync }), jsonInit(tasks));
+
+export const task_delete = (words: Array<string>) =>
+   fetch(`${API_BASE}/task`, jsonInit(words, "DELETE"));
+
+export const trans_post = (sentence: string) =>
    getText(`${API_BASE}/trans`, textInit(sentence));
 
 export const version_get = () => getText(`${API_BASE}/version`);
 
-export const lemmatization_get = () =>
-   getText(`${COMMON_BOOK_BASE_URL}/lemmatization.yaml`);
+export const user_get = () => getJson<{ name: string }>(`${API_BASE}/user`);

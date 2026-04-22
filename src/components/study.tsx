@@ -12,9 +12,7 @@ import {
 } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
-import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
-import * as srv from "../lib/server.ts";
 import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
 import Scard from "./scard.tsx";
@@ -44,8 +42,8 @@ export default (props: {
    let player!: HTMLAudioElement;
    const handleIKnown = async (level?: number) => {
       if (props.citem())
-         srv.postTasks([
-            item2task(await idb.studied(props.citem()!.word, level)),
+         mem.uploadTasks([
+            item2task(await mem.studyWord(props.citem()!.word, level)),
          ]);
    };
    const studyNext = async () => {
@@ -122,7 +120,7 @@ export default (props: {
    };
    createResource(async () => {
       setMyBooks(
-         await idb.getBooks((book) => splitID(book.bid)[0] === mem.user),
+         await mem.getLocalBooks((book) => splitID(book.bid)[0] === mem.user),
       );
    });
    return (

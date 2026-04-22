@@ -5,7 +5,6 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
 import { type Accessor, createSignal, type Setter } from "solid-js";
 import * as mem from "../lib/mem.ts";
-import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
@@ -28,7 +27,7 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
          }
       }, 1000);
       try {
-         switch ((await srv.otp(props.name())).status) {
+         switch ((await mem.sendOneTimePasscode(props.name())).status) {
             case STATUS_CODE.BadRequest:
                return showTips("请输入用户名");
             case STATUS_CODE.NotFound:

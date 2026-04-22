@@ -7,8 +7,7 @@ import GProvider, { useG } from "./components/g-provider.tsx";
 import Signin from "./components/signin.tsx";
 import Signup from "./components/signup.tsx";
 import type { TDial } from "./lib/idial.ts";
-import * as idb from "./lib/indexdb.ts";
-import * as srv from "./lib/server.ts";
+import * as mem from "./lib/mem.ts";
 
 const Entry = () => {
    const [sversion, setSversion] = createSignal("");
@@ -21,9 +20,9 @@ const Entry = () => {
    dialogs.set("#signin", () => <Signin name={name} setName={setName} />);
 
    onMount(async () => {
-      setSversion(((await idb.getMeta("_s-version")) as string) ?? "");
-      srv.version_get().then((v) => {
-         v && setSversion(v) && idb.setMeta("_s-version", v);
+      setSversion((await mem.getLocalServerVersion()) ?? "");
+      mem.getServerVersion().then((v) => {
+         v && setSversion(v) && mem.setLocalServerVersion(v);
       });
    });
 

@@ -8,7 +8,6 @@ import { type Accessor, createSignal, type Setter } from "solid-js";
 import type { IItem } from "../lib/iitem.ts";
 import { sentenceToWords } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
-import * as srv from "../lib/server.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
@@ -70,7 +69,7 @@ export default (props: {
       }
    };
    const handleTransClick = async () => {
-      const t = await srv.postTrans(props.sentence);
+      const t = await mem.baiduTranslate(props.sentence);
       if (t) props.setTrans(t);
       else showTips("翻译失败");
    };

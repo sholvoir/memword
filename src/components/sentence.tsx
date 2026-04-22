@@ -1,13 +1,11 @@
 import { createResource, createSignal, Show } from "solid-js";
 import type { ISentence } from "#srv/lib/isentence.ts";
-import { item2task } from "../lib/iitem.ts";
-import * as idb from "../lib/indexdb.ts";
 import {
    ST_MAX_LEVEL,
    sentenceToWords,
    studySentence,
 } from "../lib/isentence.ts";
-import * as srv from "../lib/server.ts";
+import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
 import { useG } from "./g-provider.tsx";
 
@@ -41,15 +39,15 @@ export default (props: {
    };
 
    const studyNext = async () => {
-      const st = await idb.getStEpisode();
+      const st = await mem.getSentenceEpisode();
       if (!st) {
          showTips("No More Sentence!");
          setSentence();
          setPhaseAnswer(false);
       } else {
          if (!st.trans) {
-            let t = await srv.getSentence(st.sentence);
-            if (!t) t = await srv.postTrans(st.sentence);
+            let t = await mem.getServerCachedTrans(st.sentence);
+            if (!t) t = await mem.baiduTranslate(st.sentence);
             if (t) st.trans = t;
          }
          setSentence(st);
@@ -61,10 +59,14 @@ export default (props: {
    const handleIKnown = async (know?: boolean) => {
       if (sentence()) {
          const st = studySentence(sentence()!, know);
-         if (st.level === ST_MAX_LEVEL) await idb.deleteSentence(st.sentence);
-         else await idb.putSentence(st);
-         delete st.trans;
-         srv.postSentences([st]);
+         if (st.level === ST_MAX_LEVEL) {
+            await mem.deleteLocalSentence(st.sentence);
+            mem.deleteSentence(st.sentence);
+         } else {
+            await mem.setLocalSentence(st);
+            delete st.trans;
+            mem.uploadSentences([st]);
+         }
          if (know) {
             const items = [];
             const result = sentenceToWords(
@@ -74,9 +76,9 @@ export default (props: {
             );
             if (result.words)
                for (const word of result.words) {
-                  items.push(await idb.studied(word));
+                  items.push(await mem.studyWord(word));
                }
-            if (items.length) srv.postTasks(items.map(item2task));
+            if (items.length) mem.uploadTasks(items);
          }
       }
    };

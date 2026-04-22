@@ -5,13 +5,35 @@ import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
-import { newSentence } from "./isentence.ts";
+import { type ISentence, newSentence } from "./isentence.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
-import * as srv from "./server.ts";
+import * as bsrv from "./server-book.ts";
+import * as dsrv from "./server-dict.ts";
+import * as msrv from "./server-mem.ts";
 
 const dictExpire = 7 * 24 * 60 * 60 * 1000;
 
-export const user = (await srv.getUser())?.name;
+export const renewAuth = msrv.renew_get;
+export const getServerVersion = msrv.version_get;
+export const getLocalServerVersion = () => idb.getMeta<string>("_s-version");
+export const setLocalServerVersion = (version: string) =>
+   idb.setMeta("_s-version", version);
+export const sendOneTimePasscode = msrv.otp_get;
+
+export const getServerCachedTrans = msrv.sentence_get;
+export const baiduTranslate = msrv.trans_post;
+
+export const deleteSentence = msrv.sentence_delete;
+export const uploadSentences = (sentences: Array<ISentence>) =>
+   msrv.sentence_post(sentences);
+export const getSentenceEpisode = idb.getStEpisode;
+export const deleteLocalSentence = idb.deleteSentence;
+export const setLocalSentence = idb.putSentence;
+
+export const uploadTasks = (items: Array<IItem>) =>
+   msrv.task_post(items.map(item2task));
+
+export const user = (await msrv.user_get())?.name;
 
 export const auth = (await idb.getMeta("_auth")) as string | undefined;
 
@@ -24,16 +46,15 @@ export const syncSetting = async (cSetting?: ISetting) => {
    if (lSetting && lSetting.version >= setting.version) setting = lSetting;
    else await idb.setMeta("_setting", setting);
    try {
-      const res = await srv.postSetting(setting);
-      if (!res.ok) return;
-      const sSetting: ISetting = await res.json();
+      const sSetting = await msrv.setting_post(setting);
+      if (!sSetting) return;
       if (sSetting.version > setting.version)
          await idb.setMeta("_setting", (setting = sSetting));
    } catch {}
 };
 
 export const updateDict = async (item: IItem) => {
-   const dict = await srv.getDict(item.word);
+   const dict = await dsrv.dict_get(item.word);
    if (!dict) return item;
    if (
       item.version !== undefined &&
@@ -44,7 +65,7 @@ export const updateDict = async (item: IItem) => {
    if (dict.entries)
       for (const entry of dict.entries)
          if (entry.sound) {
-            const resp = await srv.getSound(entry.sound);
+            const resp = await dsrv.sound_get(entry.sound);
             if (resp.ok) entry.sound = await blobToBase64(await resp.blob());
          }
    item.dictSync = Date.now();
@@ -63,7 +84,7 @@ export const search = async (word: string) => {
    const item = await idb.getItem(word);
    if (!item) {
       try {
-         const dict = await srv.getDict(word);
+         const dict = await dsrv.dict_get(word);
          if (!dict) return;
          const nitem = newItem(dict);
          idb.tempItems.set(word, nitem);
@@ -97,7 +118,7 @@ export const getEpisode = async (bid?: string, blevel?: number) => {
 
 export const deleteItem = async (word: string) => {
    try {
-      const resp = await srv.deleteTasks([word]);
+      const resp = await msrv.task_delete([word]);
       if (!resp.ok) return console.error("Fail for delete task");
       await idb.deleteItem(word);
       return true;
@@ -121,7 +142,7 @@ export const syncTasks = async () => {
       const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
-      const resp = await srv.postTasks(tasks, "1");
+      const resp = await msrv.task_post(tasks, "1");
       if (!resp.ok)
          return console.error("Network Error: get sync task data error.");
       const ntasks = await resp.json();
@@ -133,13 +154,14 @@ export const syncTasks = async () => {
    }
 };
 
+export const studyWord = idb.studied;
 export const syncSentences = async () => {
    try {
       const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_st-time")) ?? 1) as number;
       const sts = await idb.getSentences(lastTime);
       for (const st of sts) delete st.trans;
-      const resp = await srv.postSentences(sts, "1");
+      const resp = await msrv.sentence_post(sts, "1");
       if (!resp.ok)
          return console.error("Network Error: get sync sentences data error.");
       const nsts = await resp.json();
@@ -153,7 +175,7 @@ export const syncSentences = async () => {
 
 const submitIssues = async () => {
    for (const issue of await idb.getIssues()) {
-      const res = await srv.postIssue(issue);
+      const res = await msrv.issue_post(issue);
       if (res.ok || res.status === STATUS_CODE.Conflict)
          await idb.deleteIssue(issue.iid!);
    }
@@ -174,7 +196,15 @@ export const totalStats = async () => {
 };
 
 export const getServerBooks = async () => {
-   const books = await srv.getBooks();
+   const books = (await msrv.book_get()) ?? [];
+   const checksums = (await bsrv.checksum_get()) ?? {};
+   for (const [bname, { disc, checksum }] of Object.entries(checksums))
+      books.push({
+         bid: `common/${bname}`,
+         disc,
+         checksum,
+         public: true,
+      });
    if (books.length) {
       const time = Date.now();
       const deleted = await idb.syncBooks(books);
@@ -190,11 +220,15 @@ export const getServerBooks = async () => {
    }
 };
 
+export const getLocalBooks = idb.getBooks;
 export const getBook = async (bid: string) => {
    const book = await idb.getBook(bid);
    if (!book) return undefined;
    if (book.content) return book;
-   const text = await srv.getBook(bid);
+   const [username, bname] = splitID(bid);
+   const text = await (username === "common"
+      ? bsrv.book_get(bname)
+      : msrv.book_id_get(bid));
    if (!text) return undefined;
    const content = new Set<string>();
    for (let word of text.split("\n"))
@@ -214,11 +248,11 @@ export const getVocabulary = async (): Promise<
    return [
       vocab,
       async () => {
-         const resChecksum = await srv.getVocabularyChecksum();
+         const resChecksum = await dsrv.vocabulary_checksum_get();
          if (!resChecksum) return;
          const sChecksum = resChecksum.checksum;
          if (!sChecksum || sChecksum === checksum) return;
-         const resVocabulary = await srv.getVocabulary();
+         const resVocabulary = await dsrv.vocabulary_get();
          if (!resVocabulary) return;
          const { words, checksum: sCheckSum2 } = resVocabulary;
          const nvocab = new Set<string>();
@@ -236,7 +270,9 @@ export const uploadBook = async (
    isPublic?: boolean,
    replace?: boolean,
 ): Promise<[number, Record<string, string[]>?]> => {
-   const res = await srv.uploadBook(name, words, disc, isPublic, replace);
+   const res = await (replace
+      ? msrv.book_put(name, words, disc, isPublic ? "1" : undefined)
+      : msrv.book_post(name, words, disc, isPublic ? "1" : undefined));
    switch (res.status) {
       case STATUS_CODE.NotAcceptable:
          return [res.status, await res.json()];
@@ -252,7 +288,7 @@ export const uploadBook = async (
 export const deleteBook = async (bid: string) => {
    try {
       const name = splitID(bid)[1];
-      const res = await srv.deleteBook(name);
+      const res = await msrv.book_delete(name);
       if (res.ok) await idb.deleteBook(bid);
       return res.ok;
    } catch {
@@ -263,18 +299,23 @@ export const deleteBook = async (bid: string) => {
 export const addSentence = async (sentence: string, trans: string) => {
    const st = newSentence(sentence, trans);
    await idb.addSentence(st);
-   await srv.postSentences([st]);
+   await msrv.sentence_post([st]);
 };
 
 export const signin = async (name: string, code: string) => {
-   const res = await srv.signin(name, code);
+   const res = await msrv.signin_get(name, code);
    if (res.ok) await idb.setMeta("_auth", (await res.json()).auth);
    console.log(`signin ${res.status}`);
    return res.status;
 };
+export const signup = msrv.signup_get;
+export const signout = async () => {
+   const res = await msrv.signout_get();
+   if (res.ok) idb.clear();
+};
 
 export const getLamma = async () => {
-   const text = await srv.lemmatization_get();
+   const text = await bsrv.lemmatization_get();
    if (!text) return;
    try {
       return parse(text) as Record<string, string>;

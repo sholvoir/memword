@@ -3,7 +3,7 @@ import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
 import { type Accessor, createSignal, type Setter } from "solid-js";
-import * as srv from "../lib/server.ts";
+import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
 
@@ -23,7 +23,7 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
       const fone = phone().replaceAll(/[() -]/g, "");
       if (!fonePattern.test(fone)) return showTips("Invalid phone number!");
       try {
-         switch ((await srv.signup(fone, props.name())).status) {
+         switch ((await mem.signup(fone, props.name())).status) {
             case STATUS_CODE.BadRequest:
                return showTips("用户名已注册");
             case STATUS_CODE.Conflict:

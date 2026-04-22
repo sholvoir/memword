@@ -1,7 +1,7 @@
-import type { IDict } from "@sholvoir/dict-server/src/lib/imic.ts";
 import type { ITask } from "#srv/lib/itask.ts";
 import type { ITrace } from "#srv/lib/itrace.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
+import type { IDict } from "./idict.ts";
 
 export const TASK_MAX_LEVEL = 17;
 

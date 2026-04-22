@@ -5,7 +5,6 @@ import List from "@sholvoir/solid-components/list";
 import { createResource, createSignal, type Setter } from "solid-js";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import { compareWL, type IBook } from "../lib/ibook.ts";
-import * as idb from "../lib/indexdb.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { useG } from "./g-provider.tsx";
@@ -62,8 +61,8 @@ export default (props: {
       props.totalStats();
       go();
    };
-   const handleSignoutClick = () => {
-      idb.clear();
+   const handleSignoutClick = async () => {
+      await mem.signout();
       location.replace("about");
    };
    const toggleShrink = (
@@ -80,22 +79,22 @@ export default (props: {
       const regex = new RegExp(filter);
       setBooks(
          (
-            await idb.getBooks(
-               (wl) => regex.test(wl.bid) || (wl.disc && regex.test(wl.disc)),
+            await mem.getLocalBooks(
+               (wl) => regex.test(wl.bid) || regex.test(wl.disc!),
             )
          ).sort(compareWL),
       );
    });
    createResource(async () => {
       setBooks(
-         (await idb.getBooks((wl) => wl.bid.startsWith("common"))).sort(
+         (await mem.getLocalBooks((wl) => wl.bid.startsWith("common"))).sort(
             compareWL,
          ),
       );
       setSubBooks(
-         await idb.getBooks((wl) => mem.setting.books.includes(wl.bid)),
+         await mem.getLocalBooks((wl) => mem.setting.books.includes(wl.bid)),
       );
-      setMyBooks(await idb.getBooks((wl) => wl.bid.startsWith(mem.user!)));
+      setMyBooks(await mem.getLocalBooks((wl) => wl.bid.startsWith(mem.user!)));
    });
    return (
       <Dialog
