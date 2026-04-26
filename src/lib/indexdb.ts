@@ -340,7 +340,10 @@ export const studied = (word: string, level?: number) =>
             if (item1) {
                item = studyTask(item1, level);
                iStore.put(item);
-            } else iStore.add((item = neverItem(word, Date.now())));
+            } else {
+               item = studyTask(neverItem(word, Date.now()));
+               iStore.add(item);
+            }
          };
    });
 
