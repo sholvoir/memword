@@ -35,7 +35,7 @@ export default () => {
    // common
    const [vocabulary, setVocabulary] = createSignal<Set<string>>(new Set());
    const [lamma, setLamma] = createSignal<Record<string, string>>({});
-   const { go, loca } = useG()!;
+   const { loca } = useG()!;
 
    const totalStats = async () => setStats(await mem.totalStats());
 
@@ -95,7 +95,6 @@ export default () => {
 
    onMount(async () => {
       if (mem.user) {
-         go("#home");
          await totalStats();
          (async () => {
             setSversion((await mem.getLocalServerVersion()) ?? "");
@@ -113,7 +112,7 @@ export default () => {
             await mem.syncSentences();
             await totalStats();
          })();
-      } else go("#about");
+      }
    });
    return (
       <Dynamic
