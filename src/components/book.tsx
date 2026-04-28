@@ -4,16 +4,17 @@ import Checkbox from "@sholvoir/solid-components/checkbox";
 import SInput from "@sholvoir/solid-components/input-simple";
 import TaInput from "@sholvoir/solid-components/input-textarea";
 import { createSignal, Show } from "solid-js";
-import { type IBook, splitID } from "../lib/ibook.ts";
+import { splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
+import { book } from "./provider-book.ts";
 import { go, showTips, user } from "./provider-g.ts";
 
-export default (props: { book?: IBook }) => {
+export default () => {
    const [bname, setBName] = createSignal(
-      props.book ? splitID(props.book.bid)[1] : "",
+      book() ? splitID(book()!.bid)[1] : "",
    );
-   const [disc, setDisc] = createSignal(props.book?.disc ?? "");
+   const [disc, setDisc] = createSignal(book()?.disc ?? "");
    const [words, setWords] = createSignal("");
    const [replace, setReplace] = createSignal(false);
    const [isPublic, setPublic] = createSignal(false);
