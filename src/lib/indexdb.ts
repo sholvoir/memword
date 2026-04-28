@@ -14,6 +14,7 @@ import { addTaskToStat, type IStat, initStat } from "./istat.ts";
 
 type kvKey =
    | "_auth"
+   | "_lema"
    | "_page"
    | "_s-version"
    | "_setting"

@@ -2,14 +2,21 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
-import { createResource, createSignal, For, onMount, Show } from "solid-js";
+import {
+   batch,
+   createResource,
+   createSignal,
+   For,
+   onMount,
+   Show,
+} from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips, user } from "./provider-g.ts";
 import { totalStats } from "./provider-stat.ts";
-import { bid, search } from "./provider-study.ts";
+import { bid, blevel, search } from "./provider-study.ts";
 import Scard from "./scard.tsx";
 
 export default () => {
@@ -18,10 +25,6 @@ export default () => {
    const [sprint, setSprint] = createSignal(-1);
 
    const entries = () => citem()?.entries ?? [];
-   const finish = () => {
-      go(search() ? "#trans" : "#home");
-      totalStats();
-   };
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
 
@@ -39,15 +42,19 @@ export default () => {
          ]);
    };
    const studyNext = async () => {
-      if (search()) return finish();
-      setSprint((s) => s + 1);
-      setCItem(undefined);
-      setPhaseAnswer(false);
-      setShowTrans(false);
+      if (search()) return totalStats(), go("#trans");
+      batch(() => {
+         setSprint((s) => s + 1);
+         setCItem(undefined);
+         setPhaseAnswer(false);
+         setShowTrans(false);
+      });
       const item = await mem.getEpisode(bid());
-      if (!item) return finish();
-      setCItem(item);
-      setCIndex(0);
+      if (!item) return totalStats(), go("#home");
+      batch(() => {
+         setCItem(item);
+         setCIndex(0);
+      });
    };
    const handleRefresh = async () => {
       showTips("Get Server Data...", false);
@@ -108,21 +115,34 @@ export default () => {
       wordSet?.add(word);
       mem.vocabulary.add(word);
    };
-   onMount(() => {
+   onMount(async () => {
       if (search()) {
+         const item = await mem.search(search()!);
+         if (!item) return showTips("Not Found!");
+         setCItem(item);
+         setPhaseAnswer(true);
+      } else {
+         const item = await mem.getEpisode(bid(), blevel());
+         if (item)
+            batch(() => {
+               setCItem(item);
+               setPhaseAnswer(false);
+               setSprint(0);
+            });
+         else showTips("No More Task");
       }
    });
    return (
       <Dialog
          afterAnimation={studyNext}
          beforeAnimation={(up) => handleIKnown(up ? undefined : 0)}
-         class="flex flex-col px-2 pt-2 pb-4 outline-none overflow-y-auto"
-         leftClick={finish}
+         class="flex flex-col px-2 pb-4 outline-none overflow-y-auto"
+         leftClick={() => (totalStats(), go(search() ? "#trans" : "#home"))}
          onClick={handleClick}
          onKeyup={handleKeyPress}
          title={`学习${sprint() > 0 ? `(${sprint()})` : ""}`}
          tools={
-            <div class="body px-2 relative flex gap-4 text-[150%] justify-between items-end">
+            <div class="body p-2 relative flex gap-4 text-[150%] justify-between items-end">
                <BButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"
@@ -196,7 +216,7 @@ export default () => {
          touchEnabled={isPhaseAnswer()}
       >
          <Show when={citem()}>
-            <div class="py-2 flex gap-2 flex-wrap justify-between">
+            <div class="pb-2 flex gap-2 flex-wrap justify-between">
                <div class="text-4xl font-bold">{citem()?.word}</div>
                {isPhaseAnswer() && (
                   <div class="text-2xl flex items-center">

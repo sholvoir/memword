@@ -67,7 +67,7 @@ export default () => {
             const items = [];
             const result = sentenceToWords(
                mem.vocabulary,
-               mem.lamma,
+               mem.lemma,
                st.sentence,
             );
             if (result.words)

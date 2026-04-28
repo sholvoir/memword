@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import type { TDialog } from "../lib/idialog.ts";
 import type { IUser } from "../lib/iuser.ts";
+import * as mem from "../lib/mem.ts";
 
 let timeout: number | undefined;
 const [page, setPage] = createSignal<TDialog>("#empty");
@@ -18,5 +19,5 @@ export const showTips = (content?: string, autohide = true) => {
 export const go = (d?: TDialog) => {
    if (!d) d = user()?.name ? "#home" : "#about";
    setPage(d);
-   localStorage.setItem("_loca", d);
+   mem.setPage(d);
 };

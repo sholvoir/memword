@@ -13,8 +13,30 @@ export default defineConfig({
    },
    server: {
       proxy: {
-         "/api": "http://localhost:8000",
-         changeOrigin: "http://localhost:5173",
+         "/signup": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
+         "/otp": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
+         "/signin": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
+         "/renew": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
+         "/signout": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
+         "/api": {
+            target: "http://localhost:8000",
+            changeOrigin: true,
+         },
       },
    },
 });

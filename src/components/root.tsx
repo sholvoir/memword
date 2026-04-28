@@ -33,16 +33,17 @@ export default () => {
    dialogs.set("#study", () => <Study />);
 
    onMount(async () => {
+      await mem.initSVersion();
       const user = await mem.getUser();
-      if (!user || user.expired > Date.now()) {
+      if (!user || user.expired < Date.now()) {
          go("#about");
       } else {
          setUser(user);
          if (user.expired - Date.now() < maxAge / 3) mem.renewAuth();
+         go(await mem.getPage());
          await totalStats();
          await mem.init();
          await totalStats();
-         go(await mem.getPage());
       }
    });
    return <Dynamic component={dialogs.get(page())}></Dynamic>;

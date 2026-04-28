@@ -21,7 +21,7 @@ export default () => {
       setSentence(e.target.value);
       setWord("");
       setTrans("");
-      const result = sentenceToWords(mem.vocabulary, mem.lamma, e.target.value);
+      const result = sentenceToWords(mem.vocabulary, mem.lemma, e.target.value);
       if (result.words) {
          setWords(result.words);
          showTips();
@@ -36,7 +36,7 @@ export default () => {
          element.selectionStart,
          element.selectionEnd,
       );
-      const result = sentenceToWords(mem.vocabulary, mem.lamma, w);
+      const result = sentenceToWords(mem.vocabulary, mem.lemma, w);
       if (result.words?.length) setWord(result.words[0]);
    };
    const handleDictClick = async () => {

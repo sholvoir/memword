@@ -15,6 +15,7 @@ export default () => {
       <Dialog
          title="快乐背单词"
          class="about flex flex-col pb-4 font-extrabold overflow-y-auto"
+         noleft={!user()?.name}
       >
          <Show when={show()}>
             <div>
@@ -22,8 +23,11 @@ export default () => {
                <BButton
                   class="button bg-slate-300 text-slate-800"
                   onClick={async () => {
-                     await mem.renewAuth(auth());
-                     go("#home");
+                     if (await mem.renewAuth(auth())) {
+                        await mem.init();
+                        await mem.totalStats();
+                        go("#home");
+                     }
                   }}
                >
                   Login

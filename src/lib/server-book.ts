@@ -11,3 +11,6 @@ export const checksum_get = () =>
 
 export const lemmatization_get = () =>
    getText(`${BASE_URL}/lemmatization.yaml`);
+
+export const checksumlema_get = () =>
+   getJson<{ checksum: string }>(`${BASE_URL}/checksum-lemma.json`);

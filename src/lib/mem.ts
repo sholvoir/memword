@@ -28,10 +28,55 @@ export const signin = msrv.signin_get;
 export const renewAuth = async (auth?: string) => {
    const res = await msrv.renew_get(auth);
    if (res.ok) setUser(await res.json());
+   return res.ok;
 };
 export const signout = async () => {
    const res = await msrv.signout_get();
    if (res.ok) idb.clear();
+};
+
+export let sversion = "";
+export const initSVersion = async () => {
+   sversion = (await getLocalServerVersion()) ?? "";
+   const v = await getServerVersion();
+   if (v) setLocalServerVersion((sversion = v));
+};
+
+export let lemma: Record<string, string> = {};
+export const initLemma = async () => {
+   const [lm, checksum] = (await idb.getMeta<[Record<string, string>, string]>(
+      "_lema",
+   )) ?? [{}, ""];
+   lemma = lm;
+   (async () => {
+      const sChecksum = (await bsrv.checksumlema_get())?.checksum;
+      if (!sChecksum || sChecksum === checksum) return;
+      const text = await bsrv.lemmatization_get();
+      if (!text) return;
+      try {
+         lemma = parse(text) as Record<string, string>;
+         await idb.setMeta("_lema", [lemma, sChecksum]);
+      } catch {}
+   })();
+};
+
+export let vocabulary = new Set<string>();
+export const initVocabulary = async () => {
+   const [vocab, checksum] = (await idb.getMeta<[Set<string>, string]>(
+      "_vocabulary",
+   )) ?? [new Set<string>(), ""];
+   vocabulary = vocab;
+   (async () => {
+      const sChecksum = (await dsrv.vocabulary_checksum_get())?.checksum;
+      if (!sChecksum || sChecksum === checksum) return;
+      const resVocabulary = await dsrv.vocabulary_get();
+      if (!resVocabulary) return;
+      const { words, checksum: sCheckSum2 } = resVocabulary;
+      const nvocab = new Set<string>();
+      for (let word of words) if ((word = word.trim())) nvocab.add(word);
+      await idb.setMeta("_vocabulary", [nvocab, sCheckSum2]);
+      vocabulary = nvocab;
+   })();
 };
 
 export const getUser = () => idb.getMeta<IUser>("_user");
@@ -70,15 +115,6 @@ export const syncSetting = async (cSetting?: ISetting) => {
       if (sSetting.version > setting.version)
          await idb.setMeta("_setting", (setting = sSetting));
    } catch {}
-};
-export let vocabulary = new Set<string>();
-export let lamma: Record<string, string> = {};
-export let sversion = "";
-
-export const initSVersion = async () => {
-   sversion = (await getLocalServerVersion()) ?? "";
-   const v = await getServerVersion();
-   if (v) setLocalServerVersion((sversion = v));
 };
 
 export const updateDict = async (item: IItem) => {
@@ -273,26 +309,6 @@ export const getBook = async (bid: string) => {
    return book;
 };
 
-export const initVocabulary = async () => {
-   const [vocab, checksum] = (await idb.getMeta<[Set<string>, string]>(
-      "_vocabulary",
-   )) ?? [new Set<string>(), ""];
-   vocabulary = vocab;
-   (async () => {
-      const resChecksum = await dsrv.vocabulary_checksum_get();
-      if (!resChecksum) return;
-      const sChecksum = resChecksum.checksum;
-      if (!sChecksum || sChecksum === checksum) return;
-      const resVocabulary = await dsrv.vocabulary_get();
-      if (!resVocabulary) return;
-      const { words, checksum: sCheckSum2 } = resVocabulary;
-      const nvocab = new Set<string>();
-      for (let word of words) if ((word = word.trim())) nvocab.add(word);
-      await idb.setMeta("_vocabulary", [nvocab, sCheckSum2]);
-      vocabulary = nvocab;
-   })();
-};
-
 export const uploadBook = async (
    name: string,
    words: string,
@@ -332,20 +348,11 @@ export const addSentence = async (sentence: string, trans: string) => {
    await msrv.sentence_post([st]);
 };
 
-export const initLamma = async () => {
-   const text = await bsrv.lemmatization_get();
-   if (!text) return;
-   try {
-      lamma = parse(text) as Record<string, string>;
-   } catch {}
-};
-
 export const init = () =>
    Promise.all([
-      initSVersion(),
       getServerBooks(),
       initVocabulary(),
-      initLamma(),
+      initLemma(),
       syncSetting(),
       syncTasks(),
       syncSentences(),
