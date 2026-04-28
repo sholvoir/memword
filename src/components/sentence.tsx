@@ -7,7 +7,8 @@ import {
 } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips } from "./provider-g.ts";
+import { totalStats } from "./provider-stat.ts";
 
 const speechs = new Map<string, SpeechSynthesisUtterance>();
 const getUrrerance = (text: string) => {
@@ -24,18 +25,13 @@ const getUrrerance = (text: string) => {
 const speak = (text?: string) =>
    text && speechSynthesis.speak(speechs.get(text) ?? getUrrerance(text));
 
-export default (props: {
-   lamma: Record<string, string>;
-   totalStats: () => void;
-   vocabulary: Set<string>;
-}) => {
+export default () => {
    const [sentence, setSentence] = createSignal<ISentence>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
-   const { go, showTips } = useG()!;
    const finish = () => {
       go("#home");
-      props.totalStats();
+      totalStats();
    };
 
    const studyNext = async () => {
@@ -70,8 +66,8 @@ export default (props: {
          if (know) {
             const items = [];
             const result = sentenceToWords(
-               props.vocabulary,
-               props.lamma,
+               mem.vocabulary,
+               mem.lamma,
                st.sentence,
             );
             if (result.words)

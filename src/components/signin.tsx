@@ -1,20 +1,20 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: <No> */
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import Button from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
-import { type Accessor, createSignal, type Setter } from "solid-js";
+import { createSignal } from "solid-js";
+import type { IUser } from "../lib/iuser.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, setUser, showTips } from "./provider-g.ts";
+import { name, setName } from "./provider-sign.ts";
 
-let timer: any;
+let timer: NodeJS.Timeout | undefined;
 
-export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
+export default () => {
    const [code, setCode] = createSignal("");
    const [counter, setCounter] = createSignal(0);
    const [canSendOTP, setCanSendOTP] = createSignal(true);
-   const { go, showTips } = useG()!;
 
    const handleSend = async () => {
       setCanSendOTP(false);
@@ -27,7 +27,7 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
          }
       }, 1000);
       try {
-         switch ((await mem.sendOneTimePasscode(props.name())).status) {
+         switch ((await mem.sendOneTimePasscode(name())).status) {
             case STATUS_CODE.BadRequest:
                return showTips("请输入用户名");
             case STATUS_CODE.NotFound:
@@ -48,18 +48,23 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
 
    const handleClickLogin = async () => {
       try {
-         switch (await mem.signin(props.name(), code())) {
+         const res = await mem.signin(name(), code());
+         switch (res.status) {
             case STATUS_CODE.BadRequest:
                return showTips("请输入用户名和密码");
             case STATUS_CODE.NotFound:
                return showTips("未找到用户");
             case STATUS_CODE.Unauthorized:
                return showTips("错误的密码");
-            case STATUS_CODE.OK:
+            case STATUS_CODE.OK: {
                showTips("已登录");
+               const user: IUser = await res.json();
                if (timer) clearInterval(timer);
-               location.reload();
+               mem.setUser(user);
+               setUser(user);
+               go("#home");
                break;
+            }
             default:
                showTips("未知服务器错误");
          }
@@ -75,7 +80,7 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[props.name, props.setName]}
+               binding={[name, setName]}
             />
             <div class="text-right mb-3">
                尚未

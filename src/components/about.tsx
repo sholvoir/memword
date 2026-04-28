@@ -6,12 +6,11 @@ import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, user } from "./provider-g.ts";
 
-export default (props: { sversion: string }) => {
+export default () => {
    const [show, setShow] = createSignal(false);
    const [auth, setAuth] = createSignal("");
-   const { go } = useG()!;
    return (
       <Dialog
          title="快乐背单词"
@@ -22,9 +21,9 @@ export default (props: { sversion: string }) => {
                <Input binding={[auth, setAuth]} />
                <BButton
                   class="button bg-slate-300 text-slate-800"
-                  onClick={() => {
-                     mem.renewAuth(auth());
-                     location.replace(".");
+                  onClick={async () => {
+                     await mem.renewAuth(auth());
+                     go("#home");
                   }}
                >
                   Login
@@ -34,7 +33,7 @@ export default (props: { sversion: string }) => {
          <div>
             <h1 onClick={() => location.reload()}>快乐背单词</h1>
             <p>
-               版本：{props.sversion}-{version.split(".")[2]}
+               版本：{mem.sversion}-{version.split(".")[2]}
             </p>
          </div>
          <div>
@@ -64,7 +63,7 @@ export default (props: { sversion: string }) => {
                ，是成功的关键。
             </p>
          </div>
-         <Show when={!mem.user}>
+         <Show when={!user()?.name}>
             <div>
                <h1>开始学习</h1>
                <p>

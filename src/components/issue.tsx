@@ -3,11 +3,10 @@ import TAInput from "@sholvoir/solid-components/input-textarea";
 import { createSignal } from "solid-js";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips } from "./provider-g.ts";
 
 export default () => {
    const [issue, setIssue] = createSignal("");
-   const { go, showTips } = useG()!;
    const handleSubmitClick = async () => {
       await mem.submitIssue(issue());
       showTips("提交成功!");

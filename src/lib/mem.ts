@@ -3,22 +3,45 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import { parse } from "yaml";
 import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
-import { type IItem, item2task, itemMergeDict, newItem } from "./iitem.ts";
+import type { TDialog } from "./idialog.ts";
+import {
+   type IItem,
+   item2task,
+   itemMergeDict,
+   newItem,
+   studyTask,
+} from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import { type ISentence, newSentence } from "./isentence.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
+import type { IUser } from "./iuser.ts";
 import * as bsrv from "./server-book.ts";
 import * as dsrv from "./server-dict.ts";
 import * as msrv from "./server-mem.ts";
 
 const dictExpire = 7 * 24 * 60 * 60 * 1000;
+const tempItems = new Map<string, IItem>();
 
-export const renewAuth = msrv.renew_get;
+export const signup = msrv.signup_get;
+export const sendOneTimePasscode = msrv.otp_get;
+export const signin = msrv.signin_get;
+export const renewAuth = async (auth?: string) => {
+   const res = await msrv.renew_get(auth);
+   if (res.ok) setUser(await res.json());
+};
+export const signout = async () => {
+   const res = await msrv.signout_get();
+   if (res.ok) idb.clear();
+};
+
+export const getUser = () => idb.getMeta<IUser>("_user");
+export const setUser = (user: IUser) => idb.setMeta("_user", user);
+export const getPage = () => idb.getMeta<TDialog>("_page");
+export const setPage = (page: TDialog) => idb.setMeta("_page", page);
 export const getServerVersion = msrv.version_get;
 export const getLocalServerVersion = () => idb.getMeta<string>("_s-version");
 export const setLocalServerVersion = (version: string) =>
    idb.setMeta("_s-version", version);
-export const sendOneTimePasscode = msrv.otp_get;
 
 export const getServerCachedTrans = msrv.sentence_get;
 export const baiduTranslate = msrv.trans_post;
@@ -32,10 +55,6 @@ export const setLocalSentence = idb.putSentence;
 
 export const uploadTasks = (items: Array<IItem>) =>
    msrv.task_post(items.map(item2task));
-
-export const user = (await msrv.user_get())?.name;
-
-export const auth = (await idb.getMeta("_auth")) as string | undefined;
 
 export let setting: ISetting =
    ((await idb.getMeta("_setting")) as ISetting) ?? defaultSetting();
@@ -51,6 +70,15 @@ export const syncSetting = async (cSetting?: ISetting) => {
       if (sSetting.version > setting.version)
          await idb.setMeta("_setting", (setting = sSetting));
    } catch {}
+};
+export let vocabulary = new Set<string>();
+export let lamma: Record<string, string> = {};
+export let sversion = "";
+
+export const initSVersion = async () => {
+   sversion = (await getLocalServerVersion()) ?? "";
+   const v = await getServerVersion();
+   if (v) setLocalServerVersion((sversion = v));
 };
 
 export const updateDict = async (item: IItem) => {
@@ -80,14 +108,14 @@ const itemUpdateDict = async (item: IItem) => {
 };
 
 export const search = async (word: string) => {
-   if (idb.tempItems.has(word)) return idb.tempItems.get(word)!;
+   if (tempItems.has(word)) return tempItems.get(word)!;
    const item = await idb.getItem(word);
    if (!item) {
       try {
          const dict = await dsrv.dict_get(word);
          if (!dict) return;
          const nitem = newItem(dict);
-         idb.tempItems.set(word, nitem);
+         tempItems.set(word, nitem);
          return nitem;
       } catch {
          return;
@@ -146,7 +174,7 @@ export const syncTasks = async () => {
       if (!resp.ok)
          return console.error("Network Error: get sync task data error.");
       const ntasks = await resp.json();
-      await idb.mergeTasks(ntasks);
+      await idb.syncTasks(ntasks);
       await idb.setMeta("_sync-time", thisTime);
       return true;
    } catch {
@@ -154,7 +182,14 @@ export const syncTasks = async () => {
    }
 };
 
-export const studyWord = idb.studied;
+export const studyWord = async (word: string, level?: number) => {
+   if (tempItems.has(word)) {
+      const item = studyTask(tempItems.get(word)!, level);
+      await idb.putItem(item);
+      tempItems.delete(word);
+      return item;
+   } else return await idb.studied(word, level);
+};
 export const syncSentences = async () => {
    try {
       const thisTime = Date.now();
@@ -238,29 +273,24 @@ export const getBook = async (bid: string) => {
    return book;
 };
 
-export const getVocabulary = async (): Promise<
-   [Set<string>, () => Promise<Set<string> | undefined>]
-> => {
-   const [vocab, checksum] = ((await idb.getMeta("_vocabulary")) as [
-      Set<string>,
-      string,
-   ]) ?? [new Set<string>(), ""];
-   return [
-      vocab,
-      async () => {
-         const resChecksum = await dsrv.vocabulary_checksum_get();
-         if (!resChecksum) return;
-         const sChecksum = resChecksum.checksum;
-         if (!sChecksum || sChecksum === checksum) return;
-         const resVocabulary = await dsrv.vocabulary_get();
-         if (!resVocabulary) return;
-         const { words, checksum: sCheckSum2 } = resVocabulary;
-         const nvocab = new Set<string>();
-         for (let word of words) if ((word = word.trim())) nvocab.add(word);
-         await idb.setMeta("_vocabulary", [nvocab, sCheckSum2]);
-         return nvocab;
-      },
-   ];
+export const initVocabulary = async () => {
+   const [vocab, checksum] = (await idb.getMeta<[Set<string>, string]>(
+      "_vocabulary",
+   )) ?? [new Set<string>(), ""];
+   vocabulary = vocab;
+   (async () => {
+      const resChecksum = await dsrv.vocabulary_checksum_get();
+      if (!resChecksum) return;
+      const sChecksum = resChecksum.checksum;
+      if (!sChecksum || sChecksum === checksum) return;
+      const resVocabulary = await dsrv.vocabulary_get();
+      if (!resVocabulary) return;
+      const { words, checksum: sCheckSum2 } = resVocabulary;
+      const nvocab = new Set<string>();
+      for (let word of words) if ((word = word.trim())) nvocab.add(word);
+      await idb.setMeta("_vocabulary", [nvocab, sCheckSum2]);
+      vocabulary = nvocab;
+   })();
 };
 
 export const uploadBook = async (
@@ -302,22 +332,21 @@ export const addSentence = async (sentence: string, trans: string) => {
    await msrv.sentence_post([st]);
 };
 
-export const signin = async (name: string, code: string) => {
-   const res = await msrv.signin_get(name, code);
-   if (res.ok) await idb.setMeta("_auth", (await res.json()).auth);
-   console.log(`signin ${res.status}`);
-   return res.status;
-};
-export const signup = msrv.signup_get;
-export const signout = async () => {
-   const res = await msrv.signout_get();
-   if (res.ok) idb.clear();
-};
-
-export const getLamma = async () => {
+export const initLamma = async () => {
    const text = await bsrv.lemmatization_get();
    if (!text) return;
    try {
-      return parse(text) as Record<string, string>;
+      lamma = parse(text) as Record<string, string>;
    } catch {}
 };
+
+export const init = () =>
+   Promise.all([
+      initSVersion(),
+      getServerBooks(),
+      initVocabulary(),
+      initLamma(),
+      syncSetting(),
+      syncTasks(),
+      syncSentences(),
+   ]);

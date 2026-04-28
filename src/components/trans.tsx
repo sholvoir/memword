@@ -4,37 +4,24 @@ import type {
    TextAreaInputTargeted,
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
-import { type Accessor, createSignal, type Setter } from "solid-js";
-import type { IItem } from "../lib/iitem.ts";
+import { createSignal } from "solid-js";
 import { sentenceToWords } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips } from "./provider-g.ts";
+import { setSearch } from "./provider-study.ts";
 
-export default (props: {
-   lamma: Record<string, string>;
-   sentence: string;
-   setCItem: Setter<IItem | undefined>;
-   setPhaseAnswer: Setter<boolean>;
-   setSentence: Setter<string>;
-   setSprint: Setter<number>;
-   setTrans: Setter<string>;
-   setWord: Setter<string>;
-   trans: string;
-   vocabulary: Set<string>;
-   word: Accessor<string>;
-}) => {
-   const [words, setWords] = createSignal<string[]>([]);
-   const { go, showTips } = useG()!;
+const [word, setWord] = createSignal("");
+const [trans, setTrans] = createSignal("");
+const [sentence, setSentence] = createSignal("");
+const [words, setWords] = createSignal<string[]>([]);
+
+export default () => {
    const handleSentenceOnInput = (e: InputEvent & TextAreaInputTargeted) => {
-      props.setSentence(e.target.value);
-      props.setWord("");
-      props.setTrans("");
-      const result = sentenceToWords(
-         props.vocabulary,
-         props.lamma,
-         e.target.value,
-      );
+      setSentence(e.target.value);
+      setWord("");
+      setTrans("");
+      const result = sentenceToWords(mem.vocabulary, mem.lamma, e.target.value);
       if (result.words) {
          setWords(result.words);
          showTips();
@@ -49,35 +36,31 @@ export default (props: {
          element.selectionStart,
          element.selectionEnd,
       );
-      const result = sentenceToWords(props.vocabulary, props.lamma, w);
-      if (result.words?.length) props.setWord(result.words[0]);
+      const result = sentenceToWords(mem.vocabulary, mem.lamma, w);
+      if (result.words?.length) setWord(result.words[0]);
    };
    const handleDictClick = async () => {
-      const text = props.word().trim();
+      const text = word().trim();
       if (!text) return;
-      const item = await mem.search(text);
-      if (!item) return showTips("Not Found!");
-      props.setCItem(item);
-      props.setPhaseAnswer(true);
-      props.setSprint(-1);
+      setSearch(text);
       go("#study");
    };
    const handlePlayClick = () => {
-      if (props.sentence) {
-         const utterance = new SpeechSynthesisUtterance(props.sentence);
+      if (sentence()) {
+         const utterance = new SpeechSynthesisUtterance(sentence());
          speechSynthesis.speak(utterance);
       }
    };
    const handleTransClick = async () => {
-      const t = await mem.baiduTranslate(props.sentence);
-      if (t) props.setTrans(t);
+      const t = await mem.baiduTranslate(sentence());
+      if (t) setTrans(t);
       else showTips("翻译失败");
    };
    const handleAddClick = async () => {
-      await mem.addSentence(props.sentence.trim(), props.trans);
-      props.setSentence("");
-      props.setWord("");
-      props.setTrans("");
+      await mem.addSentence(sentence().trim(), trans());
+      setSentence("");
+      setWord("");
+      setTrans("");
       setWords([]);
       showTips("添加成功!");
    };
@@ -110,7 +93,7 @@ export default (props: {
                </Button>
                <Button
                   class="flex-auto button btn-prime"
-                  disabled={!words().length || !props.trans}
+                  disabled={!words().length || !trans()}
                   onClick={handleAddClick}
                >
                   添加
@@ -120,10 +103,10 @@ export default (props: {
       >
          <TInput
             autoCapitalize="none"
-            binding={[props.word, props.setWord]}
+            binding={[word, setWord]}
             name="word"
             onChange={handleDictClick}
-            options={props.vocabulary}
+            options={mem.vocabulary}
             placeholder="word"
             type="search"
          />
@@ -133,14 +116,14 @@ export default (props: {
             onInput={handleSentenceOnInput}
             onSelect={handleSentenceSelect}
             placeholder="sentence"
-            value={props.sentence}
+            value={sentence()}
          />
          <textarea
             class="grow"
             name="trans"
-            onInput={(e) => props.setTrans(e.target.value)}
+            onInput={(e) => setTrans(e.target.value)}
             placeholder="trans"
-            value={props.trans}
+            value={trans()}
          />
       </Dialog>
    );

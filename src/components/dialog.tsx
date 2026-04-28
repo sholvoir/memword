@@ -1,7 +1,7 @@
 import BButton from "@sholvoir/solid-components/button-base";
 import { type Accessor, type JSX, Show, splitProps } from "solid-js";
-import { useG } from "./g-provider.tsx";
 import Loading from "./icon-loading.tsx";
+import { go, loading, tips } from "./provider-g.ts";
 
 export type DialogProps = {
    bottom?: JSX.Element;
@@ -26,7 +26,6 @@ export default (props: DialogProps) => {
       "title",
       "tools",
    ]);
-   const { tips, go, loading } = useG()!;
    return (
       <>
          <div

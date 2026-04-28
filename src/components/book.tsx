@@ -7,7 +7,7 @@ import { createSignal, Show } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips, user } from "./provider-g.ts";
 
 export default (props: { book?: IBook }) => {
    const [bname, setBName] = createSignal(
@@ -18,9 +18,8 @@ export default (props: { book?: IBook }) => {
    const [replace, setReplace] = createSignal(false);
    const [isPublic, setPublic] = createSignal(false);
    const [revision, setRevision] = createSignal("");
-   const { go, showTips } = useG()!;
    const handleDownloadClick = async () => {
-      const bid = `${mem.user}/${bname()}`;
+      const bid = `${user()!.name}/${bname()}`;
       const book = await mem.getBook(bid);
       if (!book?.content) return;
       setWords(Array.from(book.content).sort().join("\n"));

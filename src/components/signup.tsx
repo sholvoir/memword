@@ -2,28 +2,27 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
 import SInput from "@sholvoir/solid-components/input-simple";
-import { type Accessor, createSignal, type Setter } from "solid-js";
+import { createSignal } from "solid-js";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips } from "./provider-g.ts";
+import { name, setName } from "./provider-sign.ts";
 
 const namePattern = /^[_\w-]+$/;
 const fonePattern = /^\+\d+$/;
 
-export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
+export default () => {
    const [phone, setPhone] = createSignal("");
-   const { go, showTips } = useG()!;
-
    const handleSignin = () => {
       go("#signin");
    };
    const handleSignup = async () => {
-      if (!namePattern.test(props.name()))
+      if (!namePattern.test(name()))
          return showTips("Name can only include _, letter, number and -");
       const fone = phone().replaceAll(/[() -]/g, "");
       if (!fonePattern.test(fone)) return showTips("Invalid phone number!");
       try {
-         switch ((await mem.signup(fone, props.name())).status) {
+         switch ((await mem.signup(fone, name())).status) {
             case STATUS_CODE.BadRequest:
                return showTips("用户名已注册");
             case STATUS_CODE.Conflict:
@@ -46,7 +45,7 @@ export default (props: { name: Accessor<string>; setName: Setter<string> }) => {
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[props.name, props.setName]}
+               binding={[name, setName]}
                class="mb-3"
             />
             <label for="phone">手机号码(含国际区号)</label>

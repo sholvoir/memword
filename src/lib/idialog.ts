@@ -1,14 +1,15 @@
-export const DIALS = [
-   "#home",
-   "#help",
+export const DIALOGS = [
    "#about",
-   "#issue",
-   "#setting",
    "#book",
-   "#trans",
+   "#empty",
+   "#help",
+   "#home",
+   "#issue",
    "#sentence",
-   "#study",
-   "#signup",
+   "#setting",
    "#signin",
+   "#signup",
+   "#study",
+   "#trans",
 ] as const;
-export type TDial = (typeof DIALS)[number];
+export type TDialog = (typeof DIALOGS)[number];

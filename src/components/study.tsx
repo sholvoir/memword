@@ -2,75 +2,65 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
-import {
-   type Accessor,
-   createResource,
-   createSignal,
-   For,
-   type Setter,
-   Show,
-} from "solid-js";
+import { createResource, createSignal, For, onMount, Show } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
-import { useG } from "./g-provider.tsx";
+import { go, showTips, user } from "./provider-g.ts";
+import { totalStats } from "./provider-stat.ts";
+import { bid, search } from "./provider-study.ts";
 import Scard from "./scard.tsx";
 
-export default (props: {
-   bid: Accessor<string | undefined>;
-   citem: Accessor<IItem | undefined>;
-   isPhaseAnswer: Accessor<boolean>;
-   setCItem: Setter<IItem | undefined>;
-   setPhaseAnswer: Setter<boolean>;
-   setSprint: Setter<number>;
-   sprint: Accessor<number>;
-   totalStats: () => void;
-   vocabulary: Accessor<Set<string>>;
-}) => {
-   const entries = () => props.citem()?.entries ?? [];
-   const { go, showTips } = useG()!;
+export default () => {
+   const [citem, setCItem] = createSignal<IItem>();
+   const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
+   const [sprint, setSprint] = createSignal(-1);
+
+   const entries = () => citem()?.entries ?? [];
    const finish = () => {
-      go(props.sprint() < 0 ? "#trans" : undefined);
-      props.totalStats();
+      go(search() ? "#trans" : "#home");
+      totalStats();
    };
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
 
-   const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
+   const [myBooks] = createResource(user, async (u) =>
+      (await mem.getLocalBooks()).filter(
+         (book) => splitID(book.bid)[0] === u.name,
+      ),
+   );
    const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    let player!: HTMLAudioElement;
    const handleIKnown = async (level?: number) => {
-      if (props.citem())
+      if (citem())
          mem.uploadTasks([
-            item2task(await mem.studyWord(props.citem()!.word, level)),
+            item2task(await mem.studyWord(citem()!.word, level)),
          ]);
    };
    const studyNext = async () => {
-      if (props.sprint() < 0) return finish();
-      props.setSprint((s) => s + 1);
-      props.setCItem(undefined);
-      props.setPhaseAnswer(false);
+      if (search()) return finish();
+      setSprint((s) => s + 1);
+      setCItem(undefined);
+      setPhaseAnswer(false);
       setShowTrans(false);
-      const item = await mem.getEpisode(props.bid());
+      const item = await mem.getEpisode(bid());
       if (!item) return finish();
-      props.setCItem(item);
+      setCItem(item);
       setCIndex(0);
    };
    const handleRefresh = async () => {
       showTips("Get Server Data...", false);
-      const item = await mem.updateDict(props.citem()!);
+      const item = await mem.updateDict(citem()!);
       showTips();
-      props.setCItem({ ...item });
+      setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      await mem.submitIssue(props.citem()!.word, "1");
+      await mem.submitIssue(citem()!.word, "1");
       showTips("Submitted");
    };
    const handleDelete = async () => {
-      showTips(
-         (await mem.deleteItem(props.citem()!.word)) ? "删除成功" : "删除失败",
-      );
+      showTips((await mem.deleteItem(citem()!.word)) ? "删除成功" : "删除失败");
       await studyNext();
    };
    const handleKeyPress = (e: KeyboardEvent) => {
@@ -84,13 +74,13 @@ export default (props: {
          case "X":
          case "n":
          case "x":
-            if (props.isPhaseAnswer()) handleIKnown().then(studyNext);
+            if (isPhaseAnswer()) handleIKnown().then(studyNext);
             break;
          case "M":
          case "Z":
          case "m":
          case "z":
-            if (props.isPhaseAnswer()) handleIKnown(0).then(studyNext);
+            if (isPhaseAnswer()) handleIKnown(0).then(studyNext);
             break;
       }
    };
@@ -98,10 +88,10 @@ export default (props: {
    const handleClick = (e?: MouseEvent & DivTargeted) => {
       e?.stopPropagation();
       if (isShowAddToBookMenu()) return setShowAddToBookMenu(false);
-      const cardsN = props.citem()?.entries?.length ?? 0;
+      const cardsN = citem()?.entries?.length ?? 0;
       //if (cardsN === 0) return;
-      if (!props.isPhaseAnswer()) {
-         props.setPhaseAnswer(true);
+      if (!isPhaseAnswer()) {
+         setPhaseAnswer(true);
          player.play();
       } else if (cardsN === 1) player.play();
       else if (cindex() < cardsN - 1) setCIndex((c) => c + 1);
@@ -109,19 +99,18 @@ export default (props: {
    };
    const handleAddToBook = async (book: IBook) => {
       setShowAddToBookMenu(false);
-      const word = props.citem()!.word;
+      const word = citem()!.word;
       const wordSet = (await mem.getBook(book.bid))?.content as Set<string>;
       if (wordSet?.has(word)) return showTips("已包含");
       const [_, bookName] = splitID(book.bid);
       const [status] = await mem.uploadBook(bookName, word);
       showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
-      props.vocabulary().add(word);
+      mem.vocabulary.add(word);
    };
-   createResource(async () => {
-      setMyBooks(
-         await mem.getLocalBooks((book) => splitID(book.bid)[0] === mem.user),
-      );
+   onMount(() => {
+      if (search()) {
+      }
    });
    return (
       <Dialog
@@ -131,32 +120,32 @@ export default (props: {
          leftClick={finish}
          onClick={handleClick}
          onKeyup={handleKeyPress}
-         title={`学习${props.sprint() > 0 ? `(${props.sprint()})` : ""}`}
+         title={`学习${sprint() > 0 ? `(${sprint()})` : ""}`}
          tools={
             <div class="body px-2 relative flex gap-4 text-[150%] justify-between items-end">
                <BButton
                   onClick={() => handleIKnown().then(studyNext)}
                   title="X/N"
                   class="icon--material-symbols icon--material-symbols--check-circle text-green-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <BButton
                   onClick={() => handleIKnown(0).then(studyNext)}
                   title="Z/M"
                   class="icon--mdi icon--mdi--cross-circle text-fuchsia-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <BButton
                   onClick={() =>
                      handleIKnown(TASK_MAX_LEVEL - 1).then(studyNext)
                   }
                   class="icon--material-symbols icon--material-symbols--family-star text-yellow-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <BButton
                   onClick={handleDelete}
                   class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <BButton
                   onClick={() => player.play()}
@@ -165,26 +154,26 @@ export default (props: {
                <BButton
                   onClick={handleReportIssue}
                   class="icon--material-symbols icon--material-symbols--error text-red-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <BButton
                   onClick={handleRefresh}
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                />
                <Show when={!mem.setting.trans}>
                   <BButton
                      onClick={() => setShowTrans((s) => !s)}
                      class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
-                     disabled={!props.isPhaseAnswer()}
+                     disabled={!isPhaseAnswer()}
                   ></BButton>
                </Show>
                <BButton
                   onClick={() => setShowAddToBookMenu((s) => !s)}
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
-                  disabled={!props.isPhaseAnswer()}
+                  disabled={!isPhaseAnswer()}
                ></BButton>
-               <div class="text-lg">{props.citem()?.level}</div>
+               <div class="text-lg">{citem()?.level}</div>
                <Show when={isShowAddToBookMenu()}>
                   <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
                      <For each={myBooks()}>
@@ -197,32 +186,32 @@ export default (props: {
                            </>
                         )}
                      </For>
-                     {myBooks().length && <div />}
+                     <Show when={myBooks()?.length}>
+                        <div />
+                     </Show>
                   </div>
                </Show>
             </div>
          }
-         touchEnabled={props.isPhaseAnswer()}
+         touchEnabled={isPhaseAnswer()}
       >
-         <Show when={props.citem()}>
+         <Show when={citem()}>
             <div class="py-2 flex gap-2 flex-wrap justify-between">
-               <div class="text-4xl font-bold">{props.citem()?.word}</div>
-               {props.isPhaseAnswer() && (
+               <div class="text-4xl font-bold">{citem()?.word}</div>
+               {isPhaseAnswer() && (
                   <div class="text-2xl flex items-center">
-                     {props.citem()?.entries?.[cindex()].phonetic}
+                     {citem()?.entries?.[cindex()].phonetic}
                   </div>
                )}
             </div>
-            <Show when={props.isPhaseAnswer()}>
+            <Show when={isPhaseAnswer()}>
                <Show
                   when={entries().length > 1}
                   fallback={
                      <Scard
                         meanings={entries()[0]?.meanings}
                         showTrans={
-                           isShowTrans() ||
-                           props.sprint() < 0 ||
-                           mem.setting.trans
+                           isShowTrans() || sprint() < 0 || mem.setting.trans
                         }
                      />
                   }
@@ -234,7 +223,7 @@ export default (props: {
                               meanings={entry.meanings}
                               showTrans={
                                  isShowTrans() ||
-                                 props.sprint() < 0 ||
+                                 sprint() < 0 ||
                                  mem.setting.trans
                               }
                            />
@@ -246,7 +235,7 @@ export default (props: {
             <audio
                ref={player}
                autoplay
-               src={props.citem()?.entries?.at(cindex())?.sound ?? ""}
+               src={citem()?.entries?.at(cindex())?.sound ?? ""}
             />
          </Show>
       </Dialog>

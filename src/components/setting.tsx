@@ -2,17 +2,16 @@ import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
 import Input from "@sholvoir/solid-components/input-simple";
 import List from "@sholvoir/solid-components/list";
-import { createResource, createSignal, type Setter } from "solid-js";
+import { createResource, createSignal } from "solid-js";
 import { settingFormat } from "#srv/lib/isetting.ts";
 import { compareWL, type IBook } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
-import { useG } from "./g-provider.tsx";
+import { setBook } from "./provider-book.ts";
+import { go, showLoading, showTips, user } from "./provider-g.ts";
+import { totalStats } from "./provider-stat.ts";
 
-export default (props: {
-   setBook: Setter<IBook | undefined>;
-   totalStats: () => void;
-}) => {
+export default () => {
    const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
    const [myIndex, setMyIndex] = createSignal(0);
@@ -21,14 +20,13 @@ export default (props: {
    const [books, setBooks] = createSignal<Array<IBook>>([]);
    const [cindex, setCIndex] = createSignal(0);
    const [bookFilter, setBookFilter] = createSignal("^common");
-   const { go, showTips, showLoading } = useG()!;
 
    const handleNewBookClick = () => {
-      props.setBook(undefined);
+      setBook(undefined);
       go("#book");
    };
    const handleUpdateBookClick = () => {
-      props.setBook(myBooks()[myIndex()]);
+      setBook(myBooks()[myIndex()]);
       go("#book");
    };
    const handleDeleteBookClick = async () => {
@@ -48,7 +46,7 @@ export default (props: {
    const handleAddTaskClick = async () => {
       showLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
-      props.totalStats();
+      totalStats();
       showLoading(false);
    };
    const handleOKClick = async () => {
@@ -58,12 +56,8 @@ export default (props: {
          trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
-      props.totalStats();
+      totalStats();
       go();
-   };
-   const handleSignoutClick = async () => {
-      await mem.signout();
-      location.replace("about");
    };
    const toggleShrink = (
       e: MouseEvent & {
@@ -78,23 +72,18 @@ export default (props: {
    createResource(bookFilter, async (filter) => {
       const regex = new RegExp(filter);
       setBooks(
-         (
-            await mem.getLocalBooks(
-               (wl) => regex.test(wl.bid) || regex.test(wl.disc!),
-            )
-         ).sort(compareWL),
+         (await mem.getLocalBooks())
+            .filter((wl) => regex.test(wl.bid) || regex.test(wl.disc!))
+            .sort(compareWL),
       );
    });
    createResource(async () => {
-      setBooks(
-         (await mem.getLocalBooks((wl) => wl.bid.startsWith("common"))).sort(
-            compareWL,
-         ),
+      const books = await mem.getLocalBooks();
+      setBooks(books.filter((wl) => wl.bid.startsWith("common"))).sort(
+         compareWL,
       );
-      setSubBooks(
-         await mem.getLocalBooks((wl) => mem.setting.books.includes(wl.bid)),
-      );
-      setMyBooks(await mem.getLocalBooks((wl) => wl.bid.startsWith(mem.user!)));
+      setSubBooks(books.filter((wl) => mem.setting.books.includes(wl.bid)));
+      setMyBooks(books.filter((wl) => wl.bid.startsWith(user()!.name)));
    });
    return (
       <Dialog
@@ -108,10 +97,7 @@ export default (props: {
                >
                   添加任务
                </Button>
-               <Button
-                  class="button btn-normal grow"
-                  onClick={handleSignoutClick}
-               >
+               <Button class="button btn-normal grow" onClick={mem.signout}>
                   登出
                </Button>
                <Button class="button btn-prime grow" onClick={handleOKClick}>

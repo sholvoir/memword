@@ -12,14 +12,15 @@ import {
 import { type ISentence, sentenceMergeTrace } from "./isentence.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
 
-export const tempItems = new Map<string, IItem>();
 type kvKey =
-   | "_sync-time"
-   | "_st-time"
-   | "_setting"
    | "_auth"
-   | "_vocabulary"
-   | "_s-version";
+   | "_page"
+   | "_s-version"
+   | "_setting"
+   | "_st-time"
+   | "_sync-time"
+   | "_user"
+   | "_vocabulary";
 
 const db: IDBDatabase = await new Promise((resolve, reject) => {
    const request = indexedDB.open("memword", 2);
@@ -136,19 +137,14 @@ export const deleteBook = (bid: string) =>
       request.onsuccess = () => resolve();
    });
 
-export const getBooks = (filter: (book: IBook) => boolean) =>
+export const getBooks = () =>
    new Promise<Array<IBook>>((resolve, reject) => {
-      const books: Array<IBook> = [];
-      const transaction = db.transaction("book", "readonly");
-      transaction.onerror = reject;
-      transaction.oncomplete = () => resolve(books);
-      transaction.objectStore("book").openCursor().onsuccess = (e) => {
-         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-         if (!cursor) return;
-         const wl = cursor.value as IBook;
-         if (filter(wl)) books.push(wl);
-         cursor.continue();
-      };
+      const request = db
+         .transaction("book", "readonly")
+         .objectStore("book")
+         .getAll();
+      request.onerror = reject;
+      request.onsuccess = () => resolve(request.result);
    });
 
 export const syncBooks = (books: Array<IBook>) =>
@@ -234,7 +230,7 @@ export const addTasks = (words: Iterable<string>) =>
          };
    });
 
-export const mergeTasks = (tasks: Iterable<ITask>) =>
+export const syncTasks = (tasks: Iterable<ITask>) =>
    new Promise<void>((resolve, reject) => {
       const taskMap = new Map<string, ITask>();
       for (const task of tasks) taskMap.set(task.word, task);
@@ -268,9 +264,10 @@ export const updateDict = (dict: IDict) =>
       const iStore = transaction.objectStore("item");
       iStore.get(dict.word).onsuccess = (e1) => {
          item = (e1.target as IDBRequest<IItem>).result;
-         item &&
-            (item.dictSync = Date.now()) &&
+         if (item) {
+            item.dictSync = Date.now();
             iStore.put(itemMergeDict(item, dict));
+         }
       };
    });
 
@@ -330,21 +327,16 @@ export const studied = (word: string, level?: number) =>
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(item);
       const iStore = transaction.objectStore("item");
-      if (tempItems.has(word)) {
-         item = studyTask(tempItems.get(word)!, level);
-         iStore.put(item);
-         tempItems.delete(word);
-      } else
-         iStore.get(word).onsuccess = (e2) => {
-            const item1 = (e2.target as IDBRequest<IItem>).result;
-            if (item1) {
-               item = studyTask(item1, level);
-               iStore.put(item);
-            } else {
-               item = studyTask(neverItem(word, Date.now()));
-               iStore.add(item);
-            }
-         };
+      iStore.get(word).onsuccess = (e2) => {
+         const item1 = (e2.target as IDBRequest<IItem>).result;
+         if (item1) {
+            item = studyTask(item1, level);
+            iStore.put(item);
+         } else {
+            item = studyTask(neverItem(word, Date.now()), level);
+            iStore.add(item);
+         }
+      };
    });
 
 export const addSentence = (sentence: ISentence) =>

@@ -13,6 +13,14 @@ import type { ISentence } from "./isentence.ts";
 
 const API_BASE = "/api/v2";
 
+export const signup_get = (phone: string, name: string) =>
+   fetch(url("/signup", { phone, name }));
+export const otp_get = (name: string) => fetch(url("/otp", { name }));
+export const signin_get = (name: string, code: string) =>
+   fetch(url("/signin", { name, code }));
+export const renew_get = (auth?: string) => fetch(url("/renew", { auth }));
+export const signout_get = () => fetch("/signout");
+
 export const book_get = () => getJson<Array<IBook>>(`${API_BASE}/book`);
 
 export const book_delete = (name: string) =>
@@ -49,12 +57,6 @@ export const issue_post = (issue: IIssue) =>
       jsonInit({ issue: issue.issue }),
    );
 
-export const otp_get = (name: string) =>
-   fetch(url(`${API_BASE}/otp`, { name }));
-
-export const renew_get = (auth?: string) =>
-   fetch(url(`${API_BASE}/renew`, { auth }));
-
 export const sentence_post = (sentences: Array<ISentence>, sync?: "1") =>
    fetch(url(`${API_BASE}/sentence`, { sync }), jsonInit(sentences));
 
@@ -67,14 +69,6 @@ export const sentence_delete = (sentence: string) =>
 export const setting_post = (setting: ISetting) =>
    getJson<ISetting>(`${API_BASE}/setting`, jsonInit(setting));
 
-export const signin_get = (name: string, code: string) =>
-   fetch(url(`${API_BASE}/signin`, { name, code }));
-
-export const signup_get = (phone: string, name: string) =>
-   fetch(url(`${API_BASE}/signup`, { phone, name }));
-
-export const signout_get = () => fetch(`${API_BASE}/signout`);
-
 export const task_post = (tasks: Array<ITask>, sync?: "1") =>
    fetch(url(`${API_BASE}/task`, { sync }), jsonInit(tasks));
 
@@ -85,5 +79,3 @@ export const trans_post = (sentence: string) =>
    getText(`${API_BASE}/trans`, textInit(sentence));
 
 export const version_get = () => getText(`${API_BASE}/version`);
-
-export const user_get = () => getJson<{ name: string }>(`${API_BASE}/user`);
