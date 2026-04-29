@@ -39,7 +39,7 @@ export default () => {
          go("#about");
       } else {
          setUser(user);
-         if (user.expired - Date.now() < maxAge / 3) mem.renewAuth();
+         if (user.expired - Date.now() < (maxAge * 1000) / 3) mem.renewAuth();
          go(await mem.getPage());
          await totalStats();
          await mem.init();
