@@ -16,25 +16,34 @@ import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips, user } from "./provider-g.ts";
 import { totalStats } from "./provider-stat.ts";
-import { bid, blevel, search } from "./provider-study.ts";
+import { bid, blevel, search, setSearch } from "./provider-study.ts";
 import Scard from "./scard.tsx";
 
 export default () => {
    const [citem, setCItem] = createSignal<IItem>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(-1);
-
-   const entries = () => citem()?.entries ?? [];
    const [isShowTrans, setShowTrans] = createSignal(false);
    const [cindex, setCIndex] = createSignal(0);
+   const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
+   const entries = () => citem()?.entries ?? [];
 
    const [myBooks] = createResource(user, async (u) =>
       (await mem.getLocalBooks()).filter(
          (book) => splitID(book.bid)[0] === u.name,
       ),
    );
-   const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    let player!: HTMLAudioElement;
+   const finish = () => {
+      if (search()) {
+         setSearch();
+         go("#trans");
+      } else {
+         totalStats();
+         go("#home");
+      }
+   };
+
    const handleIKnown = async (level?: number) => {
       if (citem())
          mem.uploadTasks([
@@ -42,7 +51,7 @@ export default () => {
          ]);
    };
    const studyNext = async () => {
-      if (search()) return totalStats(), go("#trans");
+      if (search()) return setSearch(), go("#trans");
       batch(() => {
          setSprint((s) => s + 1);
          setCItem(undefined);
@@ -137,7 +146,7 @@ export default () => {
          afterAnimation={studyNext}
          beforeAnimation={(up) => handleIKnown(up ? undefined : 0)}
          class="flex flex-col px-2 pb-4 outline-none overflow-y-auto"
-         leftClick={() => (totalStats(), go(search() ? "#trans" : "#home"))}
+         leftClick={finish}
          onClick={handleClick}
          onKeyup={handleKeyPress}
          title={`学习${sprint() > 0 ? `(${sprint()})` : ""}`}

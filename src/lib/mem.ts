@@ -146,18 +146,14 @@ const itemUpdateDict = async (item: IItem) => {
 export const search = async (word: string) => {
    if (tempItems.has(word)) return tempItems.get(word)!;
    const item = await idb.getItem(word);
-   if (!item) {
-      try {
-         const dict = await dsrv.dict_get(word);
-         if (!dict) return;
-         const nitem = newItem(dict);
-         tempItems.set(word, nitem);
-         return nitem;
-      } catch {
-         return;
-      }
-   }
-   return await itemUpdateDict(item);
+   if (item) return await itemUpdateDict(item);
+   try {
+      const dict = await dsrv.dict_get(word);
+      if (!dict) return;
+      const nitem = newItem(dict);
+      tempItems.set(word, nitem);
+      return nitem;
+   } catch {}
 };
 
 export const getEpisode = async (bid?: string, blevel?: number) => {
