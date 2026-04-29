@@ -29,10 +29,6 @@ export default () => {
    const [sentence, setSentence] = createSignal<ISentence>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
-   const finish = () => {
-      go("#home");
-      totalStats();
-   };
 
    const studyNext = async () => {
       const st = await mem.getSentenceEpisode();
@@ -87,7 +83,7 @@ export default () => {
       if (e.ctrlKey || e.altKey) return;
       switch (e.key) {
          case " ":
-            speak(sentence()?.sentence);
+            handleClick();
             break;
          case "N":
          case "X":
@@ -108,7 +104,7 @@ export default () => {
       <Dialog
          class="h-full p-2 outline-none relative flex flex-col text-lg"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
-         leftClick={finish}
+         leftClick={() => (totalStats(), go("#home"))}
          onClick={handleClick}
          onKeyup={handleKeyPress}
          touchEnabled={isPhaseAnswer()}
