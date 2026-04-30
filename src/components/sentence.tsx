@@ -1,3 +1,4 @@
+import BButton from "@sholvoir/solid-components/button-base";
 import { createSignal, onMount, Show } from "solid-js";
 import type { ISentence } from "#srv/lib/isentence.ts";
 import {
@@ -92,12 +93,51 @@ export default () => {
             break;
       }
    };
+   const handleDelete = async () => {
+      const st = sentence()?.sentence;
+      if (st) {
+         try {
+            await mem.deleteLocalSentence(st);
+            showTips("删除成功");
+            mem.deleteSentence(st);
+            studyNext();
+         } catch {
+            showTips("删除失败");
+         }
+      }
+   };
    onMount(studyNext);
    return (
       <Dialog
          class="h-full p-2 outline-none relative flex flex-col text-lg"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
          leftClick={() => (totalStats(), go("#home"))}
+         tools={
+            <div class="body p-2 relative flex gap-4 text-[150%] justify-between items-end">
+               <BButton
+                  onClick={() => handleIKnown(true).then(studyNext)}
+                  title="X/N"
+                  class="icon--material-symbols icon--material-symbols--check-circle text-green-500"
+                  disabled={!isPhaseAnswer()}
+               />
+               <BButton
+                  onClick={() => handleIKnown().then(studyNext)}
+                  title="Z/M"
+                  class="icon--mdi icon--mdi--cross-circle text-fuchsia-500"
+                  disabled={!isPhaseAnswer()}
+               />
+               <BButton
+                  onClick={handleDelete}
+                  class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
+                  disabled={!isPhaseAnswer()}
+               />
+               <BButton
+                  onClick={() => speak(sentence()?.sentence)}
+                  class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
+               />
+               <div class="text-lg">{sentence()?.level}</div>
+            </div>
+         }
          onClick={handleClick}
          onKeyup={handleKeyPress}
          touchEnabled={isPhaseAnswer()}
