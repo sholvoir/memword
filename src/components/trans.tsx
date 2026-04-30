@@ -7,6 +7,7 @@ import type {
 import { createSignal } from "solid-js";
 import { sentenceToWords } from "../lib/isentence.ts";
 import * as mem from "../lib/mem.ts";
+import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog.tsx";
 import { go, showTips } from "./provider-g.ts";
 import { setSearch } from "./provider-study.ts";
@@ -46,12 +47,6 @@ export default () => {
       setSearch(text);
       go("#study");
    };
-   const handlePlayClick = () => {
-      if (sentence()) {
-         const utterance = new SpeechSynthesisUtterance(sentence());
-         speechSynthesis.speak(utterance);
-      }
-   };
    const handleTransClick = async () => {
       const t = await mem.baiduTranslate(sentence());
       if (t) setTrans(t);
@@ -82,7 +77,7 @@ export default () => {
                </Button>
                <Button
                   class="flex-auto button btn-normal"
-                  onClick={handlePlayClick}
+                  onClick={() => speak(sentence())}
                >
                   播放
                </Button>
