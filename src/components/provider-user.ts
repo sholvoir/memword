@@ -12,7 +12,13 @@ export { lemma, stats, setting, vocabulary };
 export const totalStats = async () =>
    setStats(await mem.totalStats(setting().books));
 
-export const syncSetting = async (cSetting?: ISetting) => {
+export const saveSetting = async (nsetting: ISetting) => {
+   const s = setSetting(nsetting);
+   mem.setLocalSetting(s);
+   mem.syncSetting(s);
+};
+
+const initSetting = async (cSetting?: ISetting) => {
    if (cSetting && cSetting.version > setting().version) setSetting(cSetting);
    const lSetting = await mem.getLocalSetting();
    if (lSetting && lSetting.version > setting().version) setSetting(lSetting);
@@ -50,13 +56,40 @@ export const initVocabulary = async () => {
    })();
 };
 
+export const syncBooks = async () => {
+   const books = (await mem.getBooks()) ?? [];
+   const checksums = (await mem.getCommonBooks()) ?? {};
+   for (const [bname, { disc, checksum }] of Object.entries(checksums))
+      books.push({
+         bid: `common/${bname}`,
+         disc,
+         checksum,
+         public: true,
+      });
+   if (books.length) {
+      const deleted = await mem.syncBooks(books);
+      if (setting().books.length) {
+         const books = setting().books.filter((bid) => !deleted.has(bid));
+         if (books.length !== setting().books.length) {
+            const se = setSetting((s) => ({
+               ...s,
+               books,
+               version: Date.now(),
+            }));
+            mem.setLocalSetting(se);
+            mem.syncSetting(se);
+         }
+      }
+   }
+};
+
 export const afterLogin = async () => {
    await totalStats();
-   await syncSetting();
+   await initSetting();
    await mem.syncTasks();
    totalStats();
    initLemma();
    initVocabulary();
    mem.syncSentences();
-   mem.syncBooks();
+   syncBooks();
 };

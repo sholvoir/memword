@@ -205,19 +205,6 @@ export const studyWord = async (word: string, level?: number) => {
    } else return await idb.studied(word, level);
 };
 
-const submitIssues = async () => {
-   for (const issue of await idb.getIssues()) {
-      const res = await msrv.issue_post(issue);
-      if (res.ok || res.status === STATUS_CODE.Conflict)
-         await idb.deleteIssue(issue.iid!);
-   }
-};
-
-export const submitIssue = async (issue: string, d?: "1") => {
-   await idb.addIssue({ issue, d });
-   submitIssues();
-};
-
 export const totalStats = async (bids: Array<string>) => {
    const books: Array<IBook> = [];
    for (const bid of bids) {
@@ -227,7 +214,21 @@ export const totalStats = async (bids: Array<string>) => {
    return { format: statsFormat, stats: await idb.getStats(books) } as IStats;
 };
 
+export const submitIssue = async (issue: string, d?: "1") => {
+   await idb.addIssue({ issue, d });
+   (async () => {
+      for (const issue of await idb.getIssues()) {
+         const res = await msrv.issue_post(issue);
+         if (res.ok || res.status === STATUS_CODE.Conflict)
+            await idb.deleteIssue(issue.iid!);
+      }
+   })();
+};
+
 export const getLocalBooks = idb.getBooks;
+export const getBooks = msrv.book_get;
+export const getCommonBooks = bsrv.checksum_get;
+export const syncBooks = idb.syncBooks;
 export const getBook = async (bid: string) => {
    const book = await idb.getBook(bid);
    if (!book) return;
@@ -244,7 +245,6 @@ export const getBook = async (bid: string) => {
    idb.putBook(book);
    return book;
 };
-
 export const uploadBook = async (
    name: string,
    words: string,
@@ -266,7 +266,6 @@ export const uploadBook = async (
          return [res.status];
    }
 };
-
 export const deleteBook = async (bid: string) => {
    try {
       const name = splitID(bid)[1];
@@ -275,30 +274,5 @@ export const deleteBook = async (bid: string) => {
       return res.ok;
    } catch {
       return false;
-   }
-};
-
-export const syncBooks = async () => {
-   const books = (await msrv.book_get()) ?? [];
-   const checksums = (await bsrv.checksum_get()) ?? {};
-   for (const [bname, { disc, checksum }] of Object.entries(checksums))
-      books.push({
-         bid: `common/${bname}`,
-         disc,
-         checksum,
-         public: true,
-      });
-   if (books.length) {
-      const time = Date.now();
-      const deleted = await idb.syncBooks(books);
-      const setting = (await idb.getMeta("_setting")) as ISetting;
-      if (setting?.books.length) {
-         const nbooks = setting.books.filter((bid) => !deleted.has(bid));
-         if (nbooks.length !== setting.books.length) {
-            setting.books = nbooks;
-            setting.version = time;
-            await idb.setMeta("_setting", setting);
-         }
-      }
    }
 };

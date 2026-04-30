@@ -9,7 +9,7 @@ import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { setBook } from "./provider-book.ts";
 import { go, showLoading, showTips, user } from "./provider-g.ts";
-import { setting, syncSetting, totalStats } from "./provider-user.ts";
+import { saveSetting, setting, totalStats } from "./provider-user.ts";
 
 export default () => {
    const [showTrans, setShowTrans] = createSignal(setting().trans ?? false);
@@ -50,7 +50,7 @@ export default () => {
       showLoading(false);
    };
    const handleOKClick = async () => {
-      await syncSetting({
+      await saveSetting({
          format: settingFormat,
          version: Date.now(),
          trans: showTrans(),
