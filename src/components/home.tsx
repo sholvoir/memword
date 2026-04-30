@@ -4,8 +4,8 @@ import { splitID } from "../lib/ibook.ts";
 import { aggrToBAggr, type IStat } from "../lib/istat.ts";
 import Dialog from "./dialog.tsx";
 import { go } from "./provider-g.ts";
-import { stats } from "./provider-stat.ts";
 import { setBid } from "./provider-study.ts";
+import { stats } from "./provider-user.ts";
 import Stat from "./stat.tsx";
 
 const sum = (s: number, b: number) => s + b;

@@ -1,7 +1,7 @@
 import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import { parse } from "yaml";
-import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
+import type { ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import type { TDialog } from "./idialog.ts";
 import {
@@ -25,97 +25,79 @@ const tempItems = new Map<string, IItem>();
 export const signup = msrv.signup_get;
 export const sendOneTimePasscode = msrv.otp_get;
 export const signin = msrv.signin_get;
-export const renewAuth = async (auth?: string) => {
-   const res = await msrv.renew_get(auth);
-   if (res.ok) setUser(await res.json());
-   return res.ok;
-};
+export const renewAuth = msrv.renew_get;
 export const signout = async () => {
    const res = await msrv.signout_get();
    if (res.ok) idb.clear();
 };
 
-export let sversion = "";
-export const initSVersion = async () => {
-   sversion = (await getLocalServerVersion()) ?? "";
-   const v = await getServerVersion();
-   if (v) setLocalServerVersion((sversion = v));
-};
-
-export let lemma: Record<string, string> = {};
-export const initLemma = async () => {
-   const [lm, checksum] = (await idb.getMeta<[Record<string, string>, string]>(
-      "_lema",
-   )) ?? [{}, ""];
-   lemma = lm;
-   (async () => {
-      const sChecksum = (await bsrv.checksumlema_get())?.checksum;
-      if (!sChecksum || sChecksum === checksum) return;
-      const text = await bsrv.lemmatization_get();
-      if (!text) return;
-      try {
-         lemma = parse(text) as Record<string, string>;
-         await idb.setMeta("_lema", [lemma, sChecksum]);
-      } catch {}
-   })();
-};
-
-export let vocabulary = new Set<string>();
-export const initVocabulary = async () => {
-   const [vocab, checksum] = (await idb.getMeta<[Set<string>, string]>(
-      "_vocabulary",
-   )) ?? [new Set<string>(), ""];
-   vocabulary = vocab;
-   (async () => {
-      const sChecksum = (await dsrv.vocabulary_checksum_get())?.checksum;
-      if (!sChecksum || sChecksum === checksum) return;
-      const resVocabulary = await dsrv.vocabulary_get();
-      if (!resVocabulary) return;
-      const { words, checksum: sCheckSum2 } = resVocabulary;
-      const nvocab = new Set<string>();
-      for (let word of words) if ((word = word.trim())) nvocab.add(word);
-      await idb.setMeta("_vocabulary", [nvocab, sCheckSum2]);
-      vocabulary = nvocab;
-   })();
-};
-
 export const getUser = () => idb.getMeta<IUser>("_user");
 export const setUser = (user: IUser) => idb.setMeta("_user", user);
+
 export const getPage = () => idb.getMeta<TDialog>("_page");
 export const setPage = (page: TDialog) => idb.setMeta("_page", page);
+
+export const getLocalSetting = () => idb.getMeta<ISetting>("_setting");
+export const setLocalSetting = (setting: ISetting) =>
+   idb.setMeta("_setting", setting);
+export const syncSetting = msrv.setting_post;
+
 export const getServerVersion = msrv.version_get;
 export const getLocalServerVersion = () => idb.getMeta<string>("_s-version");
 export const setLocalServerVersion = (version: string) =>
    idb.setMeta("_s-version", version);
 
+export const getLocalLemma = () =>
+   idb.getMeta<[Record<string, string>, string]>("_lema");
+export const setLocalLemma = (lm: [Record<string, string>, string]) =>
+   idb.setMeta("_lema", lm);
+export const getLemmaChecksum = async () =>
+   (await bsrv.checksumlema_get())?.checksum;
+export const getLemma = async () => {
+   const text = await bsrv.lemmatization_get();
+   if (!text) return;
+   try {
+      return parse(text) as Record<string, string>;
+   } catch {}
+};
+
+export const getLocalVocabulary = () =>
+   idb.getMeta<[Set<string>, string]>("_vocabulary");
+export const setLocalVocabulary = (vocab: [Set<string>, string]) =>
+   idb.setMeta("_vocabulary", vocab);
+export const getVocabularyChecksum = async () =>
+   (await dsrv.vocabulary_checksum_get())?.checksum;
+export const getVocabulary = dsrv.vocabulary_get;
+
 export const getServerCachedTrans = msrv.sentence_get;
 export const baiduTranslate = msrv.trans_post;
 
+export const setLocalSentence = idb.putSentence;
+export const deleteLocalSentence = idb.deleteSentence;
 export const deleteSentence = msrv.sentence_delete;
+export const getSentenceEpisode = idb.getStEpisode;
 export const uploadSentences = (sentences: Array<ISentence>) =>
    msrv.sentence_post(sentences);
-export const getSentenceEpisode = idb.getStEpisode;
-export const deleteLocalSentence = idb.deleteSentence;
-export const setLocalSentence = idb.putSentence;
+export const syncSentences = async () => {
+   const thisTime = Date.now();
+   const lastTime = (await idb.getMeta<number>("_st-time")) ?? 1;
+   const sts = await idb.getSentences(lastTime);
+   for (const st of sts) delete st.trans;
+   const resp = await msrv.sentence_post(sts, "1");
+   if (!resp.ok)
+      return console.error("Network Error: get sync sentences data error.");
+   const nsts = await resp.json();
+   await idb.mergeTraceToSentences(nsts);
+   await idb.setMeta("_st-time", thisTime);
+};
+export const addSentence = async (sentence: string, trans: string) => {
+   const st = newSentence(sentence, trans);
+   await idb.addSentence(st);
+   await msrv.sentence_post([st]);
+};
 
 export const uploadTasks = (items: Array<IItem>) =>
    msrv.task_post(items.map(item2task));
-
-export let setting: ISetting =
-   ((await idb.getMeta("_setting")) as ISetting) ?? defaultSetting();
-
-export const syncSetting = async (cSetting?: ISetting) => {
-   if (cSetting && cSetting.version > setting.version) setting = cSetting;
-   const lSetting = (await idb.getMeta("_setting")) as ISetting;
-   if (lSetting && lSetting.version >= setting.version) setting = lSetting;
-   else await idb.setMeta("_setting", setting);
-   try {
-      const sSetting = await msrv.setting_post(setting);
-      if (!sSetting) return;
-      if (sSetting.version > setting.version)
-         await idb.setMeta("_setting", (setting = sSetting));
-   } catch {}
-};
 
 export const updateDict = async (item: IItem) => {
    const dict = await dsrv.dict_get(item.word);
@@ -222,23 +204,6 @@ export const studyWord = async (word: string, level?: number) => {
       return item;
    } else return await idb.studied(word, level);
 };
-export const syncSentences = async () => {
-   try {
-      const thisTime = Date.now();
-      const lastTime = ((await idb.getMeta("_st-time")) ?? 1) as number;
-      const sts = await idb.getSentences(lastTime);
-      for (const st of sts) delete st.trans;
-      const resp = await msrv.sentence_post(sts, "1");
-      if (!resp.ok)
-         return console.error("Network Error: get sync sentences data error.");
-      const nsts = await resp.json();
-      await idb.mergeTraceToSentences(nsts);
-      await idb.setMeta("_st-time", thisTime);
-      return true;
-   } catch {
-      return false;
-   }
-};
 
 const submitIssues = async () => {
    for (const issue of await idb.getIssues()) {
@@ -253,50 +218,25 @@ export const submitIssue = async (issue: string, d?: "1") => {
    submitIssues();
 };
 
-export const totalStats = async () => {
+export const totalStats = async (bids: Array<string>) => {
    const books: Array<IBook> = [];
-   for (const bid of setting.books) {
+   for (const bid of bids) {
       const book = await getBook(bid);
       if (book) books.push(book);
    }
    return { format: statsFormat, stats: await idb.getStats(books) } as IStats;
 };
 
-export const getServerBooks = async () => {
-   const books = (await msrv.book_get()) ?? [];
-   const checksums = (await bsrv.checksum_get()) ?? {};
-   for (const [bname, { disc, checksum }] of Object.entries(checksums))
-      books.push({
-         bid: `common/${bname}`,
-         disc,
-         checksum,
-         public: true,
-      });
-   if (books.length) {
-      const time = Date.now();
-      const deleted = await idb.syncBooks(books);
-      const setting = (await idb.getMeta("_setting")) as ISetting;
-      if (setting?.books.length) {
-         const nbooks = setting.books.filter((bid) => !deleted.has(bid));
-         if (nbooks.length !== setting.books.length) {
-            setting.books = nbooks;
-            setting.version = time;
-            await idb.setMeta("_setting", setting);
-         }
-      }
-   }
-};
-
 export const getLocalBooks = idb.getBooks;
 export const getBook = async (bid: string) => {
    const book = await idb.getBook(bid);
-   if (!book) return undefined;
+   if (!book) return;
    if (book.content) return book;
    const [username, bname] = splitID(bid);
    const text = await (username === "common"
       ? bsrv.book_get(bname)
       : msrv.book_id_get(bid));
-   if (!text) return undefined;
+   if (!text) return;
    const content = new Set<string>();
    for (let word of text.split("\n"))
       if ((word = word.trim())) content.add(word);
@@ -338,18 +278,27 @@ export const deleteBook = async (bid: string) => {
    }
 };
 
-export const addSentence = async (sentence: string, trans: string) => {
-   const st = newSentence(sentence, trans);
-   await idb.addSentence(st);
-   await msrv.sentence_post([st]);
+export const syncBooks = async () => {
+   const books = (await msrv.book_get()) ?? [];
+   const checksums = (await bsrv.checksum_get()) ?? {};
+   for (const [bname, { disc, checksum }] of Object.entries(checksums))
+      books.push({
+         bid: `common/${bname}`,
+         disc,
+         checksum,
+         public: true,
+      });
+   if (books.length) {
+      const time = Date.now();
+      const deleted = await idb.syncBooks(books);
+      const setting = (await idb.getMeta("_setting")) as ISetting;
+      if (setting?.books.length) {
+         const nbooks = setting.books.filter((bid) => !deleted.has(bid));
+         if (nbooks.length !== setting.books.length) {
+            setting.books = nbooks;
+            setting.version = time;
+            await idb.setMeta("_setting", setting);
+         }
+      }
+   }
 };
-
-export const init = () =>
-   Promise.all([
-      getServerBooks(),
-      initVocabulary(),
-      initLemma(),
-      syncSetting(),
-      syncTasks(),
-      syncSentences(),
-   ]);

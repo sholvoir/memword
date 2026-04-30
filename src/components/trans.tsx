@@ -10,6 +10,7 @@ import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { go, showTips } from "./provider-g.ts";
 import { setSearch } from "./provider-study.ts";
+import { lemma, vocabulary } from "./provider-user.ts";
 
 const [word, setWord] = createSignal("");
 const [trans, setTrans] = createSignal("");
@@ -21,7 +22,7 @@ export default () => {
       setSentence(e.target.value);
       setWord("");
       setTrans("");
-      const result = sentenceToWords(mem.vocabulary, mem.lemma, e.target.value);
+      const result = sentenceToWords(vocabulary(), lemma(), e.target.value);
       if (result.words) {
          setWords(result.words);
          showTips();
@@ -36,7 +37,7 @@ export default () => {
          element.selectionStart,
          element.selectionEnd,
       );
-      const result = sentenceToWords(mem.vocabulary, mem.lemma, w);
+      const result = sentenceToWords(vocabulary(), lemma(), w);
       if (result.words?.length) setWord(result.words[0]);
    };
    const handleDictClick = async () => {
@@ -106,7 +107,7 @@ export default () => {
             binding={[word, setWord]}
             name="word"
             onChange={handleDictClick}
-            options={mem.vocabulary}
+            options={vocabulary()}
             placeholder="word"
             type="search"
          />

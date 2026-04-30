@@ -8,6 +8,7 @@ import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { go, setUser, showTips } from "./provider-g.ts";
 import { name, setName } from "./provider-sign.ts";
+import { afterLogin } from "./provider-user.ts";
 
 let timer: NodeJS.Timeout | undefined;
 
@@ -60,9 +61,9 @@ export default () => {
                showTips("已登录");
                const user: IUser = await res.json();
                if (timer) clearInterval(timer);
-               mem.setUser(user);
-               setUser(user);
+               mem.setUser(setUser(user));
                go("#home");
+               afterLogin();
                break;
             }
             default:

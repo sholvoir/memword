@@ -15,8 +15,8 @@ import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips, user } from "./provider-g.ts";
-import { totalStats } from "./provider-stat.ts";
 import { bid, blevel, search, setSearch } from "./provider-study.ts";
+import { setting, totalStats, vocabulary } from "./provider-user.ts";
 import Scard from "./scard.tsx";
 
 export default () => {
@@ -122,7 +122,7 @@ export default () => {
       const [status] = await mem.uploadBook(bookName, word);
       showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
-      mem.vocabulary.add(word);
+      vocabulary().add(word);
    };
    onMount(async () => {
       if (search()) {
@@ -190,7 +190,7 @@ export default () => {
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
                   disabled={!isPhaseAnswer()}
                />
-               <Show when={!mem.setting.trans}>
+               <Show when={!setting().trans}>
                   <BButton
                      onClick={() => setShowTrans((s) => !s)}
                      class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
@@ -240,7 +240,7 @@ export default () => {
                      <Scard
                         meanings={entries()[0]?.meanings}
                         showTrans={
-                           isShowTrans() || sprint() < 0 || mem.setting.trans
+                           isShowTrans() || sprint() < 0 || setting().trans
                         }
                      />
                   }
@@ -253,7 +253,7 @@ export default () => {
                               showTrans={
                                  isShowTrans() ||
                                  sprint() < 0 ||
-                                 mem.setting.trans
+                                 setting().trans
                               }
                            />
                         )}

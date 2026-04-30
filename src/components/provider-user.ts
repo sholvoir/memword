@@ -1,8 +1,62 @@
 import { createSignal } from "solid-js";
-import { type IStats, initStats } from "../lib/istat.ts";
+import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
+import { initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
 
-const [stats, setStats] = createSignal<IStats>(initStats());
-const totalStats = async () => setStats(await mem.totalStats());
+const [stats, setStats] = createSignal(initStats());
+const [lemma, setLemma] = createSignal<Record<string, string>>({});
+const [setting, setSetting] = createSignal(defaultSetting());
+const [vocabulary, setVocabulary] = createSignal(new Set<string>());
 
-export { stats, totalStats };
+export { lemma, stats, setting, vocabulary };
+export const totalStats = async () =>
+   setStats(await mem.totalStats(setting().books));
+
+export const syncSetting = async (cSetting?: ISetting) => {
+   if (cSetting && cSetting.version > setting().version) setSetting(cSetting);
+   const lSetting = await mem.getLocalSetting();
+   if (lSetting && lSetting.version > setting().version) setSetting(lSetting);
+   else mem.setLocalSetting(setting());
+   (async () => {
+      const sSetting = await mem.syncSetting(setting());
+      if (sSetting && sSetting.version > setting().version)
+         mem.setLocalSetting(setSetting(sSetting));
+   })();
+};
+
+export const initLemma = async () => {
+   const lm = await mem.getLocalLemma();
+   if (lm) setLemma(lm[0]);
+   (async () => {
+      const sChecksum = await mem.getLemmaChecksum();
+      if (!sChecksum || sChecksum === lm?.[1]) return;
+      const l = await mem.getLemma();
+      if (l) mem.setLocalLemma([setLemma(l), sChecksum]);
+   })();
+};
+
+export const initVocabulary = async () => {
+   const vocab = await mem.getLocalVocabulary();
+   if (vocab) setVocabulary(vocab[0]);
+   (async () => {
+      const sChecksum = await mem.getVocabularyChecksum();
+      if (!sChecksum || sChecksum === vocab?.[1]) return;
+      const sVocabulary = await mem.getVocabulary();
+      if (!sVocabulary) return;
+      const { words, checksum } = sVocabulary;
+      const nvocab = new Set<string>();
+      for (let word of words) if ((word = word.trim())) nvocab.add(word);
+      mem.setLocalVocabulary([setVocabulary(nvocab), checksum]);
+   })();
+};
+
+export const afterLogin = async () => {
+   await totalStats();
+   await syncSetting();
+   await mem.syncTasks();
+   totalStats();
+   initLemma();
+   initVocabulary();
+   mem.syncSentences();
+   mem.syncBooks();
+};

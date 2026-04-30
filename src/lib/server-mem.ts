@@ -10,6 +10,7 @@ import type { ITask } from "#srv/lib/itask.ts";
 import type { IBook } from "./ibook.ts";
 import type { IIssue } from "./iissue";
 import type { ISentence } from "./isentence.ts";
+import type { IUser } from "./iuser.ts";
 
 const API_BASE = "/api/v2";
 
@@ -18,7 +19,8 @@ export const signup_get = (phone: string, name: string) =>
 export const otp_get = (name: string) => fetch(url("/otp", { name }));
 export const signin_get = (name: string, code: string) =>
    fetch(url("/signin", { name, code }));
-export const renew_get = (auth?: string) => fetch(url("/renew", { auth }));
+export const renew_get = (auth?: string) =>
+   getJson<IUser>(url("/renew", { auth }));
 export const signout_get = () => fetch("/signout");
 
 export const book_get = () => getJson<Array<IBook>>(`${API_BASE}/book`);

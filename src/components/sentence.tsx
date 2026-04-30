@@ -8,7 +8,7 @@ import {
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips } from "./provider-g.ts";
-import { totalStats } from "./provider-stat.ts";
+import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
 const speechs = new Map<string, SpeechSynthesisUtterance>();
 const getUrrerance = (text: string) => {
@@ -61,11 +61,7 @@ export default () => {
          }
          if (know) {
             const items = [];
-            const result = sentenceToWords(
-               mem.vocabulary,
-               mem.lemma,
-               st.sentence,
-            );
+            const result = sentenceToWords(vocabulary(), lemma(), st.sentence);
             if (result.words)
                for (const word of result.words) {
                   items.push(await mem.studyWord(word));

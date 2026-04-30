@@ -9,10 +9,10 @@ import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
 import { setBook } from "./provider-book.ts";
 import { go, showLoading, showTips, user } from "./provider-g.ts";
-import { totalStats } from "./provider-stat.ts";
+import { setting, syncSetting, totalStats } from "./provider-user.ts";
 
 export default () => {
-   const [showTrans, setShowTrans] = createSignal(mem.setting.trans || false);
+   const [showTrans, setShowTrans] = createSignal(setting().trans ?? false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
    const [myIndex, setMyIndex] = createSignal(0);
    const [subBooks, setSubBooks] = createSignal<Array<IBook>>([]);
@@ -50,7 +50,7 @@ export default () => {
       showLoading(false);
    };
    const handleOKClick = async () => {
-      await mem.syncSetting({
+      await syncSetting({
          format: settingFormat,
          version: Date.now(),
          trans: showTrans(),
@@ -82,7 +82,7 @@ export default () => {
       setBooks(books.filter((wl) => wl.bid.startsWith("common"))).sort(
          compareWL,
       );
-      setSubBooks(books.filter((wl) => mem.setting.books.includes(wl.bid)));
+      setSubBooks(books.filter((wl) => setting().books.includes(wl.bid)));
       setMyBooks(books.filter((wl) => wl.bid.startsWith(user()!.name)));
    });
    return (

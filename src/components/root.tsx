@@ -8,8 +8,8 @@ import Book from "./book.tsx";
 import Help from "./help.tsx";
 import Home from "./home.tsx";
 import Issue from "./issue.tsx";
-import { go, page, setUser } from "./provider-g.ts";
-import { totalStats } from "./provider-stat.ts";
+import { go, initSVersion, initUser, page, setUser } from "./provider-g.ts";
+import { afterLogin } from "./provider-user.ts";
 import Sentence from "./sentence.tsx";
 import Setting from "./setting.tsx";
 import Signin from "./signin.tsx";
@@ -33,17 +33,15 @@ export default () => {
    dialogs.set("#study", () => <Study />);
 
    onMount(async () => {
-      await mem.initSVersion();
-      const user = await mem.getUser();
+      await initSVersion();
+      const user = await initUser();
       if (!user || user.expired < Date.now()) {
          go("#about");
       } else {
-         setUser(user);
-         if (user.expired - Date.now() < (maxAge * 1000) / 3) mem.renewAuth();
+         if (user.expired - Date.now() < (maxAge * 1000) / 3)
+            mem.renewAuth().then((u) => u && mem.setUser(setUser(u)));
          go(await mem.getPage());
-         await totalStats();
-         await mem.init();
-         await totalStats();
+         afterLogin();
       }
    });
    return <Dynamic component={dialogs.get(page())}></Dynamic>;
