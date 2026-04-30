@@ -16,6 +16,9 @@ const getUrrerance = (text: string) => {
    const utterance = new SpeechSynthesisUtterance(text);
    utterance.lang = "en-US";
    utterance.rate = 0.8;
+   utterance.voice = speechSynthesis
+      .getVoices()
+      .find((voice) => voice.name === "Google US English")!;
    speechs.set(text, utterance);
    return utterance;
 };
@@ -109,7 +112,7 @@ export default () => {
    onMount(studyNext);
    return (
       <Dialog
-         class="h-full p-2 outline-none relative flex flex-col text-lg"
+         class="px-2 pb-4 outline-none relative flex flex-col text-xl"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
          leftClick={() => (totalStats(), go("#home"))}
          tools={

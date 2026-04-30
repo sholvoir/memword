@@ -19,31 +19,35 @@ export const sentenceToWords = (
       .replace(/\.$/, "")
       .replaceAll(/[^A-Za-z0-9 '.-]/g, "")
       .split(/\s+/);
-   for (let i = 0; i < array.length; i++) {
-      const word = array[i].trim();
-      if (!word) continue;
-      if (/\d/.test(word)) continue;
-      if (vocabulary.has(word)) {
-         words.push(word);
-         continue;
+   for (let word of array)
+      if ((word = word.trim())) {
+         if (/\d/.test(word)) continue;
+         if (vocabulary.has(word)) {
+            words.push(word);
+            continue;
+         }
+         const lword = word.toLowerCase();
+         if (vocabulary.has(lword)) {
+            words.push(lword);
+            continue;
+         }
+         const laword = lamma[word] || lamma[lword];
+         if (laword && vocabulary.has(laword)) {
+            words.push(laword);
+            continue;
+         }
+         const rpword = word.replace(/'s$/, "");
+         if (vocabulary.has(rpword)) {
+            words.push(rpword);
+            continue;
+         }
+         const lrpword = lword.replace(/'s$/, "");
+         if (vocabulary.has(lrpword)) {
+            words.push(lrpword);
+            continue;
+         }
+         return { word };
       }
-      const lword = word.toLowerCase();
-      if (i === 0 && vocabulary.has(lword)) {
-         words.push(lword);
-         continue;
-      }
-      const laword = lamma[word] || lamma[lword];
-      if (laword && vocabulary.has(laword)) {
-         words.push(laword);
-         continue;
-      }
-      const rpword = word.replace(/'s$/, "");
-      if (vocabulary.has(rpword)) {
-         words.push(rpword);
-         continue;
-      }
-      return { word };
-   }
    return { words };
 };
 
