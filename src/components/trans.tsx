@@ -66,15 +66,6 @@ export default () => {
          title="翻译"
          bottom={
             <div class="px-2 pt-2 pb-5 flex gap-2">
-               <Button class="flex-auto button btn-normal" onClick={() => go()}>
-                  取消
-               </Button>
-               <Button
-                  class="flex-auto button btn-normal"
-                  onClick={handleDictClick}
-               >
-                  辞典
-               </Button>
                <Button
                   class="flex-auto button btn-normal"
                   onClick={() => speak(sentence())}
@@ -94,18 +85,27 @@ export default () => {
                >
                   添加
                </Button>
+               <Button class="flex-auto button btn-normal" onClick={() => go()}>
+                  取消
+               </Button>
             </div>
          }
       >
-         <TInput
-            autoCapitalize="none"
-            binding={[word, setWord]}
-            name="word"
-            onChange={handleDictClick}
-            options={vocabulary()}
-            placeholder="word"
-            type="search"
-         />
+         <div class="flex gap-2">
+            <TInput
+               autoCapitalize="none"
+               binding={[word, setWord]}
+               class="flex-auto"
+               name="word"
+               onChange={handleDictClick}
+               options={vocabulary()}
+               placeholder="word"
+               type="search"
+            />
+            <Button class="button btn-normal" onClick={handleDictClick}>
+               查找
+            </Button>
+         </div>
          <textarea
             class="grow"
             name="sentence"
