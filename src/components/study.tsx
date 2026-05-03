@@ -13,6 +13,7 @@ import {
 import { type IBook, splitID } from "../lib/ibook.ts";
 import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
+import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips, user } from "./provider-g.ts";
 import { bid, blevel, search, setSearch } from "./provider-study.ts";
@@ -34,6 +35,10 @@ export default () => {
       ),
    );
    let player!: HTMLAudioElement;
+   const playSound = () => {
+      if (citem()?.entries?.at(cindex())?.sound) player.play();
+      else speak(citem()?.word);
+   };
    const finish = () => {
       if (search()) {
          setSearch();
@@ -108,8 +113,8 @@ export default () => {
       //if (cardsN === 0) return;
       if (!isPhaseAnswer()) {
          setPhaseAnswer(true);
-         player.play();
-      } else if (cardsN === 1) player.play();
+         playSound();
+      } else if (cardsN === 1) playSound();
       else if (cindex() < cardsN - 1) setCIndex((c) => c + 1);
       else setCIndex(0);
    };
@@ -177,7 +182,7 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => player.play()}
+                  onClick={playSound}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
                <BButton
