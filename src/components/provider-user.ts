@@ -23,11 +23,12 @@ const initSetting = async (cSetting?: ISetting) => {
    const lSetting = await mem.getLocalSetting();
    if (lSetting && lSetting.version > setting().version) setSetting(lSetting);
    else mem.setLocalSetting(setting());
-   (async () => {
-      const sSetting = await mem.syncSetting(setting());
-      if (sSetting && sSetting.version > setting().version)
-         mem.setLocalSetting(setSetting(sSetting));
-   })();
+};
+
+const syncSetting = async () => {
+   const sSetting = await mem.syncSetting(setting());
+   if (sSetting && sSetting.version > setting().version)
+      mem.setLocalSetting(setSetting(sSetting));
 };
 
 export const initLemma = async () => {
@@ -84,8 +85,9 @@ export const syncBooks = async () => {
 };
 
 export const afterLogin = async () => {
-   await totalStats();
    await initSetting();
+   await totalStats();
+   await syncSetting();
    await mem.syncTasks();
    totalStats();
    initLemma();
