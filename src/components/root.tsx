@@ -8,7 +8,14 @@ import Book from "./book.tsx";
 import Help from "./help.tsx";
 import Home from "./home.tsx";
 import Issue from "./issue.tsx";
-import { go, initSVersion, initUser, page, setUser } from "./provider-g.ts";
+import {
+   go,
+   initSVersion,
+   initUser,
+   page,
+   setPage,
+   setUser,
+} from "./provider-g.ts";
 import { afterLogin } from "./provider-user.ts";
 import Sentence from "./sentence.tsx";
 import Setting from "./setting.tsx";
@@ -38,10 +45,11 @@ export default () => {
       if (!user || user.expired < Date.now()) {
          go("#about");
       } else {
+         setPage("#home");
          if (user.expired - Date.now() < (maxAge * 1000) / 3)
             mem.renewAuth().then((u) => u && mem.setUser(setUser(u)));
+         await afterLogin();
          go(await mem.getPage());
-         afterLogin();
       }
    });
    return <Dynamic component={dialogs.get(page())}></Dynamic>;

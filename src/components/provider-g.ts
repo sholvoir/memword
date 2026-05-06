@@ -4,13 +4,13 @@ import type { IUser } from "../lib/iuser.ts";
 import * as mem from "../lib/mem.ts";
 
 let timeout: number | undefined;
-const [page, setPage] = createSignal<TDialog>("#empty");
+export const [page, setPage] = createSignal<TDialog>("#empty");
 const [tips, setTips] = createSignal<string>();
 const [sversion, setSVersion] = createSignal("");
 export const [user, setUser] = createSignal<IUser>();
 export const [loading, showLoading] = createSignal(false);
 
-export { tips, page, sversion };
+export { tips, sversion };
 
 export const initUser = async () => setUser(await mem.getUser());
 
