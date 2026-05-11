@@ -97,7 +97,7 @@ export const addSentence = async (sentence: string, trans: string) => {
 };
 
 export const uploadTasks = (items: Array<IItem>) =>
-   msrv.task_post(items.map(item2task));
+   msrv.task_patch(items.map(item2task));
 
 export const updateDict = async (item: IItem) => {
    const dict = await dsrv.dict_get(item.word);
@@ -184,16 +184,13 @@ export const syncTasks = async () => {
       const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
-      const resp = await msrv.task_post(tasks, "1");
+      const resp = await msrv.task_patch(tasks);
       if (!resp.ok)
          return console.error("Network Error: get sync task data error.");
-      const ntasks = await resp.json();
-      await idb.syncTasks(ntasks);
       await idb.setMeta("_sync-time", thisTime);
-      return true;
-   } catch {
-      return false;
-   }
+      const ntasks = await msrv.task_get();
+      if (ntasks) await idb.syncTasks(ntasks);
+   } catch {}
 };
 
 export const studyWord = async (word: string, level?: number) => {

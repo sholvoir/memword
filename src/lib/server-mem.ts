@@ -71,8 +71,10 @@ export const sentence_delete = (sentence: string) =>
 export const setting_post = (setting: ISetting) =>
    getJson<ISetting>(`${API_BASE}/setting`, jsonInit(setting));
 
-export const task_post = (tasks: Array<ITask>, sync?: "1") =>
-   fetch(url(`${API_BASE}/task`, { sync }), jsonInit(tasks));
+export const task_get = () => getJson<Array<ITask>>(`${API_BASE}/task`);
+
+export const task_patch = (tasks: Array<ITask>) =>
+   fetch(`${API_BASE}/task`, jsonInit(tasks, "PATCH"));
 
 export const task_delete = (words: Array<string>) =>
    fetch(`${API_BASE}/task`, jsonInit(words, "DELETE"));
