@@ -184,10 +184,12 @@ export const syncTasks = async () => {
       const thisTime = Date.now();
       const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
-      const resp = await msrv.task_patch(tasks);
-      if (!resp.ok)
-         return console.error("Network Error: get sync task data error.");
-      await idb.setMeta("_sync-time", thisTime);
+      if (tasks.length) {
+         const resp = await msrv.task_patch(tasks);
+         if (!resp.ok)
+            return console.error("Network Error: get sync task data error.");
+         await idb.setMeta("_sync-time", thisTime);
+      }
       const ntasks = await msrv.task_get();
       if (ntasks) await idb.syncTasks(ntasks);
    } catch {}
