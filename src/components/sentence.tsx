@@ -81,7 +81,7 @@ export default () => {
    const handleDelete = async () => {
       if (st()) {
          try {
-            await mem.deleteLocalSt(st()!.sentence);
+            await mem.deleteLocalSt(st()!.id!);
             showTips("删除成功");
             mem.deleteSt([st()!.id!]);
             studyNext();
@@ -129,7 +129,7 @@ export default () => {
          afterAnimation={studyNext}
       >
          <Show when={st()}>
-            <div>{st()!.sentence}</div>
+            <div>{st()!.sentence.replaceAll("()", "")}</div>
             <Show when={isPhaseAnswer()}>
                <div class="grow">{st()!.trans}</div>
             </Show>

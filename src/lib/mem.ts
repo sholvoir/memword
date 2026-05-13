@@ -99,16 +99,6 @@ export const uploadTracesToSts = msrv.sentence_patch;
 export const syncStis = async () => {
    const thisTime = Date.now();
    const lastTime = (await idb.getMeta<number>("_st-time")) ?? 1;
-   const noidStis = await idb.getNoidStis();
-   for (const sti of noidStis) {
-      const resp = await msrv.sentence_post(sti);
-      if (resp.ok) {
-         sti.id = await resp.text();
-         await idb.putSti(sti);
-      } else if (resp.status === STATUS_CODE.Conflict) {
-         await idb.deleteSti(sti.sentence);
-      }
-   }
    const traces = (await idb.getStis(lastTime)).map(toTrace);
    if (traces.length) {
       const resp = await msrv.sentence_patch(traces);
@@ -126,9 +116,6 @@ export const addSti = async (sentence: string, trans: string) => {
       const id = await resp.text();
       st.id = id;
       idb.addSti(st);
-      return st;
-   } else if (resp.status !== STATUS_CODE.Conflict) {
-      await idb.putSti(st);
       return st;
    }
 };

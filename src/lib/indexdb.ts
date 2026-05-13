@@ -53,7 +53,7 @@ const db: IDBDatabase = await new Promise((resolve, reject) => {
       }
       if (!d.objectStoreNames.contains(stiTable)) {
          const sStore = d.createObjectStore(stiTable, {
-            keyPath: "sentence",
+            keyPath: "id",
          });
          sStore.createIndex("last", "last");
          sStore.createIndex("next", "next");
@@ -379,21 +379,6 @@ export const deleteSti = (sentence: string) =>
          .delete(sentence);
       request.onerror = reject;
       request.onsuccess = () => resolve();
-   });
-
-export const getNoidStis = () =>
-   new Promise<Array<IStItem>>((resolve, reject) => {
-      const results: Array<IStItem> = [];
-      const transaction = db.transaction(stiTable, "readonly");
-      transaction.onerror = reject;
-      transaction.oncomplete = () => resolve(results);
-      transaction.objectStore(stiTable).openCursor().onsuccess = (e) => {
-         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
-         if (!cursor) return;
-         const st = cursor.value as IStItem;
-         if (!st.id) results.push(st);
-         cursor.continue();
-      };
    });
 
 export const getStis = (lastgte: number) =>
