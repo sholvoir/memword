@@ -23,8 +23,8 @@ export default () => {
       const st = await mem.getStEpisode();
       if (!st) {
          showTips("No More Sentence!");
-         setSt();
-         setPhaseAnswer(false);
+         totalStats();
+         go("#home");
       } else {
          setSt(st);
          setSprint((s) => s + 1);
@@ -93,7 +93,7 @@ export default () => {
    onMount(studyNext);
    return (
       <Dialog
-         class="px-2 pb-4 outline-none relative flex flex-col text-xl"
+         class="px-2 pb-4 outline-none relative flex flex-col text-xl gap-2"
          title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
          leftClick={() => (totalStats(), go("#home"))}
          tools={
