@@ -1,4 +1,4 @@
-import type { ITask } from "#srv/lib/itask.ts";
+import type { ITask } from "../lib/iitem.ts";
 
 export const statsFormat = "0.2.2";
 

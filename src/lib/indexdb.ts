@@ -1,16 +1,18 @@
-import type { ITask } from "#srv/lib/itask.ts";
-import type { IBook } from "../lib/ibook.ts";
+import type { IBook } from "./ibook.ts";
 import type { IDict } from "./idict.ts";
 import type { IIssue } from "./iissue.ts";
 import {
    type IItem,
+   type ITask,
    itemMergeDict,
    itemMergeTrace,
    neverItem,
    studyTask,
 } from "./iitem.ts";
-import { type ISentence, sentenceMergeTrace } from "./isentence.ts";
+import type { IStItem } from "./ist-item.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
+import type { ITrace } from "./itrace.ts";
+import { mergeTrace } from "./itrace.ts";
 
 type kvKey =
    | "_auth"
@@ -23,25 +25,34 @@ type kvKey =
    | "_user"
    | "_vocabulary";
 
+const metaTable = "meta";
+const bookTable = "book";
+const issueTable = "issue";
+const itemTable = "item";
+const stiTable = "sti";
+
 const db: IDBDatabase = await new Promise((resolve, reject) => {
-   const request = indexedDB.open("memword", 2);
+   const request = indexedDB.open("memword", 3);
    request.onerror = reject;
    request.onsuccess = () => resolve(request.result);
    request.onupgradeneeded = () => {
       const d = request.result;
-      if (!d.objectStoreNames.contains("mata"))
-         d.createObjectStore("mata", { keyPath: "key" });
-      if (!d.objectStoreNames.contains("book"))
-         d.createObjectStore("book", { keyPath: "bid" });
-      if (!d.objectStoreNames.contains("issue"))
-         d.createObjectStore("issue", { keyPath: "iid", autoIncrement: true });
-      if (!d.objectStoreNames.contains("item")) {
-         const iStore = d.createObjectStore("item", { keyPath: "word" });
+      if (!d.objectStoreNames.contains(metaTable))
+         d.createObjectStore(metaTable, { keyPath: "key" });
+      if (!d.objectStoreNames.contains(bookTable))
+         d.createObjectStore(bookTable, { keyPath: "bid" });
+      if (!d.objectStoreNames.contains(issueTable))
+         d.createObjectStore(issueTable, {
+            keyPath: "iid",
+            autoIncrement: true,
+         });
+      if (!d.objectStoreNames.contains(itemTable)) {
+         const iStore = d.createObjectStore(itemTable, { keyPath: "word" });
          iStore.createIndex("last", "last");
          iStore.createIndex("next", "next");
       }
-      if (!d.objectStoreNames.contains("sentence")) {
-         const sStore = d.createObjectStore("sentence", {
+      if (!d.objectStoreNames.contains(stiTable)) {
+         const sStore = d.createObjectStore(stiTable, {
             keyPath: "sentence",
          });
          sStore.createIndex("last", "last");
@@ -61,8 +72,8 @@ export const clear = () =>
 export const getMeta = <T>(key: kvKey) =>
    new Promise<T | undefined>((resolve, reject) => {
       const request = db
-         .transaction("mata", "readonly")
-         .objectStore("mata")
+         .transaction(metaTable, "readonly")
+         .objectStore(metaTable)
          .get(key);
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result?.value);
@@ -71,8 +82,8 @@ export const getMeta = <T>(key: kvKey) =>
 export const setMeta = <T>(key: kvKey, value: T) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("mata", "readwrite")
-         .objectStore("mata")
+         .transaction(metaTable, "readwrite")
+         .objectStore(metaTable)
          .put({ key, value });
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -81,8 +92,8 @@ export const setMeta = <T>(key: kvKey, value: T) =>
 export const getIssues = () =>
    new Promise<Array<IIssue>>((resolve, reject) => {
       const request = db
-         .transaction("issue", "readonly")
-         .objectStore("issue")
+         .transaction(issueTable, "readonly")
+         .objectStore(issueTable)
          .getAll();
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result);
@@ -91,8 +102,8 @@ export const getIssues = () =>
 export const addIssue = (issue: IIssue) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("issue", "readwrite")
-         .objectStore("issue")
+         .transaction(issueTable, "readwrite")
+         .objectStore(issueTable)
          .add(issue);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -101,8 +112,8 @@ export const addIssue = (issue: IIssue) =>
 export const deleteIssue = (iid: number) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("issue", "readwrite")
-         .objectStore("issue")
+         .transaction(issueTable, "readwrite")
+         .objectStore(issueTable)
          .delete(iid);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -111,8 +122,8 @@ export const deleteIssue = (iid: number) =>
 export const getBook = (bid: string) =>
    new Promise<IBook | undefined>((resolve, reject) => {
       const request = db
-         .transaction("book", "readonly")
-         .objectStore("book")
+         .transaction(bookTable, "readonly")
+         .objectStore(bookTable)
          .get(bid);
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result);
@@ -121,8 +132,8 @@ export const getBook = (bid: string) =>
 export const putBook = (book: IBook) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("book", "readwrite")
-         .objectStore("book")
+         .transaction(bookTable, "readwrite")
+         .objectStore(bookTable)
          .put(book);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -131,8 +142,8 @@ export const putBook = (book: IBook) =>
 export const deleteBook = (bid: string) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("book", "readwrite")
-         .objectStore("book")
+         .transaction(bookTable, "readwrite")
+         .objectStore(bookTable)
          .delete(bid);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -141,8 +152,8 @@ export const deleteBook = (bid: string) =>
 export const getBooks = () =>
    new Promise<Array<IBook>>((resolve, reject) => {
       const request = db
-         .transaction("book", "readonly")
-         .objectStore("book")
+         .transaction(bookTable, "readonly")
+         .objectStore(bookTable)
          .getAll();
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result);
@@ -153,23 +164,23 @@ export const syncBooks = (books: Array<IBook>) =>
       const bookMap = new Map<string, IBook>();
       for (const book of books) bookMap.set(book.bid, book);
       const deleted = new Set<string>();
-      const transaction = db.transaction("book", "readwrite");
+      const transaction = db.transaction(bookTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(deleted);
-      const bStore = transaction.objectStore("book");
+      const bStore = transaction.objectStore(bookTable);
       bStore.openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) {
             for (const [_, book] of bookMap) bStore.add(book);
             return;
          }
-         const cbook = cursor.value as IBook;
-         if (bookMap.has(cbook.bid)) {
-            const sbook = bookMap.get(cbook.bid)!;
-            if (sbook.checksum !== cbook.checksum) cursor.update(sbook);
-            bookMap.delete(cbook.bid);
+         const lbook = cursor.value as IBook;
+         if (bookMap.has(lbook.bid)) {
+            const sbook = bookMap.get(lbook.bid)!;
+            if (sbook.checksum !== lbook.checksum) cursor.update(sbook);
+            bookMap.delete(lbook.bid);
          } else {
-            deleted.add(cbook.bid);
+            deleted.add(lbook.bid);
             cursor.delete();
          }
          cursor.continue();
@@ -179,8 +190,8 @@ export const syncBooks = (books: Array<IBook>) =>
 export const getItem = (word: string) =>
    new Promise<IItem | undefined>((resolve, reject) => {
       const request = db
-         .transaction("item", "readonly")
-         .objectStore("item")
+         .transaction(itemTable, "readonly")
+         .objectStore(itemTable)
          .get(word);
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result);
@@ -189,8 +200,8 @@ export const getItem = (word: string) =>
 export const putItem = (item: IItem) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("item", "readwrite")
-         .objectStore("item")
+         .transaction(itemTable, "readwrite")
+         .objectStore(itemTable)
          .put(item);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -199,8 +210,8 @@ export const putItem = (item: IItem) =>
 export const deleteItem = (word: string) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("item", "readwrite")
-         .objectStore("item")
+         .transaction(itemTable, "readwrite")
+         .objectStore(itemTable)
          .delete(word);
       request.onerror = reject;
       request.onsuccess = () => resolve();
@@ -209,8 +220,8 @@ export const deleteItem = (word: string) =>
 export const getItems = (lastgte: number) =>
    new Promise<Array<IItem>>((resolve, reject) => {
       const request = db
-         .transaction("item", "readonly")
-         .objectStore("item")
+         .transaction(itemTable, "readonly")
+         .objectStore(itemTable)
          .index("last")
          .getAll(IDBKeyRange.lowerBound(lastgte));
       request.onerror = reject;
@@ -220,10 +231,10 @@ export const getItems = (lastgte: number) =>
 export const addTasks = (words: Iterable<string>) =>
    new Promise<void>((resolve, reject) => {
       const time = Date.now();
-      const transaction = db.transaction("item", "readwrite");
+      const transaction = db.transaction(itemTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
-      const iStore = transaction.objectStore("item");
+      const iStore = transaction.objectStore(itemTable);
       for (const word of words)
          iStore.get(word).onsuccess = (e) => {
             const item = (e.target as IDBRequest<IItem>).result;
@@ -235,10 +246,10 @@ export const syncTasks = (tasks: Iterable<ITask>) =>
    new Promise<void>((resolve, reject) => {
       const taskMap = new Map<string, ITask>();
       for (const task of tasks) taskMap.set(task.word, task);
-      const transaction = db.transaction("item", "readwrite");
+      const transaction = db.transaction(itemTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
-      const iStore = transaction.objectStore("item");
+      const iStore = transaction.objectStore(itemTable);
       iStore.openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) {
@@ -259,10 +270,10 @@ export const syncTasks = (tasks: Iterable<ITask>) =>
 export const updateDict = (dict: IDict) =>
    new Promise<IItem | undefined>((resolve, reject) => {
       let item: IItem;
-      const transaction = db.transaction("item", "readwrite");
+      const transaction = db.transaction(itemTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(item);
-      const iStore = transaction.objectStore("item");
+      const iStore = transaction.objectStore(itemTable);
       iStore.get(dict.word).onsuccess = (e1) => {
          item = (e1.target as IDBRequest<IItem>).result;
          if (item) {
@@ -275,11 +286,11 @@ export const updateDict = (dict: IDict) =>
 export const getEpisode = (filter?: (item: IItem) => boolean) =>
    new Promise<Array<IItem>>((resolve, reject) => {
       const result: Array<IItem> = [];
-      const transaction = db.transaction("item", "readonly");
+      const transaction = db.transaction(itemTable, "readonly");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(result);
       transaction
-         .objectStore("item")
+         .objectStore(itemTable)
          .index("next")
          .openCursor(IDBKeyRange.upperBound(Date.now()), "prev").onsuccess = (
          e,
@@ -301,10 +312,10 @@ export const getStats = (books: Array<IBook>) =>
          initStat(time, book.bid, book.disc),
       );
       const wordSets = books.map((book) => new Set<string>(book.content));
-      const transaction = db.transaction("item", "readonly");
+      const transaction = db.transaction(itemTable, "readonly");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve([tstat, ...stats]);
-      transaction.objectStore("item").openCursor().onsuccess = (e) => {
+      transaction.objectStore(itemTable).openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor)
             return stats.forEach(
@@ -324,10 +335,10 @@ export const getStats = (books: Array<IBook>) =>
 export const studied = (word: string, level?: number) =>
    new Promise<IItem>((resolve, reject) => {
       let item: IItem;
-      const transaction = db.transaction("item", "readwrite");
+      const transaction = db.transaction(itemTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(item);
-      const iStore = transaction.objectStore("item");
+      const iStore = transaction.objectStore(itemTable);
       iStore.get(word).onsuccess = (e2) => {
          const item1 = (e2.target as IDBRequest<IItem>).result;
          if (item1) {
@@ -340,41 +351,56 @@ export const studied = (word: string, level?: number) =>
       };
    });
 
-export const addSentence = (sentence: ISentence) =>
+export const addSti = (st: IStItem) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("sentence", "readwrite")
-         .objectStore("sentence")
-         .add(sentence);
+         .transaction(stiTable, "readwrite")
+         .objectStore(stiTable)
+         .add(st);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const putSentence = (sentence: ISentence) =>
+export const putSti = (st: IStItem) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("sentence", "readwrite")
-         .objectStore("sentence")
-         .put(sentence);
+         .transaction(stiTable, "readwrite")
+         .objectStore(stiTable)
+         .put(st);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const deleteSentence = (sentence: string) =>
+export const deleteSti = (sentence: string) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction("sentence", "readwrite")
-         .objectStore("sentence")
+         .transaction(stiTable, "readwrite")
+         .objectStore(stiTable)
          .delete(sentence);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const getSentences = (lastgte: number) =>
-   new Promise<Array<ISentence>>((resolve, reject) => {
+export const getNoidStis = () =>
+   new Promise<Array<IStItem>>((resolve, reject) => {
+      const results: Array<IStItem> = [];
+      const transaction = db.transaction(stiTable, "readonly");
+      transaction.onerror = reject;
+      transaction.oncomplete = () => resolve(results);
+      transaction.objectStore(stiTable).openCursor().onsuccess = (e) => {
+         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+         if (!cursor) return;
+         const st = cursor.value as IStItem;
+         if (!st.id) results.push(st);
+         cursor.continue();
+      };
+   });
+
+export const getStis = (lastgte: number) =>
+   new Promise<Array<IStItem>>((resolve, reject) => {
       const request = db
-         .transaction("sentence", "readonly")
-         .objectStore("sentence")
+         .transaction(stiTable, "readonly")
+         .objectStore(stiTable)
          .index("last")
          .getAll(IDBKeyRange.lowerBound(lastgte));
       request.onerror = reject;
@@ -382,42 +408,48 @@ export const getSentences = (lastgte: number) =>
    });
 
 export const getStEpisode = () =>
-   new Promise<ISentence | undefined>((resolve, reject) => {
-      let result: ISentence | undefined;
-      const transaction = db.transaction("sentence", "readonly");
+   new Promise<Array<IStItem>>((resolve, reject) => {
+      const result: Array<IStItem> = [];
+      const transaction = db.transaction(stiTable, "readonly");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(result);
       transaction
-         .objectStore("sentence")
+         .objectStore(stiTable)
          .index("next")
          .openCursor(IDBKeyRange.upperBound(Date.now()), "prev").onsuccess = (
          e,
       ) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) return;
-         return (result = cursor.value);
+         result.push(cursor.value);
+         if (result.length > 1) return;
+         cursor.continue();
       };
    });
 
-export const mergeTraceToSentences = (sentences: Iterable<ISentence>) =>
+export const syncSts = (traces: Iterable<ITrace>) =>
    new Promise<void>((resolve, reject) => {
-      const stMap = new Map<string, ISentence>();
-      for (const st of sentences) stMap.set(st.sentence, st);
-      const transaction = db.transaction("sentence", "readwrite");
+      const traceMap = new Map<string, ITrace>();
+      for (const trace of traces) if (trace.id) traceMap.set(trace.id, trace);
+      const transaction = db.transaction(stiTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
-      const sStore = transaction.objectStore("sentence");
+      const sStore = transaction.objectStore(stiTable);
       sStore.openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) {
-            for (const [_, st] of stMap) sStore.add(st);
+            for (const [_, st] of traceMap) sStore.add(st);
             return;
          }
-         const sst = cursor.value as ISentence;
-         if (stMap.has(sst.sentence)) {
-            const st = stMap.get(sst.sentence)!;
-            if (st.last > sst.last) cursor.update(sentenceMergeTrace(sst, st));
-            stMap.delete(sst.sentence);
+         const lsti = cursor.value as ITrace;
+         if (!lsti.id) return cursor.continue();
+         if (traceMap.has(lsti.id)) {
+            const trace = traceMap.get(lsti.id)!;
+            if (trace.last > lsti.last) {
+               mergeTrace(lsti, trace);
+               cursor.update(lsti);
+            }
+            traceMap.delete(lsti.id);
          } else cursor.delete();
          cursor.continue();
       };

@@ -77,7 +77,7 @@ export default () => {
       setCItem({ ...item });
    };
    const handleReportIssue = async () => {
-      await mem.submitIssue(citem()!.word, "1");
+      await mem.submitDictIssue(citem()!.word);
       showTips("Submitted");
    };
    const handleDelete = async () => {
@@ -124,7 +124,7 @@ export default () => {
       const wordSet = (await mem.getBook(book.bid))?.content as Set<string>;
       if (wordSet?.has(word)) return showTips("已包含");
       const [_, bookName] = splitID(book.bid);
-      const [status] = await mem.uploadBook(bookName, word);
+      const [status] = await mem.uploadBook(word, { name: bookName });
       showTips(status === STATUS_CODE.OK ? "添加成功" : "添加失败");
       wordSet?.add(word);
       vocabulary().add(word);

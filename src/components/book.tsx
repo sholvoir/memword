@@ -29,10 +29,12 @@ export default () => {
       setBName((bn) => bn.replaceAll("/", "-"));
       try {
          const [status, result] = await mem.uploadBook(
-            bname(),
             words(),
-            disc(),
-            isPublic(),
+            {
+               name: bname(),
+               disc: disc(),
+               public: isPublic() ? "1" : undefined,
+            },
             replace(),
          );
          switch (status) {

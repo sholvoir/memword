@@ -89,9 +89,10 @@ export const afterLogin = async () => {
    await totalStats();
    await syncSetting();
    await mem.syncTasks();
-   await mem.syncSentences();
+   await mem.syncStis();
    totalStats();
    initLemma();
    initVocabulary();
    syncBooks();
+   mem.submitIssues();
 };

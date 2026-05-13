@@ -5,7 +5,7 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
-import { sentenceToWords } from "../lib/isentence.ts";
+import { sentenceToWords } from "../lib/ist-item.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog.tsx";
@@ -53,7 +53,7 @@ export default () => {
       else showTips("翻译失败");
    };
    const handleAddClick = async () => {
-      await mem.addSentence(sentence().trim(), trans());
+      await mem.addSti(sentence().trim(), trans());
       setSentence("");
       setWord("");
       setTrans("");

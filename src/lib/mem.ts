@@ -12,8 +12,9 @@ import {
    studyTask,
 } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
-import { type ISentence, newSentence } from "./isentence.ts";
+import { newSti, stiMergeSentence } from "./ist-item.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
+import { toTrace } from "./itrace.ts";
 import type { IUser } from "./iuser.ts";
 import * as bsrv from "./server-book.ts";
 import * as dsrv from "./server-dict.ts";
@@ -69,35 +70,70 @@ export const getVocabularyChecksum = async () =>
    (await dsrv.vocabulary_checksum_get())?.checksum;
 export const getVocabulary = dsrv.vocabulary_get;
 
-export const getServerCachedTrans = msrv.sentence_get;
+export const getServerCachedTrans = msrv.sentence_id_get;
 export const baiduTranslate = msrv.trans_post;
 
-export const setLocalSentence = idb.putSentence;
-export const deleteLocalSentence = idb.deleteSentence;
-export const deleteSentence = msrv.sentence_delete;
-export const getSentenceEpisode = idb.getStEpisode;
-export const uploadSentences = (sentences: Array<ISentence>) =>
-   msrv.sentence_post(sentences);
-export const syncSentences = async () => {
+export const setLocalSt = idb.putSti;
+export const deleteLocalSt = idb.deleteSti;
+export const deleteSt = msrv.sentence_delete;
+export const getStEpisode = async () => {
+   const [f, s] = await idb.getStEpisode();
+   if (s && (!s.sentence || !s.trans))
+      msrv.sentence_id_get(s.id!).then((sentence) => {
+         if (sentence) {
+            stiMergeSentence(s, sentence);
+            idb.putSti(s);
+         }
+      });
+   if (f && (!f.sentence || !f.trans)) {
+      const sentence = await msrv.sentence_id_get(f.id!);
+      if (sentence) {
+         stiMergeSentence(f, sentence);
+         idb.putSti(f);
+      }
+      return f;
+   }
+   return f;
+};
+export const uploadTracesToSts = msrv.sentence_patch;
+export const syncStis = async () => {
    const thisTime = Date.now();
    const lastTime = (await idb.getMeta<number>("_st-time")) ?? 1;
-   const sts = await idb.getSentences(lastTime);
-   for (const st of sts) delete st.trans;
-   const resp = await msrv.sentence_post(sts, "1");
-   if (!resp.ok)
-      return console.error("Network Error: get sync sentences data error.");
-   const nsts = await resp.json();
-   await idb.mergeTraceToSentences(nsts);
+   const noidStis = await idb.getNoidStis();
+   for (const sti of noidStis) {
+      const resp = await msrv.sentence_post(sti);
+      if (resp.ok) {
+         sti.id = await resp.text();
+         await idb.putSti(sti);
+      } else if (resp.status === STATUS_CODE.Conflict) {
+         await idb.deleteSti(sti.sentence);
+      }
+   }
+   const traces = (await idb.getStis(lastTime)).map(toTrace);
+   if (traces.length) {
+      const resp = await msrv.sentence_patch(traces);
+      if (!resp.ok)
+         return console.error("Network Error: sentences update error.");
+   }
    await idb.setMeta("_st-time", thisTime);
+   const nsts = await msrv.sentence_get();
+   if (nsts) await idb.syncSts(nsts);
 };
-export const addSentence = async (sentence: string, trans: string) => {
-   const st = newSentence(sentence, trans);
-   await idb.addSentence(st);
-   await msrv.sentence_post([st]);
+export const addSti = async (sentence: string, trans: string) => {
+   const st = newSti(sentence, trans);
+   const resp = await msrv.sentence_post(st);
+   if (resp.ok) {
+      const id = await resp.text();
+      st.id = id;
+      idb.addSti(st);
+      return st;
+   } else if (resp.status !== STATUS_CODE.Conflict) {
+      await idb.putSti(st);
+      return st;
+   }
 };
 
-export const uploadTasks = (items: Array<IItem>) =>
-   msrv.task_patch(items.map(item2task));
+export const uploadTasks = msrv.task_patch;
 
 export const updateDict = async (item: IItem) => {
    const dict = await dsrv.dict_get(item.word);
@@ -182,7 +218,7 @@ export const addTasks = async (bid: string) => {
 export const syncTasks = async () => {
    try {
       const thisTime = Date.now();
-      const lastTime = ((await idb.getMeta("_sync-time")) ?? 1) as number;
+      const lastTime = (await idb.getMeta<number>("_sync-time")) ?? 1;
       const tasks = (await idb.getItems(lastTime)).map(item2task);
       if (tasks.length) {
          const resp = await msrv.task_patch(tasks);
@@ -213,15 +249,30 @@ export const totalStats = async (bids: Array<string>) => {
    return { format: statsFormat, stats: await idb.getStats(books) } as IStats;
 };
 
-export const submitIssue = async (issue: string, d?: "1") => {
-   await idb.addIssue({ issue, d });
-   (async () => {
-      for (const issue of await idb.getIssues()) {
-         const res = await msrv.issue_post(issue);
-         if (res.ok || res.status === STATUS_CODE.Conflict)
-            await idb.deleteIssue(issue.iid!);
-      }
-   })();
+export const submitDictIssue = async (issue: string) => {
+   try {
+      const res = await msrv.dictIssue_post(issue);
+      if (res.ok || res.status === STATUS_CODE.Conflict) return;
+      throw new Error();
+   } catch {
+      await idb.addIssue({ issue, d: "1" });
+   }
+};
+export const submitIssue = async (issue: string) => {
+   try {
+      if (!(await msrv.issue_post(issue)).ok) throw new Error();
+   } catch {
+      await idb.addIssue({ issue });
+   }
+};
+export const submitIssues = async () => {
+   for (const issue of await idb.getIssues()) {
+      const res = await (issue.d ? msrv.dictIssue_post : msrv.issue_post)(
+         issue.issue,
+      );
+      if (res.ok || res.status === STATUS_CODE.Conflict)
+         await idb.deleteIssue(issue.iid!);
+   }
 };
 
 export const getLocalBooks = idb.getBooks;
@@ -245,15 +296,11 @@ export const getBook = async (bid: string) => {
    return book;
 };
 export const uploadBook = async (
-   name: string,
    words: string,
-   disc?: string,
-   isPublic?: boolean,
+   option: { name: string; disc?: string; public?: "1" },
    replace?: boolean,
 ): Promise<[number, Record<string, string[]>?]> => {
-   const res = await (replace
-      ? msrv.book_put(name, words, disc, isPublic ? "1" : undefined)
-      : msrv.book_post(name, words, disc, isPublic ? "1" : undefined));
+   const res = await (replace ? msrv.book_put : msrv.book_patch)(words, option);
    switch (res.status) {
       case STATUS_CODE.NotAcceptable:
          return [res.status, await res.json()];

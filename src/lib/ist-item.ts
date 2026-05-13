@@ -1,8 +1,9 @@
 import type { ISentence } from "#srv/lib/isentence.ts";
-import type { ITrace } from "#srv/lib/itrace.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
+import type { ITrace } from "./itrace.ts";
 
 export type { ISentence };
+export type IStItem = ISentence & ITrace;
 
 export const ST_MAX_LEVEL = 10;
 
@@ -51,7 +52,7 @@ export const sentenceToWords = (
    return { words };
 };
 
-export const newSentence = (sentence: string, trans: string): ISentence => {
+export const newSti = (sentence: string, trans: string): IStItem => {
    const time = Date.now();
    return {
       sentence,
@@ -62,7 +63,7 @@ export const newSentence = (sentence: string, trans: string): ISentence => {
    };
 };
 
-export const studySentence = (st: ISentence, know?: boolean): ISentence => {
+export const studySti = (st: IStItem, know?: boolean): IStItem => {
    let level = know ? ++st.level : (st.level = 1);
    if (st.level > ST_MAX_LEVEL) st.level = level = ST_MAX_LEVEL;
    const now = Date.now();
@@ -74,9 +75,8 @@ export const studySentence = (st: ISentence, know?: boolean): ISentence => {
    return st;
 };
 
-export const sentenceMergeTrace = (st: ISentence, trace: ITrace) => {
-   st.last = trace.last;
-   st.next = trace.next;
-   st.level = trace.level;
+export const stiMergeSentence = (st: IStItem, sentence: ISentence) => {
+   st.sentence = sentence.sentence;
+   st.trans = sentence.trans;
    return st;
 };

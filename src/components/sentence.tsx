@@ -1,11 +1,13 @@
 import BButton from "@sholvoir/solid-components/button-base";
 import { createSignal, onMount, Show } from "solid-js";
-import type { ISentence } from "#srv/lib/isentence.ts";
+import { item2task } from "../lib/iitem.ts";
 import {
+   type IStItem,
    ST_MAX_LEVEL,
    sentenceToWords,
-   studySentence,
-} from "../lib/isentence.ts";
+   studySti,
+} from "../lib/ist-item.ts";
+import { toTrace } from "../lib/itrace.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
@@ -13,53 +15,47 @@ import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
 export default () => {
-   const [sentence, setSentence] = createSignal<ISentence>();
+   const [st, setSt] = createSignal<IStItem>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
 
    const studyNext = async () => {
-      const st = await mem.getSentenceEpisode();
+      const st = await mem.getStEpisode();
       if (!st) {
          showTips("No More Sentence!");
-         setSentence();
+         setSt();
          setPhaseAnswer(false);
       } else {
-         if (!st.trans) {
-            let t = await mem.getServerCachedTrans(st.sentence);
-            if (!t) t = await mem.baiduTranslate(st.sentence);
-            if (t) st.trans = t;
-         }
-         setSentence(st);
+         setSt(st);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
          speak(st.sentence);
       }
    };
    const handleIKnown = async (know?: boolean) => {
-      if (sentence()) {
-         const st = studySentence(sentence()!, know);
-         if (st.level === ST_MAX_LEVEL) {
-            await mem.deleteLocalSentence(st.sentence);
-            mem.deleteSentence(st.sentence);
+      if (st()) {
+         const cst = studySti(st()!, know);
+         if (cst.level === ST_MAX_LEVEL) {
+            await mem.deleteLocalSt(cst.sentence);
+            mem.deleteSt([cst.id!]);
          } else {
-            await mem.setLocalSentence(st);
-            delete st.trans;
-            mem.uploadSentences([st]);
+            await mem.setLocalSt(cst);
+            mem.uploadTracesToSts([toTrace(cst)]);
          }
          if (know) {
             const items = [];
-            const result = sentenceToWords(vocabulary(), lemma(), st.sentence);
+            const result = sentenceToWords(vocabulary(), lemma(), cst.sentence);
             if (result.words)
                for (const word of result.words) {
                   items.push(await mem.studyWord(word));
                }
-            if (items.length) mem.uploadTasks(items);
+            if (items.length) mem.uploadTasks(items.map(item2task));
          }
       }
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak(sentence()?.sentence);
+      speak(st()?.sentence);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -83,12 +79,11 @@ export default () => {
       }
    };
    const handleDelete = async () => {
-      const st = sentence()?.sentence;
-      if (st) {
+      if (st()) {
          try {
-            await mem.deleteLocalSentence(st);
+            await mem.deleteLocalSt(st()!.sentence);
             showTips("删除成功");
-            mem.deleteSentence(st);
+            mem.deleteSt([st()!.id!]);
             studyNext();
          } catch {
             showTips("删除失败");
@@ -121,10 +116,10 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => speak(sentence()?.sentence)}
+                  onClick={() => speak(st()?.sentence)}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
-               <div class="text-lg">{sentence()?.level}</div>
+               <div class="text-lg">{st()?.level}</div>
             </div>
          }
          onClick={handleClick}
@@ -133,10 +128,10 @@ export default () => {
          beforeAnimation={handleIKnown}
          afterAnimation={studyNext}
       >
-         <Show when={sentence()}>
-            <div>{sentence()!.sentence}</div>
+         <Show when={st()}>
+            <div>{st()!.sentence}</div>
             <Show when={isPhaseAnswer()}>
-               <div class="grow">{sentence()!.trans}</div>
+               <div class="grow">{st()!.trans}</div>
             </Show>
          </Show>
       </Dialog>
