@@ -35,8 +35,10 @@ const db: IDBDatabase = await new Promise((resolve, reject) => {
    const request = indexedDB.open("memword", 3);
    request.onerror = reject;
    request.onsuccess = () => resolve(request.result);
-   request.onupgradeneeded = () => {
+   request.onupgradeneeded = (e) => {
       const d = request.result;
+      if (e.oldVersion < 2)
+         for (const store of d.objectStoreNames) d.deleteObjectStore(store);
       if (!d.objectStoreNames.contains(metaTable))
          d.createObjectStore(metaTable, { keyPath: "key" });
       if (!d.objectStoreNames.contains(bookTable))

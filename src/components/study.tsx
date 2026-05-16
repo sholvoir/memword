@@ -181,6 +181,7 @@ export default () => {
                   class="icon--material-symbols icon--material-symbols--delete-outline text-orange-500"
                   disabled={!isPhaseAnswer()}
                />
+               <div class="text-lg w-3">{citem()?.level}</div>
                <BButton
                   onClick={playSound}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
@@ -207,14 +208,13 @@ export default () => {
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
                   disabled={!isPhaseAnswer()}
                ></BButton>
-               <div class="text-lg">{citem()?.level}</div>
                <Show when={isShowAddToBookMenu()}>
                   <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
                      <For each={myBooks()}>
                         {(wl) => (
                            <>
                               <div />
-                              <menu onClick={() => handleAddToBook(wl)}>
+                              <menu onClick={[handleAddToBook, wl]}>
                                  {wl.disc ?? wl.bid}
                               </menu>
                            </>
