@@ -19,6 +19,7 @@ import { go, showTips, user } from "./provider-g.ts";
 import { bid, blevel, search, setSearch } from "./provider-study.ts";
 import { setting, totalStats, vocabulary } from "./provider-user.ts";
 import Scard from "./scard.tsx";
+import "./menu.css";
 
 export default () => {
    const [citem, setCItem] = createSignal<IItem>();
@@ -209,20 +210,19 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                ></BButton>
                <Show when={isShowAddToBookMenu()}>
-                  <div class="menu absolute top-full right-[36px] text-lg text-right bg-(--bg-body) z-1">
+                  <div class="menu absolute top-full right-2 text-lg text-right bg-(--bg-body) z-1 border rounded-md">
                      <For each={myBooks()}>
-                        {(wl) => (
+                        {(wl, i) => (
                            <>
-                              <div />
-                              <menu onClick={[handleAddToBook, wl]}>
+                              <BButton onClick={[handleAddToBook, wl]}>
                                  {wl.disc ?? wl.bid}
-                              </menu>
+                              </BButton>
+                              <Show when={i() < (myBooks()?.length ?? 0) - 1}>
+                                 <div />
+                              </Show>
                            </>
                         )}
                      </For>
-                     <Show when={myBooks()?.length}>
-                        <div />
-                     </Show>
                   </div>
                </Show>
             </div>

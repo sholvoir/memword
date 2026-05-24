@@ -1,5 +1,5 @@
 .menu {
-	& > menu {
+	& > button {
 		cursor: pointer;
 		padding-inline: 8px;
 	}
