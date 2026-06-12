@@ -4,7 +4,7 @@ import { splitID } from "../lib/ibook.ts";
 import { aggrToBAggr, type IStat } from "../lib/istat.ts";
 import Dialog from "./dialog.tsx";
 import { go } from "./provider-g.ts";
-import { setBid } from "./provider-study.ts";
+import { goStudy } from "./provider-study.ts";
 import { stats } from "./provider-user.ts";
 import Stat from "./stat.tsx";
 
@@ -30,13 +30,13 @@ export default () => (
          <div
             class="tail shrink-0 px-4 pt-2 pb-5 flex gap-2 justify-between [&>button]:grow
 		            [&>button>span]:align-[-30%] [&>button]:min-w-21 [&>button>span]:text-4xl
-		            font-bold overflow-x-auto [scrollbar-width:none]"
+		            font-bold overflow-x-auto scrollbar-none"
          >
             <Button onClick={() => go("#trans")}>
                <span class="icon--hugeicons icon--hugeicons--translate"></span>{" "}
                翻译
             </Button>
-            <Button onClick={() => (setBid(), go("#study"))}>
+            <Button onClick={() => goStudy()}>
                <span class="icon--hugeicons icon--hugeicons--online-learning-01"></span>{" "}
                单词
             </Button>

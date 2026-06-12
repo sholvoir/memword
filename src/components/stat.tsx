@@ -1,9 +1,9 @@
 import { For } from "solid-js";
 import { BLevelName, type TBAggr } from "../lib/istat.ts";
-import { go } from "./provider-g.ts";
-import { setBid } from "./provider-study.ts";
+import { goStudy } from "./provider-study.ts";
 
 const BlevelBar = (props: {
+   bid: string;
    blevel: number;
    totals: TBAggr;
    tasks: TBAggr;
@@ -11,7 +11,10 @@ const BlevelBar = (props: {
 }) => (
    <>
       <div class="text-left">{BLevelName[props.blevel]}</div>
-      <div class="relative bg-(--bg-title) h-6 py-1 w-full hover:cursor-pointer">
+      <div
+         class="relative bg-(--bg-title) h-6 py-1 w-full hover:cursor-pointer"
+         onClick={() => goStudy(props.bid, props.blevel)}
+      >
          <div
             class="my-auto h-4 bg-slate-400"
             style={{
@@ -53,7 +56,7 @@ export default (props: {
          <button
             type="button"
             class="hover:cursor-pointer hover:underline"
-            onClick={() => (setBid(props.bid), go("#study"))}
+            onClick={() => goStudy(props.bid)}
          >
             {props.title}
          </button>
@@ -61,6 +64,7 @@ export default (props: {
       <For each={[0, 1, 2, 3, 4, 5]}>
          {(blevel) => (
             <BlevelBar
+               bid={props.bid}
                blevel={blevel}
                totals={props.totals}
                tasks={props.tasks}
