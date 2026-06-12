@@ -10,7 +10,7 @@ import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog.tsx";
 import { go, showTips } from "./provider-g.ts";
-import { goStudy, setSearch } from "./provider-study.ts";
+import { goStudy } from "./provider-study.ts";
 import { lemma, vocabulary } from "./provider-user.ts";
 
 const [word, setWord] = createSignal("");
@@ -44,8 +44,7 @@ export default () => {
    const handleDictClick = async () => {
       const text = word().trim();
       if (!text) return;
-      setSearch(text);
-      goStudy();
+      goStudy(undefined, undefined, text);
    };
    const handleTransClick = async () => {
       const t = await mem.baiduTranslate(sentence());

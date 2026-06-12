@@ -16,7 +16,7 @@ import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
 import { go, showTips, user } from "./provider-g.ts";
-import { bid, blevel, search, setSearch } from "./provider-study.ts";
+import { bid, blevel, search } from "./provider-study.ts";
 import { setting, totalStats, vocabulary } from "./provider-user.ts";
 import Scard from "./scard.tsx";
 import "./menu.css";
@@ -41,10 +41,8 @@ export default () => {
       else speak(citem()?.word);
    };
    const finish = () => {
-      if (search()) {
-         setSearch();
-         go("#trans");
-      } else {
+      if (search()) go("#trans");
+      else {
          totalStats();
          go("#home");
       }
@@ -57,14 +55,14 @@ export default () => {
          ]);
    };
    const studyNext = async () => {
-      if (search()) return setSearch(), go("#trans");
+      if (search()) return go("#trans");
       batch(() => {
          setSprint((s) => s + 1);
          setCItem(undefined);
          setPhaseAnswer(false);
          setShowTrans(false);
       });
-      const item = await mem.getEpisode(bid());
+      const item = await mem.getEpisode(bid(), blevel());
       if (!item) return totalStats(), go("#home");
       batch(() => {
          setCItem(item);

@@ -1,14 +1,15 @@
 import { createSignal } from "solid-js";
 import { go } from "./provider-g.ts";
 
-export const [search, setSearch] = createSignal<string>();
+const [search, setSearch] = createSignal<string>();
 const [bid, setBid] = createSignal<string>();
 const [blevel, setBlevel] = createSignal<number>();
 
-export { bid, blevel };
+export { search, bid, blevel };
 
-export const goStudy = (bid?: string, blevel?: number) => {
+export const goStudy = (bid?: string, blevel?: number, search?: string) => {
    setBid(bid);
    setBlevel(blevel);
+   setSearch(search);
    go("#study");
 };
