@@ -113,7 +113,7 @@ export default () => {
             binding={[showTrans, setShowTrans]}
             label="Always Show Trans"
          />
-         <fieldset class="border rounded grow overflow-y-auto px-2">
+         <fieldset class="border rounded shrink-0 grow overflow-y-auto px-2">
             <legend on:click={toggleShrink}>我的词书</legend>
             <List
                cindex={[myIndex, setMyIndex]}
@@ -177,7 +177,7 @@ export default () => {
                删除订阅
             </Button>
          </div>
-         <fieldset class="border rounded grow overflow-y-auto px-2">
+         <fieldset class="border rounded shrink-0 grow overflow-y-auto px-2">
             <legend on:click={toggleShrink}>我订阅的词书</legend>
             <List
                class="px-2"
