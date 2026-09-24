@@ -52,9 +52,10 @@ export const itemMergeDict = (item: IItem, dict: IDict) => {
 };
 
 export const studyTask = (task: ITask, level?: number): ITask => {
-   if (level === undefined) level = ++task.level;
+   if (level === undefined) level = task.level + 1;
    if (level > TASK_MAX_LEVEL) task.level = level = TASK_MAX_LEVEL;
-   if (level <= 0) task.level = level = 1;
+   else if (level <= 0) task.level = level = 1;
+   else task.level = level;
    const now = Date.now();
    task.last = now;
    task.next =
