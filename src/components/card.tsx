@@ -1,13 +1,13 @@
 import BButton from "@sholvoir/solid-components/button-base";
 import { createSignal, onMount, Show } from "solid-js";
-import { item2task } from "../lib/iitem.ts";
 import {
-   type IStItem,
+   type ICard,
    ST_MAX_LEVEL,
    sentenceToWords,
-   studySti,
-} from "../lib/ist-item.ts";
-import { toTrace } from "../lib/itrace.ts";
+   studyCard,
+} from "../lib/icard.ts";
+import { toTask } from "../lib/iitem.ts";
+import { toIDTrace } from "../lib/itrace.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
@@ -15,7 +15,7 @@ import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
 export default () => {
-   const [st, setSt] = createSignal<IStItem>();
+   const [st, setSt] = createSignal<ICard>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
 
@@ -34,7 +34,7 @@ export default () => {
    };
    const handleIKnown = async (know?: boolean) => {
       if (st()) {
-         const cst = studySti(st()!, know);
+         const cst = studyCard(st()!, know);
          if (cst.level === ST_MAX_LEVEL) {
             await mem.deleteLocalSt(cst.sentence);
             mem.deleteSt([cst.id!]);
@@ -49,7 +49,7 @@ export default () => {
                for (const word of result.words) {
                   items.push(await mem.studyWord(word));
                }
-            if (items.length) mem.uploadTasks(items.map(item2task));
+            if (items.length) mem.uploadTasks(items.map(toTask));
          }
       }
    };

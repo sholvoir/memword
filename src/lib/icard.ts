@@ -1,9 +1,7 @@
-import type { ISentence } from "@sholvoir/memword-server/src/lib/isentence.ts";
+import type { ICard } from "@sholvoir/memword-server/src/lib/icard.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
-import type { ITrace } from "./itrace.ts";
 
-export type { ISentence };
-export type IStItem = ISentence & ITrace;
+export type { ICard };
 
 export const ST_MAX_LEVEL = 10;
 
@@ -52,18 +50,17 @@ export const sentenceToWords = (
    return { words };
 };
 
-export const newSti = (sentence: string, trans: string): IStItem => {
+export const newCard = (card: string): Omit<ICard, "id"> => {
    const time = Date.now();
    return {
-      sentence,
-      trans,
+      card,
       last: time,
       next: time,
       level: 1,
    };
 };
 
-export const studySti = (st: IStItem, know?: boolean): IStItem => {
+export const studyCard = (st: ICard, know?: boolean): ICard => {
    let level = know ? ++st.level : (st.level = 1);
    if (st.level > ST_MAX_LEVEL) st.level = level = ST_MAX_LEVEL;
    const now = Date.now();
@@ -72,11 +69,5 @@ export const studySti = (st: IStItem, know?: boolean): IStItem => {
       level >= ST_MAX_LEVEL
          ? TASK_MAX_NEXT
          : now + Math.round(134848 * level ** 3 * 1.5 ** level);
-   return st;
-};
-
-export const stiMergeSentence = (st: IStItem, sentence: ISentence) => {
-   st.sentence = sentence.sentence;
-   st.trans = sentence.trans;
    return st;
 };

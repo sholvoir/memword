@@ -92,7 +92,7 @@ export const afterLogin = async () => {
    await totalStats();
    await syncSetting();
    await mem.syncTasks();
-   await mem.syncStis();
+   await mem.syncCards();
    totalStats();
    initLemma();
    initVocabulary();

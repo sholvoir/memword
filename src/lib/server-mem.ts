@@ -8,8 +8,8 @@ import {
 import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import type { ITask } from "../lib/iitem.ts";
 import type { IBook } from "./ibook.ts";
-import type { ISentence, IStItem } from "./ist-item.ts";
-import type { ITrace } from "./itrace.ts";
+import type { ICard } from "./icard.ts";
+import type { IIDTrace } from "./itrace.ts";
 import type { IUser } from "./iuser.ts";
 
 const API_BASE = "/api/v2";
@@ -42,16 +42,14 @@ export const issue_post = (issue: string) =>
 export const dictIssue_post = (issue: string) =>
    fetch(`${API_BASE}/dict-issue`, textInit(issue));
 
-export const sentence_get = () =>
-   getJson<Array<ITrace>>(`${API_BASE}/sentence`);
-export const sentence_patch = (traces: Array<ITrace>) =>
-   fetch(`${API_BASE}/sentence`, jsonInit(traces, "PATCH"));
-export const sentence_delete = (ids: Array<string>) =>
-   fetch(`${API_BASE}/sentence`, jsonInit(ids, "DELETE"));
-export const sentence_post = (st: IStItem) =>
-   fetch(`${API_BASE}/sentence`, jsonInit(st, "POST"));
-export const sentence_id_get = (id: string) =>
-   getJson<ISentence>(`${API_BASE}/sentence/${id}`);
+export const card_get = () => getJson<Array<IIDTrace>>(`${API_BASE}/card`);
+export const card_patch = (traces: Array<IIDTrace>) =>
+   fetch(`${API_BASE}/card`, jsonInit(traces, "PATCH"));
+export const card_delete = (ids: Array<string>) =>
+   fetch(`${API_BASE}/card`, jsonInit(ids, "DELETE"));
+export const card_post = (st: ICard) =>
+   fetch(`${API_BASE}/card`, jsonInit(st, "POST"));
+export const card_id_get = (id: string) => getText(`${API_BASE}/card/${id}`);
 
 export const setting_post = (setting: ISetting) =>
    getJson<ISetting>(`${API_BASE}/setting`, jsonInit(setting));

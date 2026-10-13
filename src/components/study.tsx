@@ -10,7 +10,7 @@ import {
    Show,
 } from "solid-js";
 import { type IBook, splitID } from "../lib/ibook.ts";
-import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
+import { type IItem, TASK_MAX_LEVEL, toTask } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
@@ -66,9 +66,7 @@ export default () => {
 
    const handleIKnown = async (level?: number) => {
       if (citem())
-         mem.uploadTasks([
-            item2task(await mem.studyWord(citem()!.word, level)),
-         ]);
+         mem.uploadTasks([toTask(await mem.studyWord(citem()!.word, level))]);
    };
    const studyNext = async () => {
       if (search()) return go("#trans");

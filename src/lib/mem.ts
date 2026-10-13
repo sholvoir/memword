@@ -2,18 +2,18 @@ import { STATUS_CODE } from "@sholvoir/generic/http";
 import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import { parse } from "yaml";
 import { type IBook, splitID } from "../lib/ibook.ts";
+import { newCard } from "./icard.ts";
 import type { TDialog } from "./idialog.ts";
 import {
    type IItem,
-   item2task,
    itemMergeDict,
    newItem,
    studyTask,
+   toTask,
 } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
-import { newSti, stiMergeSentence } from "./ist-item.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
-import { toTrace } from "./itrace.ts";
+import { toIDTrace } from "./itrace.ts";
 import type { IUser } from "./iuser.ts";
 import * as bsrv from "./server-book.ts";
 import * as dsrv from "./server-dict.ts";
@@ -69,52 +69,51 @@ export const getVocabularyChecksum = async () =>
    (await dsrv.vocabulary_checksum_get())?.checksum;
 export const getVocabulary = dsrv.vocabulary_get;
 
-export const getServerCachedTrans = msrv.sentence_id_get;
 export const baiduTranslate = msrv.trans_post;
 
-export const setLocalSt = idb.putSti;
-export const deleteLocalSt = idb.deleteSti;
-export const deleteSt = msrv.sentence_delete;
+export const setLocalSt = idb.putCard;
+export const deleteLocalSt = idb.deleteCard;
+export const deleteSt = msrv.card_delete;
 export const getStEpisode = async () => {
-   const [f, s] = await idb.getStEpisode();
-   if (s && (!s.sentence || !s.trans))
-      msrv.sentence_id_get(s.id!).then((sentence) => {
+   const [f, s] = await idb.getCardEpisode();
+   if (s && !s.card)
+      msrv.card_id_get(s.id).then((sentence) => {
          if (sentence) {
-            stiMergeSentence(s, sentence);
-            idb.putSti(s);
+            s.card = sentence;
+            idb.putCard(s);
          }
       });
-   if (f && (!f.sentence || !f.trans)) {
-      const sentence = await msrv.sentence_id_get(f.id!);
+   if (f && !f.card) {
+      const sentence = await msrv.card_id_get(f.id);
       if (sentence) {
-         stiMergeSentence(f, sentence);
-         idb.putSti(f);
+         f.card = sentence;
+         idb.putCard(f);
       }
       return f;
    }
    return f;
 };
-export const uploadTracesToSts = msrv.sentence_patch;
-export const syncStis = async () => {
+export const uploadTracesToSts = msrv.card_patch;
+export const syncCards = async () => {
    const thisTime = Date.now();
    const lastTime = (await idb.getMeta<number>("_st-time")) ?? 1;
-   const traces = (await idb.getStis(lastTime)).map(toTrace);
+   const traces = (await idb.getCards(lastTime)).map(toIDTrace);
    if (traces.length) {
-      const resp = await msrv.sentence_patch(traces);
+      const resp = await msrv.card_patch(traces);
       if (!resp.ok)
          return console.error("Network Error: sentences update error.");
    }
    await idb.setMeta("_st-time", thisTime);
-   const nsts = await msrv.sentence_get();
-   if (nsts) await idb.syncSts(nsts);
+   const nsts = await msrv.card_get();
+   if (nsts) await idb.syncCards(nsts);
 };
 export const addSti = async (sentence: string, trans: string) => {
-   const st = newSti(sentence, trans);
-   const resp = await msrv.sentence_post(st);
+   const st = newCard(sentence, trans);
+   const resp = await msrv.card_post(st);
    if (resp.ok) {
       const id = await resp.text();
       st.id = id;
-      idb.addSti(st);
+      idb.addCard(st);
       return st;
    }
 };
@@ -211,7 +210,7 @@ export const syncTasks = async () => {
    try {
       const thisTime = Date.now();
       const lastTime = (await idb.getMeta<number>("_sync-time")) ?? 1;
-      const tasks = (await idb.getItems(lastTime)).map(item2task);
+      const tasks = (await idb.getItems(lastTime)).map(toTask);
       if (tasks.length) {
          const resp = await msrv.task_patch(tasks);
          if (!resp.ok)

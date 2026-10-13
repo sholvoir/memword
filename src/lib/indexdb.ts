@@ -1,17 +1,16 @@
 import type { IBook } from "./ibook.ts";
+import type { ICard } from "./icard.ts";
 import type { IDict } from "./idict.ts";
 import type { IIssue } from "./iissue.ts";
 import {
    type IItem,
    type ITask,
    itemMergeDict,
-   itemMergeTrace,
    neverItem,
    studyTask,
 } from "./iitem.ts";
-import type { IStItem } from "./ist-item.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
-import type { ITrace } from "./itrace.ts";
+import type { IIDTrace } from "./itrace.ts";
 import { mergeTrace } from "./itrace.ts";
 
 type kvKey =
@@ -29,15 +28,15 @@ const metaTable = "meta";
 const bookTable = "book";
 const issueTable = "issue";
 const itemTable = "item";
-const stiTable = "sti";
+const cardTable = "card";
 
 const db: IDBDatabase = await new Promise((resolve, reject) => {
-   const request = indexedDB.open("memword", 3);
+   const request = indexedDB.open("memword", 4);
    request.onerror = reject;
    request.onsuccess = () => resolve(request.result);
    request.onupgradeneeded = (e) => {
       const d = request.result;
-      if (e.oldVersion < 2)
+      if (e.oldVersion < 4)
          for (const store of d.objectStoreNames) d.deleteObjectStore(store);
       if (!d.objectStoreNames.contains(metaTable))
          d.createObjectStore(metaTable, { keyPath: "key" });
@@ -53,10 +52,8 @@ const db: IDBDatabase = await new Promise((resolve, reject) => {
          iStore.createIndex("last", "last");
          iStore.createIndex("next", "next");
       }
-      if (!d.objectStoreNames.contains(stiTable)) {
-         const sStore = d.createObjectStore(stiTable, {
-            keyPath: "id",
-         });
+      if (!d.objectStoreNames.contains(cardTable)) {
+         const sStore = d.createObjectStore(cardTable, { keyPath: "id" });
          sStore.createIndex("last", "last");
          sStore.createIndex("next", "next");
       }
@@ -261,8 +258,7 @@ export const syncTasks = (tasks: Iterable<ITask>) =>
          const item = cursor.value as IItem;
          if (taskMap.has(item.word)) {
             const task = taskMap.get(item.word)!;
-            if (task.last > item.last)
-               cursor.update(itemMergeTrace(item, task));
+            if (task.last > item.last) cursor.update(mergeTrace(item, task));
             taskMap.delete(item.word);
          } else cursor.delete();
          cursor.continue();
@@ -353,55 +349,55 @@ export const studied = (word: string, level?: number) =>
       };
    });
 
-export const addSti = (st: IStItem) =>
+export const addCard = (card: ICard) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction(stiTable, "readwrite")
-         .objectStore(stiTable)
-         .add(st);
+         .transaction(cardTable, "readwrite")
+         .objectStore(cardTable)
+         .add(card);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const putSti = (st: IStItem) =>
+export const putCard = (card: ICard) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction(stiTable, "readwrite")
-         .objectStore(stiTable)
-         .put(st);
+         .transaction(cardTable, "readwrite")
+         .objectStore(cardTable)
+         .put(card);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const deleteSti = (sentence: string) =>
+export const deleteCard = (id: string) =>
    new Promise<void>((resolve, reject) => {
       const request = db
-         .transaction(stiTable, "readwrite")
-         .objectStore(stiTable)
-         .delete(sentence);
+         .transaction(cardTable, "readwrite")
+         .objectStore(cardTable)
+         .delete(id);
       request.onerror = reject;
       request.onsuccess = () => resolve();
    });
 
-export const getStis = (lastgte: number) =>
-   new Promise<Array<IStItem>>((resolve, reject) => {
+export const getCards = (lastgte: number) =>
+   new Promise<Array<ICard>>((resolve, reject) => {
       const request = db
-         .transaction(stiTable, "readonly")
-         .objectStore(stiTable)
+         .transaction(cardTable, "readonly")
+         .objectStore(cardTable)
          .index("last")
          .getAll(IDBKeyRange.lowerBound(lastgte));
       request.onerror = reject;
       request.onsuccess = () => resolve(request.result);
    });
 
-export const getStEpisode = () =>
-   new Promise<Array<IStItem>>((resolve, reject) => {
-      const result: Array<IStItem> = [];
-      const transaction = db.transaction(stiTable, "readonly");
+export const getCardEpisode = () =>
+   new Promise<Array<ICard>>((resolve, reject) => {
+      const result: Array<ICard> = [];
+      const transaction = db.transaction(cardTable, "readonly");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(result);
       transaction
-         .objectStore(stiTable)
+         .objectStore(cardTable)
          .index("next")
          .openCursor(IDBKeyRange.upperBound(Date.now()), "prev").onsuccess = (
          e,
@@ -414,29 +410,25 @@ export const getStEpisode = () =>
       };
    });
 
-export const syncSts = (traces: Iterable<ITrace>) =>
+export const syncCards = (traces: Iterable<IIDTrace>) =>
    new Promise<void>((resolve, reject) => {
-      const traceMap = new Map<string, ITrace>();
+      const traceMap = new Map<string, IIDTrace>();
       for (const trace of traces) if (trace.id) traceMap.set(trace.id, trace);
-      const transaction = db.transaction(stiTable, "readwrite");
+      const transaction = db.transaction(cardTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
-      const sStore = transaction.objectStore(stiTable);
-      sStore.openCursor().onsuccess = (e) => {
+      const cStore = transaction.objectStore(cardTable);
+      cStore.openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) {
-            for (const [_, st] of traceMap) sStore.add(st);
+            for (const [_, card] of traceMap) cStore.add(card);
             return;
          }
-         const lsti = cursor.value as ITrace;
-         if (!lsti.id) return cursor.continue();
-         if (traceMap.has(lsti.id)) {
-            const trace = traceMap.get(lsti.id)!;
-            if (trace.last > lsti.last) {
-               mergeTrace(lsti, trace);
-               cursor.update(lsti);
-            }
-            traceMap.delete(lsti.id);
+         const card = cursor.value as ICard;
+         if (traceMap.has(card.id)) {
+            const trace = traceMap.get(card.id)!;
+            if (trace.last > card.last) cursor.update(mergeTrace(card, trace));
+            traceMap.delete(card.id);
          } else cursor.delete();
          cursor.continue();
       };

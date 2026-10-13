@@ -5,7 +5,7 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
-import { sentenceToWords } from "../lib/ist-item.ts";
+import { sentenceToWords } from "../lib/icard.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog.tsx";
