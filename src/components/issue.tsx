@@ -1,5 +1,4 @@
 import Button from "@sholvoir/solid-components/button-ripple";
-import TAInput from "@sholvoir/solid-components/input-textarea";
 import { createSignal } from "solid-js";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
@@ -31,9 +30,12 @@ export default () => {
          }
       >
          <label for="issue">请在这里描述你的问题:</label>
-         <TAInput name="issue" class="grow" binding={[issue, setIssue]}>
-            {issue()}
-         </TAInput>
+         <textarea
+            name="issue"
+            class="grow"
+            value={issue()}
+            onInput={(e) => setIssue(e.currentTarget.value)}
+         />
       </Dialog>
    );
 };

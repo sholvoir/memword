@@ -5,7 +5,7 @@ import {
    textInit,
    url,
 } from "@sholvoir/generic/http";
-import type { ISetting } from "#srv/lib/isetting.ts";
+import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import type { ITask } from "../lib/iitem.ts";
 import type { IBook } from "./ibook.ts";
 import type { ISentence, IStItem } from "./ist-item.ts";

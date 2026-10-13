@@ -1,4 +1,4 @@
-import type { ITrace } from "#srv/lib/itrace.ts";
+import type { ITrace } from "@sholvoir/memword-server/src/lib/itrace.ts";
 
 export type { ITrace };
 

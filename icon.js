@@ -24,7 +24,6 @@ const icons = {
    mdi: ["chevron-down", "chevron-up", "cross-circle"],
    hugeicons: ["online-learning-01", "online-learning-02", "translate"],
    tabler: ["info-octagon"],
-   "icon-park-outline": ["chinese"],
 };
 
 // Parse each icon set

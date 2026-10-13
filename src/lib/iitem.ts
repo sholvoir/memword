@@ -1,4 +1,4 @@
-import type { ITask } from "#srv/lib/itask.ts";
+import type { ITask } from "@sholvoir/memword-server/src/lib/itask.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
 import type { IDict } from "./idict.ts";
 import type { ITrace } from "./itrace.ts";
@@ -15,6 +15,7 @@ export const neverItem = (word: string, time: number): IItem => ({
    last: time,
    next: time,
    level: 0,
+   entries: [],
 });
 
 export const newItem = (dict: IDict): IItem => {
@@ -51,7 +52,7 @@ export const itemMergeDict = (item: IItem, dict: IDict) => {
    return item;
 };
 
-export const studyTask = (task: ITask, level?: number): ITask => {
+export const studyTask = <T extends ITask>(task: T, level?: number): T => {
    if (level === undefined) level = task.level + 1;
    if (level > TASK_MAX_LEVEL) task.level = level = TASK_MAX_LEVEL;
    else if (level <= 0) task.level = level = 1;

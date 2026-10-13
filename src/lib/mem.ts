@@ -1,7 +1,6 @@
-import { blobToBase64 } from "@sholvoir/generic/blob";
 import { STATUS_CODE } from "@sholvoir/generic/http";
+import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import { parse } from "yaml";
-import type { ISetting } from "#srv/lib/isetting.ts";
 import { type IBook, splitID } from "../lib/ibook.ts";
 import type { TDialog } from "./idialog.ts";
 import {
@@ -122,6 +121,16 @@ export const addSti = async (sentence: string, trans: string) => {
 
 export const uploadTasks = msrv.task_patch;
 
+const prefetchSet = new Set<string>();
+const prefetch = (url: string) => {
+   if (prefetchSet.has(url)) return;
+   const link = document.createElement("link");
+   link.rel = "prefetch";
+   link.href = url;
+   document.head.append(link);
+   prefetchSet.add(url);
+};
+
 export const updateDict = async (item: IItem) => {
    const dict = await dsrv.dict_get(item.word);
    if (!dict) return item;
@@ -131,19 +140,15 @@ export const updateDict = async (item: IItem) => {
       item.version >= dict.version
    )
       return item;
-   if (dict.entries)
-      for (const entry of dict.entries)
-         if (entry.sound) {
-            const resp = await dsrv.sound_get(entry.sound);
-            if (resp.ok) entry.sound = await blobToBase64(await resp.blob());
-         }
+   for (const entry of dict.entries) if (entry.sound) prefetch(entry.sound);
    item.dictSync = Date.now();
    idb.putItem(itemMergeDict(item, dict));
    return item;
 };
 
 const itemUpdateDict = async (item: IItem) => {
-   if (!item.dictSync) return await updateDict(item);
+   if (!item.dictSync || item.dictSync < 1791858035012)
+      return await updateDict(item);
    if (item.dictSync + dictExpire < Date.now()) updateDict(item);
    return item;
 };

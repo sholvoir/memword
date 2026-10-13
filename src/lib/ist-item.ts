@@ -1,4 +1,4 @@
-import type { ISentence } from "#srv/lib/isentence.ts";
+import type { ISentence } from "@sholvoir/memword-server/src/lib/isentence.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
 import type { ITrace } from "./itrace.ts";
 

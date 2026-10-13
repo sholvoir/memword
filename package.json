@@ -1,7 +1,7 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.27.10",
+   "version": "0.28.0",
    "type": "module",
    "scripts": {
       "start": "vite",
@@ -11,26 +11,24 @@
       "worker": "vite build --config vite.worker.config.ts",
       "serve": "vite preview"
    },
-   "imports": {
-      "#srv/*": "../memword-server/src/*"
-   },
    "dependencies": {
       "@sholvoir/dict-server": "github:sholvoir/dict-server",
       "@sholvoir/generic": "npm:@jsr/sholvoir__generic@^0.4.8",
+      "@sholvoir/memword-server": "github:sholvoir/memword-server",
       "@sholvoir/solid-components": "github:sholvoir/solid-components",
       "js-cookie": "^3.0.8",
       "solid-devtools": "^0.34.5",
-      "solid-js": "^1.9.15",
+      "solid-js": "^1.9.17",
       "yaml": "^2.9.1"
    },
    "devDependencies": {
-      "@iconify/json": "^2.2.533",
+      "@iconify/json": "^2.2.541",
       "@iconify/utils": "^3.1.7",
       "@tailwindcss/vite": "^4.3.3",
       "@types/bun": "^1.4.2",
       "@types/js-cookie": "^3.0.6",
       "tailwindcss": "^4.3.3",
-      "vite": "^8.3.0",
+      "vite": "^8.3.4",
       "vite-plugin-solid": "^2.11.14"
    }
 }

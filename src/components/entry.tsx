@@ -1,27 +1,14 @@
-import { For, Show } from "solid-js";
+import type { IEntry } from "@sholvoir/dict-server/src/lib/imic";
+import { For } from "solid-js";
 
-export default (props: {
-   meanings?: Record<string, string[]>;
-   showTrans?: boolean;
-}) => (
-   <Show when={props.meanings}>
-      <div
-         class={`grow [&>p>strong]:${props.showTrans ? "text-lg" : "hidden"}`}
-      >
-         <For each={Object.entries(props.meanings!)}>
-            {([pos, means]) => (
-               <>
-                  <Show when={pos}>
-                     <p class="text-xl font-bold text-(--accent-color)">
-                        {pos}
-                     </p>
-                  </Show>
-                  <For each={means}>
-                     {(mean) => <p innerHTML={`&ensp;-&ensp;${mean}`} />}
-                  </For>
-               </>
-            )}
-         </For>
+export default (props: { entry: IEntry }) => (
+   <div class="[&>p>t]:font-bold">
+      <div class="flex gap-4 text-xl">
+         <div class="font-bold text-(--accent-color)">{props.entry.pos}</div>
+         <div>{props.entry.phonetic}</div>
       </div>
-   </Show>
+      <For each={props.entry.meanings?.split("\n")}>
+         {(meaning) => <p innerHTML={`&ensp;-&ensp;${meaning}`} />}
+      </For>
+   </div>
 );

@@ -1,8 +1,6 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import Button from "@sholvoir/solid-components/button-ripple";
 import Checkbox from "@sholvoir/solid-components/checkbox";
-import SInput from "@sholvoir/solid-components/input-simple";
-import TaInput from "@sholvoir/solid-components/input-textarea";
 import { createSignal, Show } from "solid-js";
 import { splitID } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
@@ -62,8 +60,16 @@ export default () => {
          title="上传我的词书"
          bottom={
             <div class="px-2 pt-2 pb-5 flex gap-2">
-               <Checkbox binding={[replace, setReplace]} label="Replace" />
-               <Checkbox binding={[isPublic, setPublic]} label="Public" />
+               <Checkbox
+                  label="Replace"
+                  value={replace()}
+                  onChange={setReplace}
+               />
+               <Checkbox
+                  label="Public"
+                  value={isPublic()}
+                  onChange={setPublic}
+               />
                <div class="grow"></div>
                <Button
                   class="w-24 button btn-normal"
@@ -84,15 +90,28 @@ export default () => {
          }
       >
          <label for="name">名称</label>
-         <SInput name="name" binding={[bname, setBName]} />
+         <input
+            name="name"
+            value={bname()}
+            onInput={(e) => setBName(e.currentTarget.value)}
+         />
          <label for="disc" class="mt-2">
             描述
          </label>
-         <SInput name="disc" binding={[disc, setDisc]} />
+         <input
+            name="disc"
+            value={disc()}
+            onInput={(e) => setDisc(e.currentTarget.value)}
+         />
          <label for="words" class="mt-2">
             词表
          </label>
-         <TaInput name="words" class="grow" binding={[words, setWords]} />
+         <textarea
+            name="words"
+            class="grow"
+            value={words()}
+            onInput={(e) => setWords(e.currentTarget.value)}
+         />
          <Show when={revision().length}>
             <label for="replace" class="text-(--accent-color) mt-2">
                请考虑用下面的词替换
@@ -101,7 +120,7 @@ export default () => {
                name="replace"
                class="grow"
                value={revision()}
-               onChange={(e) => setRevision(e.currentTarget.value)}
+               onInput={(e) => setRevision(e.currentTarget.value)}
             />
          </Show>
       </Dialog>

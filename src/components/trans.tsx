@@ -93,13 +93,14 @@ export default () => {
          <div class="flex gap-2">
             <TInput
                autoCapitalize="none"
-               binding={[word, setWord]}
                class="flex-auto"
                name="word"
                onChange={handleDictClick}
+               onInput={setWord}
                options={vocabulary()}
                placeholder="word"
                type="search"
+               value={word()}
             />
             <Button class="button btn-normal" onClick={handleDictClick}>
                查找

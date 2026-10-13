@@ -1,7 +1,6 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import Button from "@sholvoir/solid-components/button-ripple";
-import SInput from "@sholvoir/solid-components/input-simple";
 import { createSignal } from "solid-js";
 import type { IUser } from "../lib/iuser.ts";
 import * as mem from "../lib/mem.ts";
@@ -77,11 +76,12 @@ export default () => {
       <Dialog class="p-2 flex flex-col" title="登录">
          <div class="w-64 m-auto flex flex-col">
             <label for="name">用户名</label>
-            <SInput
+            <input
                name="name"
                placeholder="name"
                autoCapitalize="none"
-               binding={[name, setName]}
+               value={name()}
+               onInput={(e) => setName(e.currentTarget.value)}
             />
             <div class="text-right mb-3">
                尚未
@@ -94,11 +94,12 @@ export default () => {
                ?
             </div>
             <label for="code">临时密码</label>
-            <SInput
+            <input
                name="code"
                placeholder="code"
                autoCapitalize="none"
-               binding={[code, setCode]}
+               value={code()}
+               onInput={(e) => setCode(e.currentTarget.value)}
             />
             <BButton
                class="btn-anchor block text-right mb-3"

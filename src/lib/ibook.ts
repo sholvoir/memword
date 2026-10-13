@@ -1,4 +1,4 @@
-import type { IBook as IBookSrv } from "#srv/lib/ibook.ts";
+import type { IBook as IBookSrv } from "@sholvoir/memword-server/src/lib/ibook.ts";
 
 export interface IBook extends IBookSrv {
    content?: Iterable<string>;

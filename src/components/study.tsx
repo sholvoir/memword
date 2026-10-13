@@ -1,6 +1,5 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
-import Tab from "@sholvoir/solid-components/tab";
 import type { DivTargeted } from "@sholvoir/solid-components/targeted";
 import {
    batch,
@@ -15,31 +14,48 @@ import { type IItem, item2task, TASK_MAX_LEVEL } from "../lib/iitem.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
+import Entry from "./entry.tsx";
 import { go, showTips, user } from "./provider-g.ts";
 import { bid, blevel, search } from "./provider-study.ts";
-import { setting, totalStats, vocabulary } from "./provider-user.ts";
-import Scard from "./scard.tsx";
+import { totalStats, vocabulary } from "./provider-user.ts";
 import "./menu.css";
 
 export default () => {
    const [citem, setCItem] = createSignal<IItem>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(-1);
-   const [isShowTrans, setShowTrans] = createSignal(false);
-   const [cindex, setCIndex] = createSignal(0);
    const [isShowAddToBookMenu, setShowAddToBookMenu] = createSignal(false);
    const entries = () => citem()?.entries ?? [];
+   const audio = { sounds: [""], index: 0 };
+   const initSounds = (item: IItem) => {
+      audio.sounds = Array.from(
+         new Set(item.entries.filter((en) => en.sound).map((en) => en.sound!)),
+      );
+      audio.index = 0;
+      playSound();
+   };
 
    const [myBooks] = createResource(user, async (u) =>
       (await mem.getLocalBooks()).filter(
          (book) => splitID(book.bid)[0] === u.name,
       ),
    );
+
    let player!: HTMLAudioElement;
    const playSound = () => {
-      if (citem()?.entries?.at(cindex())?.sound) player.play();
-      else speak(citem()?.word);
+      if (audio.sounds.length) {
+         player.src = audio.sounds[audio.index];
+      } else speak(citem()?.word);
    };
+   const continuePlay = () => {
+      audio.index++;
+      if (audio.index < audio.sounds.length) playSound();
+      else {
+         player.src = "";
+         audio.index = 0;
+      }
+   };
+
    const finish = () => {
       if (search()) go("#trans");
       else {
@@ -60,20 +76,18 @@ export default () => {
          setSprint((s) => s + 1);
          setCItem(undefined);
          setPhaseAnswer(false);
-         setShowTrans(false);
       });
       const item = await mem.getEpisode(bid(), blevel());
       if (!item) return totalStats(), go("#home");
-      batch(() => {
-         setCItem(item);
-         setCIndex(0);
-      });
+      setCItem(item);
+      initSounds(item);
    };
    const handleRefresh = async () => {
       showTips("Get Server Data...", false);
       const item = await mem.updateDict(citem()!);
       showTips();
       setCItem({ ...item });
+      initSounds(item);
    };
    const handleReportIssue = async () => {
       await mem.submitDictIssue(citem()!.word);
@@ -108,14 +122,8 @@ export default () => {
    const handleClick = (e?: MouseEvent & DivTargeted) => {
       e?.stopPropagation();
       if (isShowAddToBookMenu()) return setShowAddToBookMenu(false);
-      const cardsN = citem()?.entries?.length ?? 0;
-      //if (cardsN === 0) return;
-      if (!isPhaseAnswer()) {
-         setPhaseAnswer(true);
-         playSound();
-      } else if (cardsN === 1) playSound();
-      else if (cindex() < cardsN - 1) setCIndex((c) => c + 1);
-      else setCIndex(0);
+      if (!isPhaseAnswer()) setPhaseAnswer(true);
+      playSound();
    };
    const handleAddToBook = async (book: IBook) => {
       setShowAddToBookMenu(false);
@@ -134,15 +142,17 @@ export default () => {
          if (!item) return showTips("Not Found!");
          setCItem(item);
          setPhaseAnswer(true);
+         initSounds(item);
       } else {
          const item = await mem.getEpisode(bid(), blevel());
-         if (item)
+         if (item) {
             batch(() => {
                setCItem(item);
                setPhaseAnswer(false);
                setSprint(0);
             });
-         else showTips("No More Task");
+            initSounds(item);
+         } else showTips("No More Task");
       }
    });
    return (
@@ -195,13 +205,6 @@ export default () => {
                   class="icon--material-symbols icon--material-symbols--refresh text-purple-500"
                   disabled={!isPhaseAnswer()}
                />
-               <Show when={!setting().trans}>
-                  <BButton
-                     onClick={() => setShowTrans((s) => !s)}
-                     class="icon--icon-park-outline icon--icon-park-outline--chinese text-amber-500"
-                     disabled={!isPhaseAnswer()}
-                  ></BButton>
-               </Show>
                <BButton
                   onClick={() => setShowAddToBookMenu((s) => !s)}
                   class="icon--material-symbols icon--material-symbols--dictionary text-cyan-500"
@@ -228,47 +231,11 @@ export default () => {
          touchEnabled={isPhaseAnswer()}
       >
          <Show when={citem()}>
-            <div class="pb-2 flex gap-2 flex-wrap justify-between">
-               <div class="text-4xl font-bold">{citem()?.word}</div>
-               {isPhaseAnswer() && (
-                  <div class="text-2xl flex items-center">
-                     {citem()?.entries?.[cindex()].phonetic}
-                  </div>
-               )}
-            </div>
-            <Show when={isPhaseAnswer()}>
-               <Show
-                  when={entries().length > 1}
-                  fallback={
-                     <Scard
-                        meanings={entries()[0]?.meanings}
-                        showTrans={
-                           isShowTrans() || sprint() < 0 || setting().trans
-                        }
-                     />
-                  }
-               >
-                  <Tab class="bg-(--bg-tab)" cindex={[cindex, setCIndex]}>
-                     <For each={entries()}>
-                        {(entry) => (
-                           <Scard
-                              meanings={entry.meanings}
-                              showTrans={
-                                 isShowTrans() ||
-                                 sprint() < 0 ||
-                                 setting().trans
-                              }
-                           />
-                        )}
-                     </For>
-                  </Tab>
-               </Show>
+            <div class="pb-2 text-4xl font-bold">{citem()?.word}</div>
+            <Show when={isPhaseAnswer() && entries().length}>
+               <For each={entries()}>{(entry) => <Entry entry={entry} />}</For>
             </Show>
-            <audio
-               ref={player}
-               autoplay
-               src={citem()?.entries?.at(cindex())?.sound ?? ""}
-            />
+            <audio ref={player} autoplay onEnded={continuePlay} />
          </Show>
       </Dialog>
    );

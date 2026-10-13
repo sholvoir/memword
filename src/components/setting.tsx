@@ -1,9 +1,7 @@
+import { settingFormat } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import Button from "@sholvoir/solid-components/button-ripple";
-import Checkbox from "@sholvoir/solid-components/checkbox";
-import Input from "@sholvoir/solid-components/input-simple";
 import List from "@sholvoir/solid-components/list";
 import { createResource, createSignal } from "solid-js";
-import { settingFormat } from "#srv/lib/isetting.ts";
 import { compareWL, type IBook } from "../lib/ibook.ts";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
@@ -11,8 +9,9 @@ import { setBook } from "./provider-book.ts";
 import { go, showLoading, showTips, user } from "./provider-g.ts";
 import { saveSetting, setting, totalStats } from "./provider-user.ts";
 
+const bookShow = (book: IBook) => book.disc ?? book.bid;
+
 export default () => {
-   const [showTrans, setShowTrans] = createSignal(setting().trans ?? false);
    const [myBooks, setMyBooks] = createSignal<Array<IBook>>([]);
    const [myIndex, setMyIndex] = createSignal(0);
    const [subBooks, setSubBooks] = createSignal<Array<IBook>>([]);
@@ -53,7 +52,6 @@ export default () => {
       await saveSetting({
          format: settingFormat,
          version: Date.now(),
-         trans: showTrans(),
          books: subBooks().map((wl) => wl.bid),
       });
       totalStats();
@@ -109,18 +107,14 @@ export default () => {
             </div>
          }
       >
-         <Checkbox
-            binding={[showTrans, setShowTrans]}
-            label="Always Show Trans"
-         />
          <fieldset class="border rounded shrink-0 grow overflow-y-auto px-2">
             <legend on:click={toggleShrink}>我的词书</legend>
             <List
-               cindex={[myIndex, setMyIndex]}
-               options={myBooks()}
-               func={(book) => book.disc ?? book.bid}
-               class="px-2"
                activeClass="bg-[var(--bg-title)]"
+               index={myIndex()}
+               onItemSelect={setMyIndex}
+               class="px-2"
+               options={myBooks().map(bookShow)}
             />
          </fieldset>
          <div class="flex justify-between gap-2">
@@ -150,20 +144,21 @@ export default () => {
          </div>
          <div class="flex gap-2">
             <label for="filter">设置过滤</label>
-            <Input
+            <input
                class="grow"
                name="filter"
-               binding={[bookFilter, setBookFilter]}
+               onInput={(e) => setBookFilter(e.currentTarget.value)}
+               value={bookFilter()}
             />
          </div>
          <fieldset class="border rounded grow overflow-y-auto px-2">
             <legend on:click={toggleShrink}>可用的词书</legend>
             <List
-               class="px-2"
-               cindex={[cindex, setCIndex]}
-               options={books()}
-               func={(book) => book.disc ?? book.bid}
                activeClass="bg-[var(--bg-title)]"
+               class="px-2"
+               index={cindex()}
+               onItemSelect={setCIndex}
+               options={books().map(bookShow)}
             />
          </fieldset>
          <div class="flex justify-between gap-2">
@@ -180,11 +175,11 @@ export default () => {
          <fieldset class="border rounded shrink-0 grow overflow-y-auto px-2">
             <legend on:click={toggleShrink}>我订阅的词书</legend>
             <List
-               class="px-2"
-               cindex={[subIndex, setSubIndex]}
-               options={subBooks()}
-               func={(book) => book.disc ?? book.bid}
                activeClass="bg-[var(--bg-title)]"
+               class="px-2"
+               index={subIndex()}
+               onItemSelect={setSubIndex}
+               options={subBooks().map(bookShow)}
             />
          </fieldset>
       </Dialog>

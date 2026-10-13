@@ -6,8 +6,16 @@ const API_BASE =
       ? "http://localhost:8080/api/v2"
       : "https://dict.micinfotech.com/api/v2";
 
-export const dict_get = (word: string) =>
-   getJson<IDict>(url(`${API_BASE}/dict`, { q: word, mic: "1" }));
+export const dict_get = async (word: string) => {
+   const dict = await getJson<IDict>(
+      url(`${API_BASE}/dict`, { q: word, mic: "1" }),
+   );
+   if (!dict) return;
+   for (const entry of dict.entries)
+      if (entry.sound)
+         entry.sound = `${API_BASE}/sound?q=${encodeURIComponent(entry.sound)}`;
+   return dict;
+};
 
 export const sound_get = (surl: string) =>
    fetch(url(`${API_BASE}/sound`, { q: surl }), { cache: "force-cache" });

@@ -16,11 +16,6 @@
     "strict": true,
     "types": [
       "vite/client"
-    ],
-    "paths": {
-      "#srv/*": [
-        "../memword-server/src/*"
-      ]
-    }
+    ]
   }
 }

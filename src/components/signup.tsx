@@ -1,7 +1,6 @@
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
-import SInput from "@sholvoir/solid-components/input-simple";
 import { createSignal } from "solid-js";
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
@@ -41,19 +40,21 @@ export default () => {
       <Dialog class="p-2 flex flex-col" title="注册">
          <div class="w-64 m-auto flex flex-col pb-4">
             <label for="name">用户名</label>
-            <SInput
-               name="name"
-               placeholder="name"
+            <input
                autoCapitalize="none"
-               binding={[name, setName]}
                class="mb-3"
+               name="name"
+               onInput={(e) => setName(e.currentTarget.value)}
+               placeholder="name"
+               value={name()}
             />
             <label for="phone">手机号码(含国际区号)</label>
-            <SInput
+            <input
                name="phone"
                placeholder="+1(987)765-5432"
                autoCapitalize="none"
-               binding={[phone, setPhone]}
+               value={phone()}
+               onInput={(e) => setPhone(e.currentTarget.value)}
                class="mb-3"
             />
             <div class="text-right mb-3">

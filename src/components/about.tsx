@@ -2,7 +2,6 @@ import { createSignal, Show } from "solid-js";
 import "./about.css";
 import BButton from "@sholvoir/solid-components/button-base";
 import RButton from "@sholvoir/solid-components/button-ripple";
-import Input from "@sholvoir/solid-components/input-simple";
 import { version } from "../../package.json" with { type: "json" };
 import * as mem from "../lib/mem.ts";
 import Dialog from "./dialog.tsx";
@@ -20,7 +19,11 @@ export default () => {
       >
          <Show when={show()}>
             <div>
-               <Input binding={[auth, setAuth]} />
+               <input
+                  name="auth"
+                  value={auth()}
+                  onInput={(e) => setAuth(e.target.value)}
+               />
                <BButton
                   class="button bg-slate-300 text-slate-800"
                   onClick={async () => {

@@ -1,5 +1,8 @@
+import {
+   defaultSetting,
+   type ISetting,
+} from "@sholvoir/memword-server/src/lib/isetting.ts";
 import { createSignal } from "solid-js";
-import { defaultSetting, type ISetting } from "#srv/lib/isetting.ts";
 import { initStats } from "../lib/istat.ts";
 import * as mem from "../lib/mem.ts";
 
@@ -8,7 +11,7 @@ const [lemma, setLemma] = createSignal<Record<string, string>>({});
 const [setting, setSetting] = createSignal(defaultSetting());
 const [vocabulary, setVocabulary] = createSignal(new Set<string>());
 
-export { lemma, stats, setting, vocabulary };
+export { lemma, setting, stats, vocabulary };
 export const totalStats = async () =>
    setStats(await mem.totalStats(setting().books));
 
