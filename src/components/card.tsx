@@ -1,13 +1,14 @@
+import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import BButton from "@sholvoir/solid-components/button-base";
 import { createSignal, onMount, Show } from "solid-js";
 import {
+   extractWords,
    type ICard,
    ST_MAX_LEVEL,
-   sentenceToWords,
    studyCard,
 } from "../lib/icard.ts";
 import { toTask } from "../lib/iitem.ts";
-import { toIDTrace } from "../lib/itrace.ts";
+import { extractIDTrace } from "../lib/itrace.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
@@ -15,36 +16,36 @@ import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
 export default () => {
-   const [st, setSt] = createSignal<ICard>();
+   const [card, setCard] = createSignal<WithID<ICard>>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
 
    const studyNext = async () => {
-      const st = await mem.getStEpisode();
-      if (!st) {
+      const card = await mem.getCardEpisode();
+      if (!card) {
          showTips("No More Sentence!");
          totalStats();
          go("#home");
       } else {
-         setSt(st);
+         setCard(card);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
-         speak(st.sentence);
+         speak(card.page);
       }
    };
    const handleIKnown = async (know?: boolean) => {
-      if (st()) {
-         const cst = studyCard(st()!, know);
-         if (cst.level === ST_MAX_LEVEL) {
-            await mem.deleteLocalSt(cst.sentence);
-            mem.deleteSt([cst.id!]);
+      if (card()) {
+         const ccard = studyCard(card()!, know);
+         if (ccard.level === ST_MAX_LEVEL) {
+            await mem.deleteLocalCard(ccard.id);
+            mem.deleteCard([ccard.id]);
          } else {
-            await mem.setLocalSt(cst);
-            mem.uploadTracesToSts([toTrace(cst)]);
+            await mem.setLocalCard(ccard);
+            mem.uploadCardTraces([extractIDTrace(ccard)]);
          }
          if (know) {
             const items = [];
-            const result = sentenceToWords(vocabulary(), lemma(), cst.sentence);
+            const result = extractWords(vocabulary(), lemma(), ccard.page!);
             if (result.words)
                for (const word of result.words) {
                   items.push(await mem.studyWord(word));
@@ -55,7 +56,7 @@ export default () => {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak(st()?.sentence);
+      speak(card()?.page);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -79,11 +80,11 @@ export default () => {
       }
    };
    const handleDelete = async () => {
-      if (st()) {
+      if (card()) {
          try {
-            await mem.deleteLocalSt(st()!.id!);
+            await mem.deleteLocalCard(card()!.id!);
             showTips("删除成功");
-            mem.deleteSt([st()!.id!]);
+            mem.deleteCard([card()!.id!]);
             studyNext();
          } catch {
             showTips("删除失败");
@@ -116,10 +117,10 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => speak(st()?.sentence)}
+                  onClick={() => speak(card()?.page)}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
-               <div class="text-lg">{st()?.level}</div>
+               <div class="text-lg">{card()?.level}</div>
             </div>
          }
          onClick={handleClick}
@@ -128,11 +129,10 @@ export default () => {
          beforeAnimation={handleIKnown}
          afterAnimation={studyNext}
       >
-         <Show when={st()}>
-            <div>{st()!.sentence.replaceAll("()", "")}</div>
-            <Show when={isPhaseAnswer()}>
-               <div class="grow">{st()!.trans}</div>
-            </Show>
+         <Show when={card()}>
+            <div class={isPhaseAnswer() ? "[&>r]:font-bold" : "[&>r]:hidden"}>
+               {card()!.page?.replaceAll("()", "")}
+            </div>
          </Show>
       </Dialog>
    );

@@ -1,11 +1,13 @@
-import type { ICard } from "@sholvoir/memword-server/src/lib/icard.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
+import type { ITrace } from "./itrace.ts";
 
-export type { ICard };
+export interface ICard extends ITrace {
+   page?: string;
+}
 
 export const ST_MAX_LEVEL = 10;
 
-export const sentenceToWords = (
+export const extractWords = (
    vocabulary: Set<string>,
    lamma: Record<string, string>,
    sentence: string,
@@ -15,8 +17,10 @@ export const sentenceToWords = (
 } => {
    const words = [];
    const array = sentence
+      .replaceAll(/<r>.+?<\/r>/g, "")
+      .replaceAll(/<\/?.+?>/g, "")
       .replace(/\.$/, "")
-      .replaceAll(/[^A-Za-z0-9 '.-]/g, "")
+      .replaceAll(/[^A-Za-z0-9 '.\n-]/g, "")
       .split(/\s+/);
    for (let word of array)
       if ((word = word.trim())) {
@@ -50,24 +54,24 @@ export const sentenceToWords = (
    return { words };
 };
 
-export const newCard = (card: string): Omit<ICard, "id"> => {
+export const newCard = (page: string): ICard => {
    const time = Date.now();
    return {
-      card,
       last: time,
       next: time,
       level: 1,
+      page,
    };
 };
 
-export const studyCard = (st: ICard, know?: boolean): ICard => {
-   let level = know ? ++st.level : (st.level = 1);
-   if (st.level > ST_MAX_LEVEL) st.level = level = ST_MAX_LEVEL;
+export const studyCard = <T extends ITrace>(card: T, know?: boolean): T => {
+   let level = know ? ++card.level : (card.level = 1);
+   if (card.level > ST_MAX_LEVEL) card.level = level = ST_MAX_LEVEL;
    const now = Date.now();
-   st.last = now;
-   st.next =
+   card.last = now;
+   card.next =
       level >= ST_MAX_LEVEL
          ? TASK_MAX_NEXT
          : now + Math.round(134848 * level ** 3 * 1.5 ** level);
-   return st;
+   return card;
 };

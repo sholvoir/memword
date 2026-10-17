@@ -5,7 +5,7 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
-import { sentenceToWords } from "../lib/icard.ts";
+import { extractWords } from "../lib/icard.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog.tsx";
@@ -14,16 +14,14 @@ import { goStudy } from "./provider-study.ts";
 import { lemma, vocabulary } from "./provider-user.ts";
 
 const [word, setWord] = createSignal("");
-const [trans, setTrans] = createSignal("");
-const [sentence, setSentence] = createSignal("");
+const [page, setPage] = createSignal("");
 const [words, setWords] = createSignal<string[]>([]);
 
 export default () => {
-   const handleSentenceOnInput = (e: InputEvent & TextAreaInputTargeted) => {
-      setSentence(e.target.value);
+   const handlePageInput = (e: InputEvent & TextAreaInputTargeted) => {
+      setPage(e.target.value);
       setWord("");
-      setTrans("");
-      const result = sentenceToWords(vocabulary(), lemma(), e.target.value);
+      const result = extractWords(vocabulary(), lemma(), e.target.value);
       if (result.words) {
          setWords(result.words);
          showTips();
@@ -38,7 +36,7 @@ export default () => {
          element.selectionStart,
          element.selectionEnd,
       );
-      const result = sentenceToWords(vocabulary(), lemma(), w);
+      const result = extractWords(vocabulary(), lemma(), w);
       if (result.words?.length) setWord(result.words[0]);
    };
    const handleDictClick = async () => {
@@ -47,15 +45,14 @@ export default () => {
       goStudy(undefined, undefined, text);
    };
    const handleTransClick = async () => {
-      const t = await mem.baiduTranslate(sentence());
-      if (t) setTrans(t);
+      const t = await mem.baiduTranslate(page());
+      if (t) setPage((p) => `${p}\n<r>t</r>`);
       else showTips("翻译失败");
    };
    const handleAddClick = async () => {
-      await mem.addSti(sentence().trim(), trans());
-      setSentence("");
+      await mem.addCard(page().trim());
+      setPage("");
       setWord("");
-      setTrans("");
       setWords([]);
       showTips("添加成功!");
    };
@@ -67,7 +64,7 @@ export default () => {
             <div class="px-2 pt-2 pb-5 flex gap-2">
                <Button
                   class="flex-auto button btn-normal"
-                  onClick={() => speak(sentence())}
+                  onClick={() => speak(page())}
                >
                   播放
                </Button>
@@ -79,7 +76,7 @@ export default () => {
                </Button>
                <Button
                   class="flex-auto button btn-prime"
-                  disabled={!words().length || !trans()}
+                  disabled={!words().length}
                   onClick={handleAddClick}
                >
                   添加
@@ -109,17 +106,10 @@ export default () => {
          <textarea
             class="grow"
             name="sentence"
-            onInput={handleSentenceOnInput}
+            onInput={handlePageInput}
             onSelect={handleSentenceSelect}
             placeholder="sentence"
-            value={sentence()}
-         />
-         <textarea
-            class="grow"
-            name="trans"
-            onInput={(e) => setTrans(e.target.value)}
-            placeholder="trans"
-            value={trans()}
+            value={page()}
          />
       </Dialog>
    );

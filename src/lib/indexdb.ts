@@ -1,3 +1,4 @@
+import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import type { IBook } from "./ibook.ts";
 import type { ICard } from "./icard.ts";
 import type { IDict } from "./idict.ts";
@@ -10,16 +11,15 @@ import {
    studyTask,
 } from "./iitem.ts";
 import { addTaskToStat, type IStat, initStat } from "./istat.ts";
-import type { IIDTrace } from "./itrace.ts";
-import { mergeTrace } from "./itrace.ts";
+import { type ITrace, mergeTrace } from "./itrace.ts";
 
 type kvKey =
    | "_auth"
+   | "_card-time"
    | "_lema"
    | "_page"
    | "_s-version"
    | "_setting"
-   | "_st-time"
    | "_sync-time"
    | "_user"
    | "_vocabulary";
@@ -53,9 +53,9 @@ const db: IDBDatabase = await new Promise((resolve, reject) => {
          iStore.createIndex("next", "next");
       }
       if (!d.objectStoreNames.contains(cardTable)) {
-         const sStore = d.createObjectStore(cardTable, { keyPath: "id" });
-         sStore.createIndex("last", "last");
-         sStore.createIndex("next", "next");
+         const iStore = d.createObjectStore(cardTable, { keyPath: "id" });
+         iStore.createIndex("last", "last");
+         iStore.createIndex("next", "next");
       }
    };
 });
@@ -349,7 +349,7 @@ export const studied = (word: string, level?: number) =>
       };
    });
 
-export const addCard = (card: ICard) =>
+export const addCard = (card: WithID<ICard>) =>
    new Promise<void>((resolve, reject) => {
       const request = db
          .transaction(cardTable, "readwrite")
@@ -359,7 +359,7 @@ export const addCard = (card: ICard) =>
       request.onsuccess = () => resolve();
    });
 
-export const putCard = (card: ICard) =>
+export const putCard = (card: WithID<ICard>) =>
    new Promise<void>((resolve, reject) => {
       const request = db
          .transaction(cardTable, "readwrite")
@@ -380,7 +380,7 @@ export const deleteCard = (id: string) =>
    });
 
 export const getCards = (lastgte: number) =>
-   new Promise<Array<ICard>>((resolve, reject) => {
+   new Promise<Array<WithID<ICard>>>((resolve, reject) => {
       const request = db
          .transaction(cardTable, "readonly")
          .objectStore(cardTable)
@@ -391,8 +391,8 @@ export const getCards = (lastgte: number) =>
    });
 
 export const getCardEpisode = () =>
-   new Promise<Array<ICard>>((resolve, reject) => {
-      const result: Array<ICard> = [];
+   new Promise<Array<WithID<ICard>>>((resolve, reject) => {
+      const result: Array<WithID<ICard>> = [];
       const transaction = db.transaction(cardTable, "readonly");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve(result);
@@ -410,10 +410,10 @@ export const getCardEpisode = () =>
       };
    });
 
-export const syncCards = (traces: Iterable<IIDTrace>) =>
+export const syncCards = (traces: Iterable<WithID<ITrace>>) =>
    new Promise<void>((resolve, reject) => {
-      const traceMap = new Map<string, IIDTrace>();
-      for (const trace of traces) if (trace.id) traceMap.set(trace.id, trace);
+      const cardMap = new Map<string, WithID<ITrace>>();
+      for (const trace of traces) if (trace.id) cardMap.set(trace.id, trace);
       const transaction = db.transaction(cardTable, "readwrite");
       transaction.onerror = reject;
       transaction.oncomplete = () => resolve();
@@ -421,14 +421,14 @@ export const syncCards = (traces: Iterable<IIDTrace>) =>
       cStore.openCursor().onsuccess = (e) => {
          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
          if (!cursor) {
-            for (const [_, card] of traceMap) cStore.add(card);
+            for (const [_, card] of cardMap) cStore.add(card);
             return;
          }
-         const card = cursor.value as ICard;
-         if (traceMap.has(card.id)) {
-            const trace = traceMap.get(card.id)!;
+         const card = cursor.value as WithID<ITrace>;
+         if (cardMap.has(card.id)) {
+            const trace = cardMap.get(card.id)!;
             if (trace.last > card.last) cursor.update(mergeTrace(card, trace));
-            traceMap.delete(card.id);
+            cardMap.delete(card.id);
          } else cursor.delete();
          cursor.continue();
       };

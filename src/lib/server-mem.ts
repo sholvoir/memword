@@ -1,3 +1,4 @@
+import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import {
    getJson,
    getText,
@@ -9,7 +10,7 @@ import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import type { ITask } from "../lib/iitem.ts";
 import type { IBook } from "./ibook.ts";
 import type { ICard } from "./icard.ts";
-import type { IIDTrace } from "./itrace.ts";
+import type { ITrace } from "./itrace.ts";
 import type { IUser } from "./iuser.ts";
 
 const API_BASE = "/api/v2";
@@ -42,21 +43,22 @@ export const issue_post = (issue: string) =>
 export const dictIssue_post = (issue: string) =>
    fetch(`${API_BASE}/dict-issue`, textInit(issue));
 
-export const card_get = () => getJson<Array<IIDTrace>>(`${API_BASE}/card`);
-export const card_patch = (traces: Array<IIDTrace>) =>
+export const card_get = () =>
+   getJson<Array<WithID<ITrace>>>(`${API_BASE}/card`);
+export const card_patch = (traces: Array<WithID<ITrace>>) =>
    fetch(`${API_BASE}/card`, jsonInit(traces, "PATCH"));
 export const card_delete = (ids: Array<string>) =>
    fetch(`${API_BASE}/card`, jsonInit(ids, "DELETE"));
-export const card_post = (st: ICard) =>
-   fetch(`${API_BASE}/card`, jsonInit(st, "POST"));
+export const card_post = (card: ICard) =>
+   getText(`${API_BASE}/card`, jsonInit(card, "POST"));
 export const card_id_get = (id: string) => getText(`${API_BASE}/card/${id}`);
 
 export const setting_post = (setting: ISetting) =>
    getJson<ISetting>(`${API_BASE}/setting`, jsonInit(setting));
 
 export const task_get = () => getJson<Array<ITask>>(`${API_BASE}/task`);
-export const task_patch = (tasks: Array<ITask>) =>
-   fetch(`${API_BASE}/task`, jsonInit(tasks, "PATCH"));
+export const task_patch = (traces: Array<ITask>) =>
+   fetch(`${API_BASE}/task`, jsonInit(traces, "PATCH"));
 export const task_delete = (words: Array<string>) =>
    fetch(`${API_BASE}/task`, jsonInit(words, "DELETE"));
 

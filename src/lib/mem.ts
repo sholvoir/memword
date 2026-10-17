@@ -13,7 +13,7 @@ import {
 } from "./iitem.ts";
 import * as idb from "./indexdb.ts";
 import { type IStats, isBLevelIncludesLevel, statsFormat } from "./istat.ts";
-import { toIDTrace } from "./itrace.ts";
+import { extractIDTrace } from "./itrace.ts";
 import type { IUser } from "./iuser.ts";
 import * as bsrv from "./server-book.ts";
 import * as dsrv from "./server-dict.ts";
@@ -71,50 +71,49 @@ export const getVocabulary = dsrv.vocabulary_get;
 
 export const baiduTranslate = msrv.trans_post;
 
-export const setLocalSt = idb.putCard;
-export const deleteLocalSt = idb.deleteCard;
-export const deleteSt = msrv.card_delete;
-export const getStEpisode = async () => {
+export const setLocalCard = idb.putCard;
+export const deleteLocalCard = idb.deleteCard;
+export const deleteCard = msrv.card_delete;
+export const getCardEpisode = async () => {
    const [f, s] = await idb.getCardEpisode();
-   if (s && !s.card)
+   if (s && !s.page)
       msrv.card_id_get(s.id).then((sentence) => {
          if (sentence) {
-            s.card = sentence;
+            s.page = sentence;
             idb.putCard(s);
          }
       });
-   if (f && !f.card) {
+   if (f && !f.page) {
       const sentence = await msrv.card_id_get(f.id);
       if (sentence) {
-         f.card = sentence;
+         f.page = sentence;
          idb.putCard(f);
       }
       return f;
    }
    return f;
 };
-export const uploadTracesToSts = msrv.card_patch;
+export const uploadCardTraces = msrv.card_patch;
 export const syncCards = async () => {
    const thisTime = Date.now();
-   const lastTime = (await idb.getMeta<number>("_st-time")) ?? 1;
-   const traces = (await idb.getCards(lastTime)).map(toIDTrace);
+   const lastTime = (await idb.getMeta<number>("_card-time")) ?? 1;
+   const traces = (await idb.getCards(lastTime)).map(extractIDTrace);
    if (traces.length) {
       const resp = await msrv.card_patch(traces);
       if (!resp.ok)
          return console.error("Network Error: sentences update error.");
    }
-   await idb.setMeta("_st-time", thisTime);
+   await idb.setMeta("_card-time", thisTime);
    const nsts = await msrv.card_get();
    if (nsts) await idb.syncCards(nsts);
 };
-export const addSti = async (sentence: string, trans: string) => {
-   const st = newCard(sentence, trans);
-   const resp = await msrv.card_post(st);
-   if (resp.ok) {
-      const id = await resp.text();
-      st.id = id;
-      idb.addCard(st);
-      return st;
+export const addCard = async (page: string) => {
+   const card = newCard(page);
+   const id = await msrv.card_post(card);
+   if (id) {
+      const idcard = { id, ...card };
+      idb.addCard(idcard);
+      return idcard;
    }
 };
 
@@ -130,8 +129,17 @@ const prefetch = (url: string) => {
    prefetchSet.add(url);
 };
 
+const dict_get = async (word: string) => {
+   const dict = await dsrv.dict_get(word);
+   if (!dict?.mic) return;
+   for (const entry of dict.mic.entries)
+      if (entry.sound)
+         entry.sound = `${dsrv.API_BASE}/sound?q=${encodeURIComponent(entry.sound)}`;
+   return dict.mic;
+};
+
 export const updateDict = async (item: IItem) => {
-   const dict = await dsrv.dict_get(item.word);
+   const dict = await dict_get(item.word);
    if (!dict) return item;
    if (
       item.version !== undefined &&
@@ -157,7 +165,7 @@ export const search = async (word: string) => {
    const item = await idb.getItem(word);
    if (item) return await itemUpdateDict(item);
    try {
-      const dict = await dsrv.dict_get(word);
+      const dict = await dict_get(word);
       if (!dict) return;
       const nitem = newItem(dict);
       tempItems.set(word, nitem);

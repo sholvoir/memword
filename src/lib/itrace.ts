@@ -1,21 +1,7 @@
+import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import type { ITrace } from "@sholvoir/memword-server/src/lib/itrace.ts";
 
 export type { ITrace };
-export interface IIDTrace extends ITrace {
-   id: string;
-}
-
-export const toIDTrace = <T extends IIDTrace>({
-   id,
-   last,
-   next,
-   level,
-}: T): IIDTrace => ({
-   id,
-   last,
-   next,
-   level,
-});
 
 export const mergeTrace = <T extends ITrace>(objective: T, trace: ITrace) => {
    objective.last = trace.last;
@@ -23,3 +9,25 @@ export const mergeTrace = <T extends ITrace>(objective: T, trace: ITrace) => {
    objective.level = trace.level;
    return objective;
 };
+
+export const extractTrace = <T extends ITrace>({
+   last,
+   next,
+   level,
+}: T): ITrace => ({
+   last,
+   next,
+   level,
+});
+
+export const extractIDTrace = <T extends WithID<ITrace>>({
+   id,
+   last,
+   next,
+   level,
+}: T): WithID<ITrace> => ({
+   id,
+   last,
+   next,
+   level,
+});
