@@ -46,7 +46,7 @@ export default () => {
    };
    const handleTransClick = async () => {
       const t = await mem.baiduTranslate(page());
-      if (t) setPage((p) => `${p}\n<r>{t}</r>`);
+      if (t) setPage((p) => `${p}\n<r>${t}</r>`);
       else showTips("翻译失败");
    };
    const handleAddClick = async () => {
