@@ -223,10 +223,10 @@ export const syncTasks = async () => {
          const resp = await msrv.task_patch(tasks);
          if (!resp.ok)
             return console.error("Network Error: get sync task data error.");
-         await idb.setMeta("_sync-time", thisTime);
       }
       const ntasks = await msrv.task_get();
       if (ntasks) await idb.syncTasks(ntasks);
+      await idb.setMeta("_sync-time", thisTime);
    } catch {}
 };
 
