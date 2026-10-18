@@ -28,7 +28,6 @@ export default (props: DialogProps) => {
    ]);
    return (
       <>
-         <div class="ios-status-bar-fix"></div>
          <div
             class={`title shrink-0 px-2 flex justify-between items-center font-bold ${
                tips() ? "bg-(--bg-accent)" : "bg-(--bg-title)"
