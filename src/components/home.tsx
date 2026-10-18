@@ -42,7 +42,7 @@ export default () => (
             </Button>
             <Button onClick={() => go("#sentence")}>
                <span class="icon--hugeicons icon--hugeicons--online-learning-02"></span>{" "}
-               句子
+               闪卡
             </Button>
             <Button onClick={() => go("#setting")}>
                <span class="icon--material-symbols icon--material-symbols--settings"></span>{" "}

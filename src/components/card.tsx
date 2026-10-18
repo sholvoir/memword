@@ -1,6 +1,6 @@
 import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import BButton from "@sholvoir/solid-components/button-base";
-import { createSignal, onMount, Show } from "solid-js";
+import { createSignal, Index, onMount, Show } from "solid-js";
 import {
    extractWords,
    type ICard,
@@ -19,6 +19,7 @@ export default () => {
    const [card, setCard] = createSignal<WithID<ICard>>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
+   const [sound, setSound] = createSignal("");
 
    const studyNext = async () => {
       const card = await mem.getCardEpisode();
@@ -30,7 +31,7 @@ export default () => {
          setCard(card);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
-         speak(card.page);
+         speak(setSound(card.page!.replaceAll(/<r>.+?<\/r>/g, "")));
       }
    };
    const handleIKnown = async (know?: boolean) => {
@@ -56,7 +57,7 @@ export default () => {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak(card()?.page);
+      speak(sound());
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -95,7 +96,7 @@ export default () => {
    return (
       <Dialog
          class="px-2 pb-4 outline-none relative flex flex-col text-xl gap-2"
-         title={`句子${sprint() > 0 ? `(${sprint()})` : ""}`}
+         title={`闪卡${sprint() > 0 ? `(${sprint()})` : ""}`}
          leftClick={() => (totalStats(), go("#home"))}
          tools={
             <div class="body p-2 relative flex gap-4 text-[150%] justify-between items-end">
@@ -117,7 +118,7 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => speak(card()?.page)}
+                  onClick={() => speak(sound())}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
                <div class="text-lg">{card()?.level}</div>
@@ -130,8 +131,12 @@ export default () => {
          afterAnimation={studyNext}
       >
          <Show when={card()}>
-            <div class={isPhaseAnswer() ? "[&>r]:font-bold" : "[&>r]:hidden"}>
-               {card()!.page?.replaceAll("()", "")}
+            <div
+               class={isPhaseAnswer() ? "[&>p>r]:font-bold" : "[&>p>r]:hidden"}
+            >
+               <Index each={card()!.page?.replaceAll("()", "").split("\n")}>
+                  {(p) => <p innerHTML={p()} />}
+               </Index>
             </div>
          </Show>
       </Dialog>
