@@ -46,6 +46,7 @@
   body {
     color: var(--text-color);
     background-color: var(--bg-title);
+    padding-top: env(safe-area-inset-top, 0);
   }
 
   input,
@@ -60,6 +61,17 @@
 
   div {
     border-color: var(--border-color);
+  }
+  
+  .ios-status-bar-fix {
+    background-color: var(--bg-title);
+    height: env(safe-area-inset-top, 0);
+    left: 0;
+    min-height: 6px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 9999; 
   }
 
   .title {

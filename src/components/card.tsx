@@ -24,7 +24,7 @@ export default () => {
    const studyNext = async () => {
       const card = await mem.getCardEpisode();
       if (!card) {
-         showTips("No More Sentence!");
+         showTips("No More Cards!");
          totalStats();
          go("#home");
       } else {
