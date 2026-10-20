@@ -10,7 +10,7 @@ const [sversion, setSVersion] = createSignal("");
 export const [user, setUser] = createSignal<IUser>();
 export const [loading, showLoading] = createSignal(false);
 
-export { tips, sversion };
+export { sversion, tips };
 
 export const initUser = async () => setUser(await mem.getUser());
 

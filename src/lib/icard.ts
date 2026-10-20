@@ -1,9 +1,8 @@
+import type { ICard } from "@sholvoir/memword-server/src/lib/icard.ts";
 import { TASK_MAX_NEXT } from "./common.ts";
 import type { ITrace } from "./itrace.ts";
 
-export interface ICard extends ITrace {
-   page?: string;
-}
+export type { ICard };
 
 export const ST_MAX_LEVEL = 10;
 

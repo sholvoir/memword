@@ -132,9 +132,14 @@ const prefetch = (url: string) => {
 const dict_get = async (word: string) => {
    const dict = await dsrv.dict_get(word);
    if (!dict?.mic) return;
-   for (const entry of dict.mic.entries)
-      if (entry.sound)
-         entry.sound = `${dsrv.API_BASE}/sound?q=${encodeURIComponent(entry.sound)}`;
+   if (dict.mic.entries?.length)
+      for (const entry of dict.mic.entries)
+         if (entry.pronounces?.length)
+            for (const pronounce of entry.pronounces)
+               if (pronounce.sound)
+                  pronounce.sound = `${dsrv.API_BASE}/sound?q=${encodeURIComponent(
+                     pronounce.sound,
+                  )}`;
    return dict.mic;
 };
 
@@ -147,7 +152,6 @@ export const updateDict = async (item: IItem) => {
       item.version >= dict.version
    )
       return item;
-   for (const entry of dict.entries) if (entry.sound) prefetch(entry.sound);
    item.dictSync = Date.now();
    idb.putItem(itemMergeDict(item, dict));
    return item;
@@ -190,6 +194,11 @@ export const getEpisode = async (bid?: string, blevel?: number) => {
       );
    else items = await idb.getEpisode();
    if (items[1]) itemUpdateDict(items[1]);
+   if (items[1]?.entries?.length)
+      for (const entry of items[1].entries)
+         if (entry.pronounces?.length)
+            for (const pronounce of entry.pronounces)
+               if (pronounce.sound) prefetch(pronounce.sound);
    if (items[0]) return await itemUpdateDict(items[0]);
 };
 

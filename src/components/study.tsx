@@ -28,9 +28,13 @@ export default () => {
    const entries = () => citem()?.entries ?? [];
    const audio = { sounds: [""], index: 0 };
    const initSounds = (item: IItem) => {
-      audio.sounds = Array.from(
-         new Set(item.entries.filter((en) => en.sound).map((en) => en.sound!)),
-      );
+      const sounds = new Set<string>();
+      if (item.entries?.length)
+         for (const entry of item.entries)
+            if (entry.pronounces?.length)
+               for (const pronounce of entry.pronounces)
+                  if (pronounce.sound) sounds.add(pronounce.sound);
+      audio.sounds = Array.from(sounds);
       audio.index = 0;
       playSound();
    };

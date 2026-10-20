@@ -5,9 +5,11 @@ export default (props: { entry: IEntry }) => (
    <div class="[&>p>t]:font-bold">
       <div class="flex gap-4 text-xl">
          <div class="font-bold text-(--accent-color)">{props.entry.pos}</div>
-         <div>{props.entry.phonetic}</div>
+         <For each={props.entry.pronounces}>
+            {(pronounce) => <div>{pronounce.phonetic}</div>}
+         </For>
       </div>
-      <For each={props.entry.meanings?.split("\n")}>
+      <For each={props.entry.meanings}>
          {(meaning) => <p innerHTML={`&ensp;-&ensp;${meaning}`} />}
       </For>
    </div>

@@ -5,7 +5,7 @@ const [search, setSearch] = createSignal<string>();
 const [bid, setBid] = createSignal<string>();
 const [blevel, setBlevel] = createSignal<number>();
 
-export { search, bid, blevel };
+export { bid, blevel, search };
 
 export const goStudy = (bid?: string, blevel?: number, search?: string) => {
    setBid(bid);
