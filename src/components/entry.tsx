@@ -1,5 +1,5 @@
 import type { IEntry } from "@sholvoir/dict-server/src/lib/imic";
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 
 export default (props: { entry: IEntry }) => (
    <div class="[&>p>t]:font-bold">
@@ -9,6 +9,9 @@ export default (props: { entry: IEntry }) => (
             {(pronounce) => <div>{pronounce.phonetic}</div>}
          </For>
       </div>
+      <Show when={props.entry.top}>
+         <p innerHTML={props.entry.top}></p>
+      </Show>
       <For each={props.entry.meanings}>
          {(meaning) => <p innerHTML={`&ensp;-&ensp;${meaning}`} />}
       </For>

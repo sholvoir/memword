@@ -34,7 +34,8 @@
          "style": {
             "noNonNullAssertion": "off"
          }
-      }
+      },
+      "includes": ["**", "!docs/**"]
    },
    "javascript": {
       "formatter": {
