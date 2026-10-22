@@ -1,4 +1,3 @@
-import refine from "@sholvoir/dict-server/src/lib/refine.ts";
 import Button from "@sholvoir/solid-components/button-ripple";
 import TInput from "@sholvoir/solid-components/input-text";
 import type {
@@ -15,7 +14,7 @@ import { go, showTips } from "./provider-g.ts";
 import { goStudy } from "./provider-study.ts";
 import { lemma, vocabulary } from "./provider-user.ts";
 
-const buttonClass = "flex-none button btn-normal";
+const buttonClass = "flex-auto button btn-normal";
 
 const [word, setWord] = createSignal("");
 const [words, setWords] = createSignal<string[]>([]);
@@ -25,18 +24,6 @@ export default () => {
    const taSelect = (start: number, end: number) => {
       ta.focus();
       ta.setSelectionRange(start, end);
-   };
-   const handleRefineClick = () => {
-      const value = ta.value;
-      const selectionStart = ta.selectionStart;
-      const selectionEnd = ta.selectionEnd;
-      const r = refine(value.substring(selectionStart, selectionEnd));
-      if (!r) return;
-      setCard(
-         "page",
-         value.substring(0, selectionStart) + r + value.substring(selectionEnd),
-      );
-      taSelect(selectionStart, selectionStart + r.length);
    };
    const handleRemoveClick = () => {
       const value = ta.value;
@@ -183,10 +170,6 @@ export default () => {
             </Button>
          </div>
          <div class="flex gap-2">
-            <div class="grow"></div>
-            <Button class={buttonClass} onClick={handleRefineClick}>
-               ^
-            </Button>
             <Button class={buttonClass} onClick={handleRemoveClick}>
                ~
             </Button>
