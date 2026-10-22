@@ -12,6 +12,7 @@ import { extractIDTrace } from "../lib/itrace.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
 import Dialog from "./dialog-e.tsx";
+import { setCard as setCommonCard } from "./provider-card.ts";
 import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
@@ -122,6 +123,11 @@ export default () => {
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
                <div class="text-lg">{card()?.level}</div>
+               <BButton
+                  disabled={!card()}
+                  onClick={() => (setCommonCard(card()!), go("#trans"))}
+                  class="icon--material-symbols-light icon--material-symbols-light--edit-document text-cyan-500"
+               />
             </div>
          }
          onClick={handleClick}

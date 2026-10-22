@@ -21,6 +21,7 @@ const icons = {
       "settings",
       "volume-up",
    ],
+   "material-symbols-light": ["edit-document"],
    mdi: ["chevron-down", "chevron-up", "cross-circle"],
    hugeicons: ["online-learning-01", "online-learning-02", "translate"],
    tabler: ["info-octagon"],

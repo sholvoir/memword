@@ -1,8 +1,9 @@
+import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import { STATUS_CODE } from "@sholvoir/generic/http";
 import type { ISetting } from "@sholvoir/memword-server/src/lib/isetting.ts";
 import { parse } from "yaml";
 import { type IBook, splitID } from "../lib/ibook.ts";
-import { newCard } from "./icard.ts";
+import { type ICard, newCard } from "./icard.ts";
 import type { TDialog } from "./idialog.ts";
 import {
    type IItem,
@@ -115,6 +116,10 @@ export const addCard = async (page: string) => {
       idb.addCard(idcard);
       return idcard;
    }
+};
+export const updateCard = async (card: WithID<ICard>) => {
+   await msrv.card_patch([card]);
+   idb.putCard(card);
 };
 
 export const uploadTasks = msrv.task_patch;

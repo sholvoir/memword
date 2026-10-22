@@ -45,7 +45,7 @@ export const dictIssue_post = (issue: string) =>
 
 export const card_get = () =>
    getJson<Array<WithID<ITrace>>>(`${API_BASE}/card`);
-export const card_patch = (traces: Array<WithID<ITrace>>) =>
+export const card_patch = (traces: Array<WithID<ICard>>) =>
    fetch(`${API_BASE}/card`, jsonInit(traces, "PATCH"));
 export const card_delete = (ids: Array<string>) =>
    fetch(`${API_BASE}/card`, jsonInit(ids, "DELETE"));
