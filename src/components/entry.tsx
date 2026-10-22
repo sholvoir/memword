@@ -2,7 +2,7 @@ import type { IEntry } from "@sholvoir/dict-server/src/lib/imic";
 import { For, Show } from "solid-js";
 
 export default (props: { entry: IEntry }) => (
-   <div class="[&>p>t]:font-bold">
+   <div class="[&>p>t]:font-bold [&>p>t]:m-3">
       <div class="flex gap-4 text-xl">
          <div class="font-bold text-(--accent-color)">{props.entry.pos}</div>
          <For each={props.entry.pronounces}>
