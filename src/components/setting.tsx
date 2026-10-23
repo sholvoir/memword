@@ -45,6 +45,7 @@ export default () => {
    const handleAddTaskClick = async () => {
       showLoading(true);
       await mem.addTasks(subBooks()[subIndex()].bid);
+      await mem.syncTasks();
       totalStats();
       showLoading(false);
    };
