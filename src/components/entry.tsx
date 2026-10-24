@@ -12,7 +12,7 @@ export default (props: { entry: IEntry }) => (
       <Show when={props.entry.top}>
          <p innerHTML={props.entry.top}></p>
       </Show>
-      <For each={props.entry.meanings}>
+      <For each={props.entry.meanings?.split("\n")}>
          {(meaning) => <p innerHTML={`&ensp;-&ensp;${meaning}`} />}
       </For>
    </div>
