@@ -163,7 +163,7 @@ export const updateDict = async (item: IItem) => {
 };
 
 const itemUpdateDict = async (item: IItem) => {
-   if (!item.dictSync || item.dictSync < 1791858035012)
+   if (!item.dictSync || item.dictSync < 1792810218693)
       return await updateDict(item);
    if (item.dictSync + dictExpire < Date.now()) updateDict(item);
    return item;
