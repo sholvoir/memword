@@ -5,6 +5,7 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
+import { unwrap } from "solid-js/store";
 import { extractWords, newCard } from "../lib/icard.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
@@ -111,7 +112,7 @@ export default () => {
    };
    const handleAddUpdateClick = async () => {
       if (card.id) {
-         await mem.updateCard(card as any);
+         await mem.updateCard(unwrap(card) as any);
          setCard(newCard(""));
          showTips("更新成功!");
       } else {
