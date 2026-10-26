@@ -20,7 +20,7 @@ export default () => {
    const [card, setCard] = createSignal<WithID<ICard>>();
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
-   const [sound, setSound] = createSignal("");
+   let sound = "";
 
    const studyNext = async () => {
       const card = await mem.getCardEpisode();
@@ -32,7 +32,7 @@ export default () => {
          setCard(card);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
-         speak(setSound(card.page!.replaceAll(/<r>.+?<\/r>/g, "")));
+         speak((sound = card.page!.replaceAll(/<r>.+?<\/r>/g, ".")));
       }
    };
    const handleIKnown = async (know?: boolean) => {
@@ -58,7 +58,7 @@ export default () => {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak(sound());
+      speak(sound);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -119,7 +119,7 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => speak(sound())}
+                  onClick={() => speak(sound)}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                />
                <div class="text-lg">{card()?.level}</div>
