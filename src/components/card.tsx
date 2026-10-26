@@ -137,11 +137,20 @@ export default () => {
          afterAnimation={studyNext}
       >
          <Show when={card()}>
-            <div
-               class={isPhaseAnswer() ? "[&>p>r]:font-bold" : "[&>p>r]:hidden"}
-            >
+            <div class="grid grid-cols-2">
                <Index each={card()!.page?.replaceAll("()", "").split("\n")}>
-                  {(p) => <p innerHTML={p()} />}
+                  {(line) => {
+                     const [o, r] = line().split(/\t+/);
+                     return (
+                        <>
+                           <div innerHTML={o} />
+                           <div
+                              class="font-bold"
+                              innerHTML={isPhaseAnswer() ? r : ""}
+                           />
+                        </>
+                     );
+                  }}
                </Index>
             </div>
          </Show>

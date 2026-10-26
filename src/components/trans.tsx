@@ -5,7 +5,6 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
-import { unwrap } from "solid-js/store";
 import { extractWords, newCard } from "../lib/icard.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
@@ -75,6 +74,19 @@ export default () => {
       }
       setCard("page", npage.join("\n"));
    };
+   const handlePageKeyDown = (e: KeyboardEvent & TextAreaTargeted) => {
+      if (e.key === "Tab") {
+         e.preventDefault();
+         const value = ta.value;
+         const selectionStart = ta.selectionStart;
+         const selectionEnd = ta.selectionEnd;
+         setCard(
+            "page",
+            `${value.substring(0, selectionStart)}\t${value.substring(selectionEnd)}`,
+         );
+         taSelect(selectionStart + 1, selectionStart + 1);
+      }
+   };
    const handlePageInput = (e: InputEvent & TextAreaInputTargeted) => {
       setCard("page", e.target.value);
       setWord("");
@@ -112,11 +124,15 @@ export default () => {
    };
    const handleAddUpdateClick = async () => {
       if (card.id) {
-         await mem.updateCard(unwrap(card) as any);
+         const { id, ...rest } = card;
+         if (await mem.addCard(rest)) {
+            await mem.deleteCard([id]);
+            mem.deleteLocalCard(id);
+         }
          setCard(newCard(""));
          showTips("更新成功!");
       } else {
-         await mem.addCard(card.page ?? "");
+         await mem.addCard(newCard(card.page ?? ""));
          setCard("page", "");
          showTips("添加成功!");
       }
@@ -211,6 +227,7 @@ export default () => {
          <textarea
             class="grow"
             name="sentence"
+            onKeyDown={handlePageKeyDown}
             onInput={handlePageInput}
             onSelect={handleSentenceSelect}
             placeholder="sentence"
