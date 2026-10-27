@@ -91,7 +91,7 @@ export default () => {
          try {
             await mem.deleteLocalCard(card()!.id!);
             showTips("删除成功");
-            mem.deleteCard([card()!.id!]);
+            await mem.deleteCard([card()!.id!]);
             studyNext();
          } catch {
             showTips("删除失败");
