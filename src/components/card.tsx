@@ -1,6 +1,6 @@
 import type { WithID } from "@sholvoir/dict-server/src/lib/common.ts";
 import BButton from "@sholvoir/solid-components/button-base";
-import { createSignal, Index, onMount, Show } from "solid-js";
+import { batch, createSignal, Index, onMount, Show } from "solid-js";
 import {
    extractWords,
    type ICard,
@@ -18,22 +18,28 @@ import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
 export default () => {
    const [card, setCard] = createSignal<WithID<ICard>>();
+   const [show, setShow] = createSignal<Array<string>>([]);
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
    let sound = "";
 
    const studyNext = async () => {
-      const card = await mem.getCardEpisode();
-      if (!card) {
+      const ccard = await mem.getCardEpisode();
+      if (!ccard) {
          showTips("No More Cards!");
          totalStats();
          go("#home");
       } else {
-         setCard(card);
-         setSprint((s) => s + 1);
-         setPhaseAnswer(false);
+         batch(() => {
+            setCard(ccard);
+            setSprint((s) => s + 1);
+            setPhaseAnswer(false);
+            if (ccard.page)
+               setShow(ccard.page.replaceAll("()", "").split("\n"));
+         });
+
          const clips = [];
-         for (const line of card.page!.split("\n")) {
+         for (const line of ccard.page!.split("\n")) {
             const [o] = line.split(/\t+/);
             if (o) clips.push(o);
          }
@@ -43,12 +49,12 @@ export default () => {
    const handleIKnown = async (know?: boolean) => {
       if (card()) {
          const ccard = studyCard(card()!, know);
-         if (ccard.level === ST_MAX_LEVEL) {
+         if (ccard.level >= ST_MAX_LEVEL) {
             await mem.deleteLocalCard(ccard.id);
-            mem.deleteCard([ccard.id]);
+            await mem.deleteCard([ccard.id]);
          } else {
             await mem.setLocalCard(ccard);
-            mem.uploadCardTraces([extractIDTrace(ccard)]);
+            await mem.uploadCardTraces([extractIDTrace(ccard)]);
          }
          if (know) {
             const items = [];
@@ -57,7 +63,7 @@ export default () => {
                for (const word of result.words) {
                   items.push(await mem.studyWord(word));
                }
-            if (items.length) mem.uploadTasks(items.map(toTask));
+            if (items.length) await mem.uploadTasks(items.map(toTask));
          }
       }
    };
@@ -143,7 +149,7 @@ export default () => {
       >
          <Show when={card()}>
             <div class="grid grid-cols-2 gap-2">
-               <Index each={card()!.page?.replaceAll("()", "").split("\n")}>
+               <Index each={show()}>
                   {(line) => {
                      const [o, r] = line().split(/\t+/);
                      const cl = { "col-span-2": o.length > 18 };
