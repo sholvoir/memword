@@ -32,7 +32,12 @@ export default () => {
          setCard(card);
          setSprint((s) => s + 1);
          setPhaseAnswer(false);
-         speak((sound = card.page!.replaceAll(/<r>.+?<\/r>/g, ".")));
+         const clips = [];
+         for (const line of card.page!.split("\n")) {
+            const [o] = line.split(/\t+/);
+            if (o) clips.push(o);
+         }
+         if (clips.length) speak((sound = clips.join(".")));
       }
    };
    const handleIKnown = async (know?: boolean) => {
@@ -144,10 +149,7 @@ export default () => {
                      return (
                         <>
                            <div innerHTML={o} />
-                           <div
-                              class="font-bold"
-                              innerHTML={isPhaseAnswer() ? r : ""}
-                           />
+                           <div innerHTML={isPhaseAnswer() ? (r ?? "") : ""} />
                         </>
                      );
                   }}
