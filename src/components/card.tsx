@@ -142,14 +142,18 @@ export default () => {
          afterAnimation={studyNext}
       >
          <Show when={card()}>
-            <div class="grid grid-cols-2">
+            <div class="grid grid-cols-2 gap-2">
                <Index each={card()!.page?.replaceAll("()", "").split("\n")}>
                   {(line) => {
                      const [o, r] = line().split(/\t+/);
+                     const cl = { "col-span-2": o.length > 18 };
                      return (
                         <>
-                           <div innerHTML={o} />
-                           <div innerHTML={isPhaseAnswer() ? (r ?? "") : ""} />
+                           <div classList={cl} innerHTML={o} />
+                           <div
+                              classList={cl}
+                              innerHTML={isPhaseAnswer() ? (r ?? "") : ""}
+                           />
                         </>
                      );
                   }}
