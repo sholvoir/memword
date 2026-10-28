@@ -1,16 +1,17 @@
 import { Show } from "solid-js";
 
-export default (props: { meaning: string; hideMinus?: true }) => {
-   const [o, r] = props.meaning.split(/\t+/);
+export default (props: { meaning?: Array<string>; hideMinus?: true }) => {
    return (
       <p>
          <Show when={!props.hideMinus}>&ensp;-&ensp;</Show>
-         <Show when={o}>
-            <span innerHTML={o} />
+         <Show when={props.meaning?.[0]}>
+            <span innerHTML={props.meaning?.[0]} />
          </Show>
-         <Show when={o && r}>&ensp;&ensp;</Show>
-         <Show when={r}>
-            <span class="font-bold" innerHTML={r} />
+         <Show when={props.meaning?.[0] && props.meaning?.[1]}>
+            &ensp;&ensp;
+         </Show>
+         <Show when={props.meaning?.[1]}>
+            <span class="font-bold" innerHTML={props.meaning?.[1]} />
          </Show>
       </p>
    );

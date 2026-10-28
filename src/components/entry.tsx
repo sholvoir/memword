@@ -1,5 +1,5 @@
 import type { IEntry } from "@sholvoir/dict-server/src/lib/imic";
-import { For, Show } from "solid-js";
+import { For, Index, Show } from "solid-js";
 import Meaning from "./meaning";
 
 export default (props: { entry: IEntry }) => (
@@ -11,10 +11,10 @@ export default (props: { entry: IEntry }) => (
          </For>
       </div>
       <Show when={props.entry.top}>
-         <Meaning meaning={props.entry.top!} hideMinus={true} />
+         <Meaning meaning={props.entry.top!.split(/\t+/)} hideMinus={true} />
       </Show>
-      <For each={props.entry.meanings?.split?.("\n")}>
-         {(meaning) => <Meaning meaning={meaning} />}
-      </For>
+      <Index each={props.entry.meanings?.split?.("\n")}>
+         {(meaning) => <Meaning meaning={meaning().split(/\t+/)} />}
+      </Index>
    </div>
 );

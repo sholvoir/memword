@@ -16,13 +16,17 @@ import { setCard as setCommonCard } from "./provider-card.ts";
 import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
-const CardLine = (props: { line: string; showAnswer: boolean }) => {
-   const [o, r] = props.line.split(/\t+/);
-   const cl = { "col-span-2": o.length > 18 };
+const CardLine = (props: { line: Array<string>; showAnswer: boolean }) => {
    return (
       <>
-         <div classList={cl} innerHTML={o} />
-         <div classList={cl} innerHTML={props.showAnswer ? (r ?? "") : ""} />
+         <div
+            classList={{ "col-span-2": props.line[0].length > 18 }}
+            innerHTML={props.line[0]}
+         />
+         <div
+            classList={{ "col-span-2": props.line[0].length > 18 }}
+            innerHTML={props.showAnswer ? (props.line[1] ?? "") : ""}
+         />
       </>
    );
 };
@@ -52,7 +56,7 @@ export default () => {
                const [o] = line.split(/\t+/);
                if (o) clips.push(o);
             }
-            if (clips.length) speak((sound = clips.join(".")));
+            if (clips.length) speak((sound = clips.join(".\n")));
          }
       }
    };
@@ -117,9 +121,13 @@ export default () => {
    onMount(studyNext);
    return (
       <Dialog
-         class="px-2 pb-4 outline-none relative flex flex-col text-xl gap-2"
-         title={`闪卡${sprint() > 0 ? `(${sprint()})` : ""}`}
+         afterAnimation={studyNext}
+         beforeAnimation={handleIKnown}
+         class="px-2 pb-4 outline-none relative flex flex-col text-xl gap-2 overflow-y-auto"
          leftClick={() => (totalStats(), go("#home"))}
+         onClick={handleClick}
+         onKeyup={handleKeyPress}
+         title={`闪卡${sprint() > 0 ? `(${sprint()})` : ""}`}
          tools={
             <div class="body p-2 relative flex gap-4 text-[150%] justify-between items-end">
                <BButton
@@ -152,17 +160,16 @@ export default () => {
                />
             </div>
          }
-         onClick={handleClick}
-         onKeyup={handleKeyPress}
          touchEnabled={isPhaseAnswer()}
-         beforeAnimation={handleIKnown}
-         afterAnimation={studyNext}
       >
          <Show when={card()}>
             <div class="grid grid-cols-2 gap-2">
                <Index each={show()}>
                   {(line) => (
-                     <CardLine line={line()} showAnswer={isPhaseAnswer()} />
+                     <CardLine
+                        line={line().split(/\t+/)}
+                        showAnswer={isPhaseAnswer()}
+                     />
                   )}
                </Index>
             </div>
