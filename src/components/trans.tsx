@@ -1,4 +1,5 @@
 import Button from "@sholvoir/solid-components/button-ripple";
+import Checkbox from "@sholvoir/solid-components/checkbox";
 import TInput from "@sholvoir/solid-components/input-text";
 import type {
    TextAreaInputTargeted,
@@ -37,7 +38,7 @@ export default () => {
       );
       taSelect(selectionStart - 1, selectionEnd - 1);
    };
-   const handleParenthesesClick = (patenheses: "()" | "[]" | '""') => {
+   const handleParenthesesClick = (patenheses: "（）" | "“”") => {
       const value = ta.value;
       const selectionStart = ta.selectionStart;
       const selectionEnd = ta.selectionEnd;
@@ -51,7 +52,7 @@ export default () => {
       );
       taSelect(selectionStart + 1, selectionEnd + 1);
    };
-   const handleBIClick = (tag: "o" | "b" | "i" | "r") => {
+   const handleBIClick = (tag: "b" | "i") => {
       const value = ta.value;
       const selectionStart = ta.selectionStart;
       const selectionEnd = ta.selectionEnd;
@@ -65,14 +66,6 @@ export default () => {
       );
       const l = tag.length + 2;
       taSelect(selectionStart + l, selectionEnd + l);
-   };
-   const handleReverseClick = () => {
-      const npage: Array<string> = [];
-      for (const p of ta.value.split("\n")) {
-         if (p.endsWith("</r>")) npage.push(p);
-         else npage.push(`${p} <r></r>`);
-      }
-      setCard("page", npage.join("\n"));
    };
    const handlePageKeyDown = (e: KeyboardEvent & TextAreaTargeted) => {
       if (e.key === "Tab") {
@@ -127,7 +120,9 @@ export default () => {
          const { id, ...rest } = card;
          if (await mem.addCard(rest)) {
             await mem.deleteCard([id]);
-            mem.deleteLocalCard(id);
+            await mem.deleteLocalCard(id);
+         } else {
+            showTips("更新失败!");
          }
          setCard(newCard(""));
          showTips("更新成功!");
@@ -192,36 +187,21 @@ export default () => {
             </Button>
             <Button
                class={buttonClass}
-               onClick={() => handleParenthesesClick('""')}
+               onClick={() => handleParenthesesClick("“”")}
             >
-               &quot;&quot;
+               “”
             </Button>
             <Button
                class={buttonClass}
-               onClick={() => handleParenthesesClick("()")}
+               onClick={() => handleParenthesesClick("（）")}
             >
                ()
-            </Button>
-            <Button
-               class={buttonClass}
-               onClick={() => handleParenthesesClick("[]")}
-            >
-               []
-            </Button>
-            <Button class={buttonClass} onClick={() => handleBIClick("o")}>
-               O
             </Button>
             <Button class={buttonClass} onClick={() => handleBIClick("b")}>
                B
             </Button>
             <Button class={buttonClass} onClick={() => handleBIClick("i")}>
                I
-            </Button>
-            <Button class={buttonClass} onClick={() => handleBIClick("r")}>
-               R
-            </Button>
-            <Button class={buttonClass} onClick={handleReverseClick}>
-               Reverse
             </Button>
          </div>
          <textarea
@@ -234,6 +214,13 @@ export default () => {
             ref={ta}
             value={card.page}
          />
+         <div>
+            <Checkbox
+               label="Silence"
+               onChange={(v: boolean) => setCard("silence", v)}
+               value={!!card.silence}
+            ></Checkbox>
+         </div>
       </Dialog>
    );
 };

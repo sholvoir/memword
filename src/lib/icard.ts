@@ -16,10 +16,9 @@ export const extractWords = (
 } => {
    const words = [];
    const array = sentence
-      .replaceAll(/<r>.+?<\/r>/g, "")
       .replaceAll(/<\/?.+?>/g, "")
       .replace(/\.$/, "")
-      .replaceAll(/[^A-Za-z0-9 '.\n-]/g, "")
+      .replaceAll(/[^A-Za-z0-9 '\n-]/g, "")
       .split(/\s+/);
    for (let word of array)
       if ((word = word.trim())) {

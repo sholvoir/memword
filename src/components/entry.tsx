@@ -4,7 +4,7 @@ import Meaning from "./meaning";
 
 export default (props: { entry: IEntry }) => (
    <div>
-      <div class="flex gap-4 text-xl">
+      <div class="flex flex-wrap gap-3 text-xl">
          <div class="font-bold text-(--accent-color)">{props.entry.pos}</div>
          <For each={props.entry.pronounces}>
             {(pronounce) => <div>{pronounce.phonetic}</div>}

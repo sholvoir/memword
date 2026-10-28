@@ -111,7 +111,7 @@ export const addCard = async (card: ICard) => {
    const id = await msrv.card_post(card);
    if (id) {
       const idcard = { id, ...card };
-      idb.addCard(idcard);
+      await idb.addCard(idcard);
       return idcard;
    }
 };

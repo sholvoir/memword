@@ -16,11 +16,22 @@ import { setCard as setCommonCard } from "./provider-card.ts";
 import { go, showTips } from "./provider-g.ts";
 import { lemma, totalStats, vocabulary } from "./provider-user.ts";
 
+const CardLine = (props: { line: string; showAnswer: boolean }) => {
+   const [o, r] = props.line.split(/\t+/);
+   const cl = { "col-span-2": o.length > 18 };
+   return (
+      <>
+         <div classList={cl} innerHTML={o} />
+         <div classList={cl} innerHTML={props.showAnswer ? (r ?? "") : ""} />
+      </>
+   );
+};
+
 export default () => {
    const [card, setCard] = createSignal<WithID<ICard>>();
-   const [show, setShow] = createSignal<Array<string>>([]);
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
+   const show = () => card()?.page?.replaceAll("()", "").split("\n") ?? [];
    let sound = "";
 
    const studyNext = async () => {
@@ -34,16 +45,15 @@ export default () => {
             setCard(ccard);
             setSprint((s) => s + 1);
             setPhaseAnswer(false);
-            if (ccard.page)
-               setShow(ccard.page.replaceAll("()", "").split("\n"));
          });
-
-         const clips = [];
-         for (const line of ccard.page!.split("\n")) {
-            const [o] = line.split(/\t+/);
-            if (o) clips.push(o);
+         if (!ccard.silence) {
+            const clips = [];
+            for (const line of ccard.page!.split("\n")) {
+               const [o] = line.split(/\t+/);
+               if (o) clips.push(o);
+            }
+            if (clips.length) speak((sound = clips.join(".")));
          }
-         if (clips.length) speak((sound = clips.join(".")));
       }
    };
    const handleIKnown = async (know?: boolean) => {
@@ -69,7 +79,7 @@ export default () => {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      speak(sound);
+      if (!card()?.silence) speak(sound);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -132,6 +142,7 @@ export default () => {
                <BButton
                   onClick={() => speak(sound)}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
+                  disabled={card()?.silence}
                />
                <div class="text-lg">{card()?.level}</div>
                <BButton
@@ -150,19 +161,9 @@ export default () => {
          <Show when={card()}>
             <div class="grid grid-cols-2 gap-2">
                <Index each={show()}>
-                  {(line) => {
-                     const [o, r] = line().split(/\t+/);
-                     const cl = { "col-span-2": o.length > 18 };
-                     return (
-                        <>
-                           <div classList={cl} innerHTML={o} />
-                           <div
-                              classList={cl}
-                              innerHTML={isPhaseAnswer() ? (r ?? "") : ""}
-                           />
-                        </>
-                     );
-                  }}
+                  {(line) => (
+                     <CardLine line={line()} showAnswer={isPhaseAnswer()} />
+                  )}
                </Index>
             </div>
          </Show>
