@@ -20,11 +20,17 @@ const CardLine = (props: { line: Array<string>; showAnswer: boolean }) => {
    return (
       <>
          <div
-            classList={{ "col-span-2": props.line[0].length > 18 }}
+            classList={{
+               "col-span-2":
+                  props.line[0].length > 18 || props.line[1].length > 9,
+            }}
             innerHTML={props.line[0]}
          />
          <div
-            classList={{ "col-span-2": props.line[0].length > 18 }}
+            classList={{
+               "col-span-2":
+                  props.line[0].length > 18 || props.line[1].length > 9,
+            }}
             innerHTML={props.showAnswer ? (props.line[1] ?? "") : ""}
          />
       </>
@@ -163,7 +169,7 @@ export default () => {
          touchEnabled={isPhaseAnswer()}
       >
          <Show when={card()}>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-[auto_auto] gap-2">
                <Index each={show()}>
                   {(line) => (
                      <CardLine
