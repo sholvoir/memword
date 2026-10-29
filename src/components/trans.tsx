@@ -6,6 +6,7 @@ import type {
    TextAreaTargeted,
 } from "@sholvoir/solid-components/targeted";
 import { createSignal } from "solid-js";
+import { reconcile } from "solid-js/store";
 import { extractWords, newCard } from "../lib/icard.ts";
 import * as mem from "../lib/mem.ts";
 import { speak } from "../lib/speech.ts";
@@ -124,7 +125,7 @@ export default () => {
          } else {
             showTips("更新失败!");
          }
-         setCard(newCard(""));
+         setCard(reconcile(newCard("")));
          showTips("更新成功!");
       } else {
          await mem.addCard(newCard(card.page ?? ""));
@@ -214,7 +215,7 @@ export default () => {
             ref={ta}
             value={card.page}
          />
-         <div>
+         <div class="flex flex-row-reverse">
             <Checkbox
                label="Silence"
                onChange={(v: boolean) => setCard("silence", v)}
