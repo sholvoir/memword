@@ -109,12 +109,15 @@ export default () => {
    };
    const handleTransClick = async () => {
       const npage: Array<string> = [];
-      for (const p of ta.value.split("\n")) {
-         const t = await mem.baiduTranslate(p);
-         if (t) npage.push(`${p}\n<r>${t}</r>`);
-         else npage.push(p);
+      const result = await mem.baiduTranslate(ta.value.trim());
+      if (result) {
+         const lines = ta.value.split("\n");
+         const trans = result.split("\n");
+         const len = Math.max(lines.length, trans.length);
+         for (let i = 0; i < len; i++)
+            npage.push(`${lines[i] ?? ""}\t${trans[i] ?? ""}`);
+         setCard("page", npage.join("\n"));
       }
-      setCard("page", npage.join("\n"));
    };
    const handleAddUpdateClick = async () => {
       if (card.id) {
