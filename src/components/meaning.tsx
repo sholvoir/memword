@@ -11,7 +11,7 @@ export default (props: { meaning?: Array<string>; hideMinus?: true }) => {
             &ensp;&ensp;
          </Show>
          <Show when={props.meaning?.[1]}>
-            <span class="font-bold" innerHTML={props.meaning?.[1]} />
+            <span innerHTML={props.meaning?.[1]} />
          </Show>
       </p>
    );
