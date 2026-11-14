@@ -172,6 +172,7 @@ export default () => {
          <div class="flex gap-2">
             <TInput
                autoCapitalize="none"
+               autocomplete="off"
                class="flex-auto"
                name="word"
                onChange={handleDictClick}
