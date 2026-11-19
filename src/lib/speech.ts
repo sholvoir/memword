@@ -10,5 +10,8 @@ const getUrrerance = (text: string) => {
    return utterance;
 };
 
-export const speak = (text?: string) =>
-   text && speechSynthesis.speak(speechs.get(text) ?? getUrrerance(text));
+export const speak = (texts?: Iterable<string>) => {
+   if (texts)
+      for (const text of texts)
+         speechSynthesis.speak(speechs.get(text) ?? getUrrerance(text));
+};

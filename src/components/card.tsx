@@ -42,7 +42,7 @@ export default () => {
    const [isPhaseAnswer, setPhaseAnswer] = createSignal(false);
    const [sprint, setSprint] = createSignal(0);
    const show = () => card()?.page?.replaceAll("()", "").split("\n") ?? [];
-   let sound = "";
+   const clips = new Set<string>();
 
    const studyNext = async () => {
       const ccard = await mem.getCardEpisode();
@@ -56,13 +56,13 @@ export default () => {
             setSprint((s) => s + 1);
             setPhaseAnswer(false);
          });
+         clips.clear();
          if (!ccard.silence) {
-            const clips = [];
             for (const line of ccard.page!.split("\n")) {
-               const [o] = line.split(/\t+/);
-               if (o) clips.push(o);
+               const [clip] = line.split(/\t+/);
+               if (clip) clips.add(clip);
             }
-            if (clips.length) speak((sound = clips.join(".\n")));
+            speak(clips);
          }
       }
    };
@@ -89,7 +89,7 @@ export default () => {
    };
    const handleClick = () => {
       if (!isPhaseAnswer()) setPhaseAnswer(true);
-      if (!card()?.silence) speak(sound);
+      if (!card()?.silence) speak(clips);
    };
    const handleKeyPress = (e: KeyboardEvent) => {
       e.stopPropagation();
@@ -154,7 +154,7 @@ export default () => {
                   disabled={!isPhaseAnswer()}
                />
                <BButton
-                  onClick={() => speak(sound)}
+                  onClick={() => speak(clips)}
                   class="icon--material-symbols icon--material-symbols--volume-up text-blue-500"
                   disabled={card()?.silence}
                />

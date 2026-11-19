@@ -107,6 +107,16 @@ export default () => {
       if (!text) return;
       goStudy(undefined, undefined, text);
    };
+   const handlePlayClick = async () => {
+      if (!card.silence) {
+         const clips = new Set<string>();
+         for (const line of card.page!.split("\n")) {
+            const [clip] = line.split(/\t+/);
+            if (clip) clips.add(clip);
+         }
+         speak(clips);
+      }
+   };
    const handleTransClick = async () => {
       const npage: Array<string> = [];
       const result = await mem.baiduTranslate(ta.value.trim());
@@ -146,7 +156,7 @@ export default () => {
             <div class="px-2 pt-2 pb-5 flex gap-2">
                <Button
                   class="flex-auto button btn-normal"
-                  onClick={() => speak(card.page)}
+                  onClick={handlePlayClick}
                >
                   播放
                </Button>

@@ -49,7 +49,7 @@ export default () => {
    const playSound = () => {
       if (audio.sounds.length) {
          player.src = audio.sounds[audio.index];
-      } else speak(citem()?.word);
+      } else speak([citem()!.word]);
    };
    const continuePlay = () => {
       audio.index++;

@@ -1,7 +1,7 @@
 {
    "name": "memword",
    "private": true,
-   "version": "0.29.25",
+   "version": "0.29.26",
    "type": "module",
    "scripts": {
       "start": "vite",
@@ -22,13 +22,13 @@
       "yaml": "^2.9.1"
    },
    "devDependencies": {
-      "@iconify/json": "^2.2.556",
+      "@iconify/json": "^2.2.558",
       "@iconify/utils": "^3.1.7",
       "@tailwindcss/vite": "^4.3.5",
       "@types/bun": "^1.4.4",
       "@types/js-cookie": "^3.0.6",
       "tailwindcss": "^4.3.5",
       "vite": "^8.3.8",
-      "vite-plugin-solid": "^2.11.16"
+      "vite-plugin-solid": "^2.11.17"
    }
 }
